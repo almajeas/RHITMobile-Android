@@ -43,6 +43,7 @@ public class MainActivityTest extends
 	@UiThreadTest
 	public void testMapViewState() {
 		assertTrue(m_mapView.isSatellite());
+		assertTrue(m_mapView.getOverlays().size() > 0);
 	}
 
 }
