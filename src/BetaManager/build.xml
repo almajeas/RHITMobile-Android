@@ -52,6 +52,46 @@
     </target>
 -->
 
+    <target name="run-tests" depends="install">
+        <property name="project.package" value="edu.rosehulman.android.directory"/>
+	<!--<property name="files.dir" value="/data/data/${manifest.package}/files"/>-->
+	<property name="project.testrunner" value="edu.rosehulman.android.directory.beta.CustomInstrumentationTestRunner"/>
+        <property name="reports.dir" value="${out.dir}/reports"/>
+	<property name="files.dir" value="/data/data/${project.package}/files"/>
+
+	<echo>Cleaning up previous test reports...</echo>
+
+        <delete dir="${reports.dir}"/>
+        <exec executable="${adb}" failonerror="true">
+            <arg line="${adb.device.arg}" />
+            <arg value="shell" />
+            <arg value="rm" />
+            <arg value="-f" />
+            <arg value="${files.dir}/testResults.xml" />
+        </exec>
+	
+        <echo>Running tests...</echo>
+        <exec executable="${adb}" failonerror="true">
+            <arg line="${adb.device.arg}"/>
+            <arg value="shell" />
+            <arg value="am" />
+            <arg value="instrument" />
+            <arg value="-w" />
+            <arg value="${manifest.package}/${project.testrunner}" />
+        </exec>
+        
+        <echo>Downloading XML test reports...</echo>
+        <mkdir dir="${reports.dir}"/>
+        <exec executable="${adb}" failonerror="true">
+            <arg line="${adb.device.arg}"/>
+            <arg value="pull" />
+	    <arg value="${files.dir}/testResults.xml" />
+            <arg value="${reports.dir}" />
+        </exec>
+
+
+    </target>
+
     <!-- Execute the Android Setup task that will setup some properties
          specific to the target, and import the build rules files.
 
