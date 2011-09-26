@@ -47,6 +47,7 @@ public class MainActivity extends MapActivity {
         
         mapView = (MapView)findViewById(R.id.mapview);
         mapView.setBuiltInZoomControls(true);
+        
         mapView.setSatellite(true);
         
         //center the map
@@ -56,6 +57,7 @@ public class MainActivity extends MapActivity {
 
         //draw something
         mapView.getOverlays().add(new BuildingOverlay(this, center));
+        mapView.getOverlays().add(new TextOverlay(center, "Hulman Memorial Union"));
         
         //display our location indicator (and compass)
         myLocation = new MyLocationOverlay(this, mapView);
