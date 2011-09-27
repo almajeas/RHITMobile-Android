@@ -13,6 +13,8 @@ import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 
+import edu.rosehulman.android.directory.R;
+
 public class BuildingOverlay extends Overlay implements Overlay.Snappable {
 	
 	private Context context;
