@@ -77,7 +77,7 @@ public class MainActivity extends MapActivity {
 			return;
 		}
         
-        MapAreaAdapter buildingAdapter = new MapAreaAdapter(this);
+        MapAreaAdapter buildingAdapter = new MapAreaAdapter();
         buildingAdapter.open();
         buildingAdapter.replaceBuildings(collection.mapAreas);
         

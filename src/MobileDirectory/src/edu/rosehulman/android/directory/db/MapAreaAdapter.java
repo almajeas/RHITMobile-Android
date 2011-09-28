@@ -3,11 +3,9 @@ package edu.rosehulman.android.directory.db;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
 import edu.rosehulman.android.directory.model.MapArea;
 
-public class MapAreaAdapter {
+public class MapAreaAdapter extends TableAdapter {
 	
 	public static final String TABLE_NAME = "MapAreas";
 	
@@ -19,19 +17,7 @@ public class MapAreaAdapter {
 	public static final String KEY_CENTER_LAT = "CenterLat";
 	public static final String KEY_CENTER_LON = "CenterLon";
 	
-	private SQLiteOpenHelper dbOpenHelper;
-	private SQLiteDatabase db;
-	
-	public MapAreaAdapter(Context context) {
-		dbOpenHelper = DatabaseHelper.getInstance(context);
-	}
-	
-	public void open() {
-		db = dbOpenHelper.getWritableDatabase();
-	}
-	
-	public void close() {
-		db.close();
+	public MapAreaAdapter() {
 	}
 	
 	public Cursor getBuildingOverlayCursor() {
@@ -41,9 +27,11 @@ public class MapAreaAdapter {
 	
 	public void replaceBuildings(MapArea[] newData) {
 		db.beginTransaction();
+		MapAreaCornersAdapter cornersAdapter = new MapAreaCornersAdapter(db);
 		
 		//delete all records
 		db.delete(TABLE_NAME, null, null);
+		cornersAdapter.clearCorners();
 		
 		//add each building to the database
 		for (MapArea building : newData) {
@@ -58,6 +46,7 @@ public class MapAreaAdapter {
 			values.put(KEY_CENTER_LON, building.center.lon);
 			
 			db.insert(TABLE_NAME, null, values);
+			cornersAdapter.addMapAreaCorners(building.id, building.corners);
 		}
 		
 		db.setTransactionSuccessful();
