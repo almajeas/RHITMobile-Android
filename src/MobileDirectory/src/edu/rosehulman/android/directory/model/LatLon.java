@@ -10,17 +10,14 @@ public class LatLon {
 	public int lat;
 	public int lon;
 	
-	public LatLon() {
-	}
-	
 	public LatLon(int lat, int lon) {
 		this.lat = lat;
 		this.lon = lon;
 	}
 	
 	public LatLon(double lat, double lon) {
-		this.lat = (int)(lat*10E5);
-		this.lon = (int)(lon*10E5);
+		this.lat = (int)(lat*1E6);
+		this.lon = (int)(lon*1E6);
 	}
 	
 	public static LatLon deserialize(JSONObject root) throws JSONException {
