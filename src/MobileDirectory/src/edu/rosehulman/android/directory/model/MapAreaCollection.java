@@ -6,7 +6,10 @@ import org.json.JSONObject;
 
 public class MapAreaCollection {
 	
+	/** Collection of MapArea objects */
 	public MapArea mapAreas[];
+	
+	/** Version associated with the given collection of MapArea objects */
 	public String version;
 	
 	private static MapArea[] deserializeMapAreas(JSONArray array) throws JSONException {
@@ -19,6 +22,13 @@ public class MapAreaCollection {
 		return res;
 	}
 	
+	/**
+	 * Deserialize the given JSONObject into a new instance of MapAreaCollection
+	 * 
+	 * @param root The JSONObject with the necessary field to create a new MapAreaCollection
+	 * @return A new MapAreaCollection initialized from the given JSONObject
+	 * @throws JSONException
+	 */
 	public static MapAreaCollection deserialize(JSONObject root) throws JSONException {
 		MapAreaCollection res = new MapAreaCollection();
 		
