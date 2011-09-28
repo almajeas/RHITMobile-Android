@@ -30,8 +30,12 @@ public class TextOverlay extends Overlay {
 	private Rect bounds;
 	private Rect offsetBounds;
 	
-	public TextOverlay(GeoPoint loc, String text) {
+	private int minZoomLevel;
+	
+	public TextOverlay(GeoPoint loc, String text, int minZoomLevel) {
 		this.location = loc;
+		this.minZoomLevel = minZoomLevel;
+		
 		bounds = new Rect();
 		offsetBounds = new Rect();
 		
@@ -73,10 +77,17 @@ public class TextOverlay extends Overlay {
 		return offsetBounds;
 	}
 	
+	public boolean isVisible(MapView mapView) {
+		return mapView.getZoomLevel() >= minZoomLevel;
+	}
+	
 	@Override
 	public void draw(Canvas canvas, MapView mapView, boolean shadow) {
 		//we don't have a shadow
 		if (shadow) return;
+		
+		if (!isVisible(mapView))
+			return;
 		
 		Point pt = mapView.getProjection().toPixels(location, null);
 		for (int i = 0; i < lines.size(); i++) {

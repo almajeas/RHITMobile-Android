@@ -1,7 +1,9 @@
 package edu.rosehulman.android.directory.service;
 
+import edu.rosehulman.android.directory.model.MapAreaCollection;
+
 public interface IMobileDirectoryService {
 	
-	//TODO add service methods
+	public MapAreaCollection getMapAreas(String currentVersion) throws Exception;
 
 }

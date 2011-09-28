@@ -17,17 +17,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 	private static final String DATABASE_NAME = "mobile_directory.db";
 
-	private static final int DATABASE_VERSION = 1;
+	private static final int DATABASE_VERSION = 3;
 
-	private static final String TABLE_BUILDINGS = "buildings";
-	private static final String CREATE_TABLE_BUILDINGS =
-			"CREATE TABLE " + TABLE_BUILDINGS + " " +
-				"( _id INTEGER PRIMARY KEY AUTOINCREMENT" +
-				", name TEXT NOT NULL" +
-				", showLabel INTEGER NOT NULL" +
-				", description TEXT" +
-				", centerLat REAL NOT NULL" + 
-				", centerLon REAL NOT NULL" +
+	private static final String TABLE_MAP_AREAS = "MapAreas";
+	private static final String CREATE_TABLE_MAP_AREAS =
+			"CREATE TABLE " + TABLE_MAP_AREAS + " " +
+				"( _Id INTEGER PRIMARY KEY" +
+				", Name TEXT NOT NULL" +
+				", Description TEXT" +
+				", LabelOnHybrid INTEGER NOT NULL" +
+				", MinZoomLevel INTEGER NOT NULL" +
+				", CenterLat REAL NOT NULL" + 
+				", CenterLon REAL NOT NULL" +
 				");";
 
 	private DatabaseHelper(Context context) {
@@ -36,12 +37,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
-		db.execSQL(CREATE_TABLE_BUILDINGS);
+		db.execSQL(CREATE_TABLE_MAP_AREAS);
 	}
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		db.execSQL("DROP TABLE IF EXISTS " + TABLE_BUILDINGS);
+		db.execSQL("DROP TABLE IF EXISTS " + TABLE_MAP_AREAS);
 		onCreate(db);
 	}
 
