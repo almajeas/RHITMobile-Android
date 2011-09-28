@@ -57,8 +57,6 @@ public class CustomInstrumentationTestRunner extends InstrumentationTestRunner {
 		}
 		
 		public void serialize(XmlSerializer serializer) throws IOException {
-			
-			
 			serializer.startTag(null, TAG_TESTCASE);
 			serializer.attribute(null, ATTRIBUTE_CLASSNAME, className);
 			serializer.attribute(null, ATTRIBUTE_NAME, testCase.getName());
@@ -184,7 +182,7 @@ public class CustomInstrumentationTestRunner extends InstrumentationTestRunner {
 			
 			currentTest = new TestRunnerTestCase((TestCase)test);
 			
-			if (currentSuite == null || currentSuite.name != currentTest.className) {
+			if (currentSuite == null || !currentSuite.name.equals(currentTest.className)) {
 				currentSuite = new TestRunnerTestSuite(currentTest.className);
 				testSuites.add(currentSuite);
 			}
