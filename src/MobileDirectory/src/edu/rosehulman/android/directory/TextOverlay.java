@@ -15,6 +15,7 @@ import android.graphics.Typeface;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
+import com.google.android.maps.Projection;
 
 public class TextOverlay extends Overlay {
 	
@@ -26,11 +27,16 @@ public class TextOverlay extends Overlay {
 	private List<String> lines;
 	private float offsets[];
 	
+	private Rect bounds;
+	private Rect offsetBounds;
+	
 	public TextOverlay(GeoPoint loc, String text) {
 		this.location = loc;
+		bounds = new Rect();
+		offsetBounds = new Rect();
 		
 		lines = splitText(text);
-		offsets = calcOffsets(lines);
+		offsets = calcOffsets(lines, bounds);
 	}
 	
 	static {
@@ -58,6 +64,15 @@ public class TextOverlay extends Overlay {
 		textPaint.setTextSize(20.0f);
 	}
 	
+	public Rect getBounds(Projection projection) {
+		Point pt = projection.toPixels(location, null);
+		offsetBounds.left = bounds.left + pt.x;
+		offsetBounds.right = bounds.right + pt.x;
+		offsetBounds.top = bounds.top + pt.y;
+		offsetBounds.bottom = bounds.bottom + pt.y;
+		return offsetBounds;
+	}
+	
 	@Override
 	public void draw(Canvas canvas, MapView mapView, boolean shadow) {
 		//we don't have a shadow
@@ -68,7 +83,7 @@ public class TextOverlay extends Overlay {
 			float y = pt.y + offsets[i];
 			String line = lines.get(i);
 			canvas.drawText(line, pt.x, y, outlinePaint);
-			canvas.drawText(line, pt.x, y, textPaint);	
+			canvas.drawText(line, pt.x, y, textPaint);
 		}
 	}
 	
@@ -100,15 +115,22 @@ public class TextOverlay extends Overlay {
 		return lines;
 	}
 	
-	private static float[] calcOffsets(List<String> lines) {
-		Rect bounds = new Rect();
+	private static float[] calcOffsets(List<String> lines, Rect bounds) {
+		Rect lineBounds = new Rect();
 		float offsets[] = new float[lines.size()];
 		int i = 0;
 		float offset = 0.0f;
 		for (String line : lines) {
 			//calculate the height of this line
-			textPaint.getTextBounds(line, 0, line.length(), bounds);
-			float height = bounds.bottom - bounds.top + textPaint.descent();
+			textPaint.getTextBounds(line, 0, line.length(), lineBounds);
+			float height = lineBounds.bottom - lineBounds.top + textPaint.descent();
+			
+			//update our bounding box
+			bounds.right = Math.max(bounds.right, lineBounds.right - lineBounds.left);
+			if (i == 0) {
+				bounds.top = (int)lineBounds.bottom - lineBounds.top;
+			}
+			
 			//store our previous offset, and remember the running total
 			offsets[i] = offset;
 			offset = offsets[i] + height;
@@ -117,10 +139,23 @@ public class TextOverlay extends Overlay {
 		}
 		
 		//offset each offset by half the total height of the text
+		float totalHeight = offset;
 		offset = offset / 2;
-		for (int j = 0; j < offsets.length; j++) {
-			offsets[j] -= offset;
+		for (i = 0; i < offsets.length; i++) {
+			offsets[i] -= offset;
 		}
+		
+		//center our bounds
+		bounds.left = -bounds.right / 2;
+		bounds.right += bounds.left;
+		bounds.top = -(int)(totalHeight / 2) - bounds.top;
+		bounds.bottom = (int)(totalHeight + bounds.top);
+		
+		//add some padding
+		bounds.left -= 5;
+		bounds.right += 5;
+		bounds.top -= 5;
+		bounds.bottom += 5;
 		
 		return offsets;
 	}

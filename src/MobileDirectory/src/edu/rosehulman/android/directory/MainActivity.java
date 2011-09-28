@@ -101,7 +101,7 @@ public class MainActivity extends MapActivity {
         		}
         );
         
-        
+        TextOverlayLayer textLayer = new TextOverlayLayer();
         Cursor buildingOverlays = buildingAdapter.getBuildingOverlayCursor();
         buildingOverlays.moveToFirst();
         int iName = buildingOverlays.getColumnIndex("name");
@@ -110,10 +110,11 @@ public class MainActivity extends MapActivity {
         do {
         	String name = buildingOverlays.getString(iName);
         	GeoPoint pt = new GeoPoint(buildingOverlays.getInt(iLat), buildingOverlays.getInt(iLon));
-        	mapView.getOverlays().add(new TextOverlay(pt, name));
+        	textLayer.addOverlay(new TextOverlay(pt, name));
         } while (buildingOverlays.moveToNext());
         
-        		buildingAdapter.close();
+        buildingAdapter.close();
+        mapView.getOverlays().add(textLayer);
 //        DatabaseHelper dbHelper = new DatabaseHelper(this);
 //        SQLiteDatabase db = dbHelper.getWritableDatabase();
 //        ContentValues values = new ContentValues();
