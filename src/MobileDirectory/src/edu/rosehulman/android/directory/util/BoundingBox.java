@@ -46,5 +46,15 @@ public class BoundingBox implements BoundingArea {
 		//TODO intersect with a path (by offloading to path)
 		return this.intersects((BoundingBox)other);
 	}
+	
+	public boolean equals(BoundingBox o) {
+		return (left == o.left) && (right == o.right) && 
+			(top == o.top) && (bottom == o.bottom); 
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		return this.equals((BoundingBox)other);
+	}
 
 }
