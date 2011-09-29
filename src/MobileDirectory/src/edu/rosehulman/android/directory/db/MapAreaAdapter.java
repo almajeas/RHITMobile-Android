@@ -1,7 +1,6 @@
 package edu.rosehulman.android.directory.db;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
 import edu.rosehulman.android.directory.model.MapArea;
 
