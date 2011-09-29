@@ -43,7 +43,11 @@ public class BoundingBox implements BoundingArea {
 	}
 	
 	public boolean intersects(BoundingArea other) {
-		//TODO intersect with a path (by offloading to path)
+		if (other instanceof BoundingPath) {
+			//offload the comparison to the BoundingPath
+			return other.intersects(this);
+		}
+		
 		return this.intersects((BoundingBox)other);
 	}
 	
