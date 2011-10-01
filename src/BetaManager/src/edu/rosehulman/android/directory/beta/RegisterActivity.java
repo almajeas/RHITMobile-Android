@@ -40,13 +40,12 @@ import android.view.View.OnClickListener;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
+/**
+ * Activity used to register users for the beta program
+ */
 public class RegisterActivity extends Activity {
     
 	private static String TAG = "RegisterActivity";
-	
-    private static String PREFS_FILE = "PREFS_BETA";
-    private static String PREF_HAS_RUN = "HAS_RUN";
     
     private TextView txtEmail;
     private TextView txtName;
@@ -152,10 +151,7 @@ public class RegisterActivity extends Activity {
     		
     		if (result) {
     			//mark that we are registered
-    			SharedPreferences prefs = getSharedPreferences(PREFS_FILE, MODE_WORLD_READABLE);
-    			Editor edit = prefs.edit();
-    	        edit.putBoolean(PREF_HAS_RUN, true);
-    	        edit.commit();
+    			BetaPrefs.setRegistered(RegisterActivity.this, true);
     	        
     	        //jump to the startup activity
     	        startActivity(new Intent(RegisterActivity.this, StartupActivity.class));

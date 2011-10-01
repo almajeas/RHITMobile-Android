@@ -11,8 +11,8 @@
                      android:targetPackage="edu.rosehulman.android.directory" />
 	<instrumentation android:name="edu.rosehulman.android.directory.beta.CustomInstrumentationTestRunner"
 		             android:targetPackage="edu.rosehulman.android.directory"
-	    	         android:label="directory instrumentation test runner" />
-
+	    	         android:label="directory instrumentation test runner" />	
+	
 
     <application android:icon="@drawable/icon" android:label="@string/app_name">
         <activity android:name=".BetaManagerActivity"
@@ -36,6 +36,12 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <activity android:name=".BetaPreferencesActivity" />
+        <receiver 
+        	android:name=".InstrumentationCompleted" 
+        	android:enabled="true"
+        	android:exported="true"
+        	/>
 		<uses-library android:name="android.test.runner" />
     </application>
     

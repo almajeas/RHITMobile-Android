@@ -18,10 +18,12 @@ import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
 
 import edu.rosehulman.android.directory.db.MapAreaAdapter;
-import edu.rosehulman.android.directory.model.MapArea;
 import edu.rosehulman.android.directory.model.MapAreaCollection;
 import edu.rosehulman.android.directory.service.MobileDirectoryService;
 
+/**
+ * Main entry point into MobileDirectory
+ */
 public class MainActivity extends MapActivity {
 	
 	private BetaManagerManager betaManager;
@@ -38,18 +40,15 @@ public class MainActivity extends MapActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         
-        boolean useBeta = !getIntent().getBooleanExtra("DisableBeta", false);
-        if (useBeta) {
-	        betaManager = new BetaManagerManager(this);
-	        
-	        if (betaManager.hasBetaManager()) {
-	        	if (betaManager.isBetaRegistered()) {
-	        		betaManager.launchBetaActivity(BetaManagerManager.ACTION_SHOW_STARTUP);	
-	        	} else {
-	        		betaManager.launchBetaActivity(BetaManagerManager.ACTION_SHOW_REGISTER);
-	        	}
-	        }
-        }
+        betaManager = new BetaManagerManager(this);
+        
+	    if (betaManager.hasBetaManager() && betaManager.isBetaEnabled()) {
+	       	if (betaManager.isBetaRegistered()) {
+	       		betaManager.launchBetaActivity(BetaManagerManager.ACTION_SHOW_STARTUP);	
+	       	} else {
+	       		betaManager.launchBetaActivity(BetaManagerManager.ACTION_SHOW_REGISTER);
+	       	}
+	    }
         
         mapView = (MapView)findViewById(R.id.mapview);
         mapView.setBuiltInZoomControls(true);

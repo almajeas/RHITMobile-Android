@@ -16,14 +16,24 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 
+/**
+ * Provides common functionality for making REST web service calls
+ */
 public abstract class RestClient {
 
-	private List<NameValuePair> queryParams;
+	protected List<NameValuePair> queryParams;
+	protected String path;
 	private String host;
 	private int port;
-	private String path;
 	private HttpMethod method;
 	
+	/**
+	 * Create a new RestClient
+	 * 
+	 * @param host The host to send the request to (i.e. example.com)
+	 * @param port The port the remote service is running on
+	 * @param path The request path (i.e. index.htm)
+	 */
 	public RestClient(String host, int port, String path) {
 		this.queryParams = new LinkedList<NameValuePair>();
 		this.host = host;

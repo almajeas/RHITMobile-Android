@@ -4,18 +4,44 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+/**
+ * Manages the databases on the system.
+ * 
+ * Knows how to create new and upgrade existing databases.  Also, this class
+ * automatically switches from the real database to a mock database if the 
+ * system is being unit tested
+ */
 public class DatabaseHelper extends SQLiteOpenHelper {
 	
 	private static DatabaseHelper instance = null;
+	private static final String DATABASE_NAME = "mobile_directory.db";
+	private static final String MOCK_DATABASE_NAME = "mock_mobile_directory.db";
 	
-	public static DatabaseHelper getInstance(Context context) {
-		if (instance == null) {
-			instance = new DatabaseHelper(context.getApplicationContext());
+	/**
+	 * Create the single, static instance of DatabaseHelper
+	 * 
+	 * @param context The context to use
+	 * @param mock True if a mock database should be used
+	 * @return The newly created DatabaseHelper
+	 */
+	public static DatabaseHelper createInstance(Context context, boolean mock) {
+		if (mock) {
+			instance = new DatabaseHelper(context.getApplicationContext(), MOCK_DATABASE_NAME);
+		} else {
+			instance = new DatabaseHelper(context.getApplicationContext(), DATABASE_NAME);
 		}
 		return instance;
 	}
-
-	private static final String DATABASE_NAME = "mobile_directory.db";
+	
+	/**
+	 * Retrieves the instance of DatabaseHelper
+	 * 
+	 * @return The single instance of DatabaseHelper
+	 */
+	public static DatabaseHelper getInstance() {
+		assert(instance != null);
+		return instance;
+	}
 
 	private static final int DATABASE_VERSION = 5;
 
@@ -41,8 +67,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 				", Lon REAL NOT NULL" +
 				");";
 
-	private DatabaseHelper(Context context) {
-		super(context, DATABASE_NAME, null, DATABASE_VERSION);
+	private DatabaseHelper(Context context, String dbName) {
+		super(context, dbName, null, DATABASE_VERSION);
 	}
 
 	@Override

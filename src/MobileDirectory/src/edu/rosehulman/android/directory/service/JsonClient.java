@@ -7,7 +7,11 @@ import org.apache.http.client.ResponseHandler;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.json.JSONObject;
 
-public class JsonClient extends RestClient {
+/**
+ * Provides an implementation of RestClient that parses the response
+ * as a JSONObject
+ */
+public class JsonClient extends RestClient implements Client<JSONObject> {
 
 	/**
 	 * Create a new JsonClient
@@ -29,6 +33,7 @@ public class JsonClient extends RestClient {
 	 * @throws URISyntaxException If an invalid URI was used
 	 * @throws Exception On other errors, including Internal Server Errors
 	 */
+	@Override
 	public JSONObject execute() throws URISyntaxException, Exception {
 		HttpResponse response = super.performRequest();
 		

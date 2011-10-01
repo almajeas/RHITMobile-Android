@@ -15,12 +15,23 @@ import junit.framework.TestListener;
 
 import org.xmlpull.v1.XmlSerializer;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.test.AndroidTestRunner;
 import android.test.InstrumentationTestRunner;
 import android.util.Log;
 import android.util.Xml;
 
+/**
+ * Handler for running MobileDirectory test cases from within BetaManager
+ * 
+ * For the most part, this class does not change how the test cases are run.
+ * It only logs the results of running the test cases and notifies BetaManger
+ * when the testing is completed.
+ * 
+ * The results of a test run will be stored in testResults.xml
+ */
 public class CustomInstrumentationTestRunner extends InstrumentationTestRunner {
 
 	public static String TAG = "CustomInstrumentationTestRunner";
@@ -130,9 +141,14 @@ public class CustomInstrumentationTestRunner extends InstrumentationTestRunner {
 		
 		try {
 			writeTestResults();
+			Log.d(TAG, "Wrote JUnit test results XML file");
 		} catch (IOException e) {
 			Log.e(TAG, "Failed to write test results", e);
 		}
+		
+		//let BetaManager know that the unit tests are done
+		Context context = getContext();
+		context.sendBroadcast(new Intent(context, InstrumentationCompleted.class));
 		
 		super.finish(resultCode, results);
 	}

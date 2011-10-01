@@ -24,11 +24,6 @@ public class MainActivityTest extends
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
-		
-		//disable looping back into the beta system
-		Intent intent = new Intent();
-		intent.putExtra("DisableBeta", true);
-		setActivityIntent(intent); 
 
 		mActivity = getActivity();
 
