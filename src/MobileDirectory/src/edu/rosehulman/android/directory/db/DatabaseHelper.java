@@ -43,7 +43,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		return instance;
 	}
 
-	private static final int DATABASE_VERSION = 5;
+	private static final int DATABASE_VERSION = 6;
 
 	private static final String TABLE_MAP_AREAS = "MapAreas";
 	private static final String CREATE_TABLE_MAP_AREAS =
@@ -53,8 +53,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 				", Description TEXT" +
 				", LabelOnHybrid INTEGER NOT NULL" +
 				", MinZoomLevel INTEGER NOT NULL" +
-				", CenterLat REAL NOT NULL" + 
-				", CenterLon REAL NOT NULL" +
+				", CenterLat INTEGER NOT NULL" + 
+				", CenterLon INTEGER NOT NULL" +
 				");";
 	
 	private static final String TABLE_MAP_AREA_CORNERS = "MapAreaCorners";
@@ -63,8 +63,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 				"( _Id INTEGER PRIMARY KEY AUTOINCREMENT" +
 				", MapArea INTEGER REFERENCES MapAreas(_Id)" +
 				", Item INTEGER NOT NULL" +
-				", Lat REAL NOT NULL" + 
-				", Lon REAL NOT NULL" +
+				", Lat INTEGER NOT NULL" + 
+				", Lon INTEGER NOT NULL" +
 				");";
 
 	private DatabaseHelper(Context context, String dbName) {

@@ -17,6 +17,9 @@ import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.Projection;
 
+/**
+ * MapView overlay that renders a string, wrapped in a reasonable way
+ */
 public class TextOverlay extends Overlay {
 	
 	private static Paint outlinePaint;
@@ -32,6 +35,13 @@ public class TextOverlay extends Overlay {
 	
 	private int minZoomLevel;
 	
+	/**
+	 * Creates a new TextOverlay
+	 * 
+	 * @param loc The lat/long that the text should appear
+	 * @param text The text to render
+	 * @param minZoomLevel The minimum zoom level to render the text at
+	 */
 	public TextOverlay(GeoPoint loc, String text, int minZoomLevel) {
 		this.location = loc;
 		this.minZoomLevel = minZoomLevel;
@@ -68,6 +78,12 @@ public class TextOverlay extends Overlay {
 		textPaint.setTextSize(20.0f);
 	}
 	
+	/**
+	 * Determine the bounds of rendered text with a given projection
+	 * 
+	 * @param projection The projection to use when computing the bounds
+	 * @return a new Rect with the bounds of the rendered text
+	 */
 	public Rect getBounds(Projection projection) {
 		Point pt = projection.toPixels(location, null);
 		offsetBounds.left = bounds.left + pt.x;
@@ -77,6 +93,12 @@ public class TextOverlay extends Overlay {
 		return offsetBounds;
 	}
 	
+	/**
+	 * Determine if the text will be visible on the given MapView
+	 * 
+	 * @param mapView The MapView to check against
+	 * @return True if the overlay will be visible
+	 */
 	public boolean isVisible(MapView mapView) {
 		return mapView.getZoomLevel() >= minZoomLevel;
 	}

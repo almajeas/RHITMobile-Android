@@ -1,5 +1,8 @@
 package edu.rosehulman.android.directory;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.content.Context;
 import android.database.Cursor;
 import android.location.Location;
@@ -81,18 +84,38 @@ public class MainActivity extends MapActivity {
         buildingAdapter.replaceBuildings(collection.mapAreas);
         
         TextOverlayLayer textLayer = new TextOverlayLayer();
-        Cursor buildingOverlays = buildingAdapter.getBuildingOverlayCursor();
-        buildingOverlays.moveToFirst();
+        Cursor buildingOverlays = buildingAdapter.getBuildingOverlayCursor(false);
+        int iId = buildingOverlays.getColumnIndex("_Id");
         int iName = buildingOverlays.getColumnIndex("Name");
         int iLat = buildingOverlays.getColumnIndex("CenterLat");
         int iLon = buildingOverlays.getColumnIndex("CenterLon");
         int iMinZoomLevel = buildingOverlays.getColumnIndex("MinZoomLevel");
-        do {
+        while (buildingOverlays.moveToNext()) {
         	String name = buildingOverlays.getString(iName);
         	int minZoomLevel = buildingOverlays.getInt(iMinZoomLevel);
         	GeoPoint pt = new GeoPoint(buildingOverlays.getInt(iLat), buildingOverlays.getInt(iLon));
         	textLayer.addOverlay(new TextOverlay(pt, name, minZoomLevel));
         } while (buildingOverlays.moveToNext());
+        buildingOverlays.close();
+        
+        buildingOverlays = buildingAdapter.getBuildingOverlayCursor(true);
+        iId = buildingOverlays.getColumnIndex("_Id");
+        while (buildingOverlays.moveToNext()) {
+        	int buildingId = buildingOverlays.getInt(iId);
+        	Cursor buildingPoints = buildingAdapter.getBuildingCornersCursor(buildingId);
+            iLat = buildingPoints.getColumnIndex("Lat");
+            iLon = buildingPoints.getColumnIndex("Lon");
+        	List<GeoPoint> pts = new ArrayList<GeoPoint>(buildingPoints.getCount());
+        	while (buildingPoints.moveToNext()) {
+        		int lat = buildingPoints.getInt(iLat);
+        		int lon = buildingPoints.getInt(iLon);
+        		pts.add(new GeoPoint(lat, lon));
+        	}
+        	buildingPoints.close();
+        	BoundingMapArea boundingMapArea = new BoundingMapArea(pts);
+        	textLayer.addObstacle(boundingMapArea);
+        }
+        buildingOverlays.close();
         
         buildingAdapter.close();
         mapView.getOverlays().add(textLayer);

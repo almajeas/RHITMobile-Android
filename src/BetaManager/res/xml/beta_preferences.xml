@@ -20,7 +20,11 @@
 			android:summary="Enable/Disable integration of BetaManager"
 			/>
 			
-		
-			
+		<CheckBoxPreference 
+			android:key="DRAW_DEBUG"
+			android:title="Draw debug information"
+			android:summary="Enable/Disable drawing debug information"
+			/>
+				
 	</PreferenceCategory>    
 </PreferenceScreen>

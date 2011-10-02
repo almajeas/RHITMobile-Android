@@ -16,17 +16,35 @@ public class MapAreaAdapter extends TableAdapter {
 	public static final String KEY_CENTER_LAT = "CenterLat";
 	public static final String KEY_CENTER_LON = "CenterLon";
 	
+	private MapAreaCornersAdapter cornersAdapter;
+	
 	public MapAreaAdapter() {
 	}
 	
-	public Cursor getBuildingOverlayCursor() {
+	@Override
+	public void open() {
+		super.open();
+		cornersAdapter = new MapAreaCornersAdapter(db);		
+	}
+	
+	@Override
+	public void close() {
+		super.close();
+		cornersAdapter = null;
+	}
+	
+	public Cursor getBuildingOverlayCursor(boolean textVisible) {
 		String[] projection = new String[] {KEY_ID, KEY_NAME, KEY_CENTER_LAT, KEY_CENTER_LON, KEY_MIN_ZOOM_LEVEL};
-		return db.query(TABLE_NAME, projection, KEY_LABEL_ON_HYBRID + "='0'", null, null, null, null);
+		String[] args = new String[] {textVisible ? "1" : "0"};
+		return db.query(TABLE_NAME, projection, KEY_LABEL_ON_HYBRID + "=?", args, null, null, null);
+	}
+	
+	public Cursor getBuildingCornersCursor(int buildingId) {
+		return cornersAdapter.getBuildingCornersCursor(buildingId);
 	}
 	
 	public void replaceBuildings(MapArea[] newData) {
 		db.beginTransaction();
-		MapAreaCornersAdapter cornersAdapter = new MapAreaCornersAdapter(db);
 		
 		//delete all records
 		db.delete(TABLE_NAME, null, null);

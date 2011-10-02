@@ -1,6 +1,7 @@
 package edu.rosehulman.android.directory.db;
 
 import android.content.ContentValues;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import edu.rosehulman.android.directory.model.LatLon;
 
@@ -32,6 +33,12 @@ public class MapAreaCornersAdapter extends TableAdapter {
 			
 			db.insert(TABLE_NAME, null, values);
 		}
+	}
+
+	public Cursor getBuildingCornersCursor(int buildingId) {
+		String[] projection = new String[] {KEY_LAT, KEY_LON};
+		String[] args = new String[] { String.valueOf(buildingId) };
+		return db.query(TABLE_NAME, projection, KEY_MAP_AREA + "=?", args, null, null, KEY_ITEM);
 	}
 	
 	

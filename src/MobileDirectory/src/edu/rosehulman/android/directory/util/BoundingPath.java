@@ -4,7 +4,7 @@ import java.util.List;
 
 public class BoundingPath implements BoundingArea {
 	
-	private List<Point> points;
+	protected List<Point> points;
 	
 	public BoundingPath(List<Point> points) {
 		this.points = points;

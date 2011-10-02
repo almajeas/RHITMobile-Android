@@ -26,6 +26,7 @@ public class BetaManagerManager extends ContextWrapper {
     public static String PREF_BETA_ENABLED = "BETA_ENABLED";
     public static String PREF_HAS_RUN = "HAS_RUN";
     public static String PREF_USE_MOCKS = "USE_MOCKS";
+    public static String PREF_DRAW_DEBUG = "DRAW_DEBUG";
     public static String PREF_ALWAYS_USE_MOCKS = "ALWAYS_USE_MOCKS";
 	
 	private static final String BETA_PACKAGE = "edu.rosehulman.android.directory.beta";
@@ -59,6 +60,14 @@ public class BetaManagerManager extends ContextWrapper {
     private SharedPreferences getBetaPreferences() throws NameNotFoundException {
     	return createPackageContext(BETA_PACKAGE, 0).getSharedPreferences(PREFS_FILE, MODE_WORLD_READABLE);	
     }
+    
+    private boolean getBooleanParameter(String name, boolean defValue) {
+    	try {
+			return getBetaPreferences().getBoolean(name, defValue);
+		} catch (NameNotFoundException e) {
+			return defValue;
+		}
+    }
 
     /**
      * Determine if the beta system is enabled
@@ -66,12 +75,7 @@ public class BetaManagerManager extends ContextWrapper {
      * @return True if enabled; false otherwise
      */
     public boolean isBetaEnabled() {
-    	try {
-    		return getBetaPreferences().getBoolean(PREF_BETA_ENABLED, false);	
-    	} catch (NameNotFoundException ex) {
-    		Log.e(C.TAG, "Failed to open beta shared preferences");
-    		return false;
-    	}    	
+    	return getBooleanParameter(PREF_BETA_ENABLED, false);    	
     }
     
     /**
@@ -80,12 +84,7 @@ public class BetaManagerManager extends ContextWrapper {
      * @return True if the user is registered
      */
     public boolean isBetaRegistered() {
-    	try {
-    		return getBetaPreferences().getBoolean(PREF_HAS_RUN, false);	
-    	} catch (NameNotFoundException ex) {
-    		Log.e(C.TAG, "Failed to open beta shared preferences");
-    		return false;
-    	}    	
+    	return getBooleanParameter(PREF_HAS_RUN, false);
     }
     
     /**
@@ -105,6 +104,15 @@ public class BetaManagerManager extends ContextWrapper {
     		return false;
     	}
     }
+
+    /**
+     * Determine if rendered controls should show debug information
+     * 
+     * @return True if controls should render debug information
+     */
+	public boolean shouldDrawDebug() {
+		return getBooleanParameter(PREF_DRAW_DEBUG, false);
+	}
     
     /**
      * Spawn a BetaManager activity
@@ -118,5 +126,5 @@ public class BetaManagerManager extends ContextWrapper {
     	} catch (ActivityNotFoundException ex) {
     		Log.e(C.TAG, "Activity not found", ex);
     	}
-    }	
+    }
 }

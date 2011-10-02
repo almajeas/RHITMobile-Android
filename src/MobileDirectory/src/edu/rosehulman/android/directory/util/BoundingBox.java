@@ -6,10 +6,10 @@ package edu.rosehulman.android.directory.util;
  */
 public class BoundingBox implements BoundingArea {
 	
-	private int left;
-	private int right;
-	private int top;
-	private int bottom;
+	public int left;
+	public int right;
+	public int top;
+	public int bottom;
 	
 	/**
 	 * Creates a new BoundingBox with the given coordinates
@@ -20,26 +20,28 @@ public class BoundingBox implements BoundingArea {
 	 * @param bottom min of two y parameters
 	 */
 	public BoundingBox(int left, int right, int top, int bottom) {
+		assert(left <= right);
+		assert(bottom <= top);
 		this.left = left;
 		this.right = right;
 		this.top = top;
 		this.bottom = bottom;
 	}
-
+	
 	private boolean doesIntersect(int r1, int r2, int s1, int s2) {
 		// Positive intersection
-		// A: |--------|           |--------|           |--------|
-		// B:     |--------|    |--------|                |----|
+		// A: |--------|            |--------|
+		// B:     |--------|          |----|
 				
 		// Negative intersection
-		// A: |--------|                      |--------|
-		// B:          |--------|    |--------|
+		// A: |--------|         
+		// B:          |--------|
 		return !((s1 <= r1) && (s2 <= r1)) ^ ((s1 >= r2) && (s2 >= r2));
 	}
 	
 	private boolean intersects(BoundingBox o) {
 		return doesIntersect(left, right, o.left, o.right) &&
-				doesIntersect(top, bottom, o.top, o.bottom);
+				doesIntersect(bottom, top, o.bottom, o.top);
 	}
 	
 	public boolean intersects(BoundingArea other) {

@@ -15,8 +15,18 @@ public class MyApplication extends Application {
 	
 	public SQLiteOpenHelper dbHelper;
 	
+	public BetaManagerManager betaManagerManager;
+	
+	private static MyApplication instance;
+	
+	public static MyApplication getInstance() {
+		return instance;
+	}
+	
 	@Override
 	public void onCreate() {
+		instance = this;
+		
 		Context context = getApplicationContext();
 		BetaManagerManager beta = new BetaManagerManager(context);
 		boolean isMocking = beta.isMocking();
@@ -28,6 +38,9 @@ public class MyApplication extends Application {
 			MobileDirectoryService.setClientFactory(new WebClientFactory());
 		}
 		
+		betaManagerManager = new BetaManagerManager(context);
+		
+		instance = this;
 	}
 
 }

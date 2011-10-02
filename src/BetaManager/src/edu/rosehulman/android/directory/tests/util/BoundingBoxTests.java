@@ -8,6 +8,7 @@ public class BoundingBoxTests extends TestCase {
 	private BoundingBox left;
 	private BoundingBox right;
 	
+	private BoundingBox cornerLeft;	
 	private BoundingBox touchingLeft;
 	
 	private BoundingBox straddleBoth;
@@ -17,6 +18,7 @@ public class BoundingBoxTests extends TestCase {
 	public void setUp() {
 		left = new BoundingBox(-10, 0, 10, 0);
 		right = new BoundingBox(1, 5, 5, -10);
+		cornerLeft = new BoundingBox(-2, 5, 15, 8);
 		touchingLeft = new BoundingBox(0, 5, 0, -5);
 		
 		straddleBoth = new BoundingBox(-5, 3, 4, 1);
@@ -43,6 +45,7 @@ public class BoundingBoxTests extends TestCase {
 		showIntersection(left, insideLeft);
 		showIntersection(left, straddleBoth);
 		showIntersection(right, straddleBoth);
+		showIntersection(left, cornerLeft);
 	}
 	
 	public void testSelfIntersection() {
