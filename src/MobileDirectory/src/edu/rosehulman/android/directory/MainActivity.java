@@ -118,14 +118,7 @@ public class MainActivity extends MapActivity {
         buildingOverlays.close();
         
         buildingAdapter.close();
-        mapView.getOverlays().add(textLayer);
-//        DatabaseHelper dbHelper = new DatabaseHelper(this);
-//        SQLiteDatabase db = dbHelper.getWritableDatabase();
-//        ContentValues values = new ContentValues();
-//        values.put("name", "TestBuilding");
-//        db.insert("buildings", null, values);
-//        db.close();
-        
+        mapView.getOverlays().add(textLayer);        
     }
     
     @Override
@@ -189,7 +182,7 @@ public class MainActivity extends MapActivity {
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
     	menu.setGroupVisible(R.id.beta_channel, betaManager.hasBetaManager());
-    	menu.setGroupVisible(R.id.location_items, myLocation.getMyLocation() != null);
+    	menu.setGroupEnabled(R.id.location_items, myLocation.getMyLocation() != null);
         return true;
     }
     
