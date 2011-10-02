@@ -28,7 +28,7 @@ import edu.rosehulman.android.directory.service.MobileDirectoryService;
  * Main entry point into MobileDirectory
  */
 public class MainActivity extends MapActivity {
-	
+
 	private BetaManagerManager betaManager;
 
     private MapView mapView;
@@ -45,12 +45,15 @@ public class MainActivity extends MapActivity {
         
         betaManager = new BetaManagerManager(this);
         
-	    if (betaManager.hasBetaManager() && betaManager.isBetaEnabled()) {
-	       	if (betaManager.isBetaRegistered()) {
-	       		betaManager.launchBetaActivity(BetaManagerManager.ACTION_SHOW_STARTUP);	
-	       	} else {
-	       		betaManager.launchBetaActivity(BetaManagerManager.ACTION_SHOW_REGISTER);
-	       	}
+        if (savedInstanceState == null) {
+		    if (betaManager.hasBetaManager() && betaManager.isBetaEnabled()) {
+		       	if (betaManager.isBetaRegistered()) {
+		       		betaManager.launchBetaActivity(BetaManagerManager.ACTION_SHOW_STARTUP);	
+		       	} else {
+		       		betaManager.launchBetaActivity(BetaManagerManager.ACTION_SHOW_REGISTER);
+		       	}
+	
+	        }
 	    }
         
         mapView = (MapView)findViewById(R.id.mapview);
@@ -119,6 +122,19 @@ public class MainActivity extends MapActivity {
         
         buildingAdapter.close();
         mapView.getOverlays().add(textLayer);        
+    }
+    
+    @Override
+    protected void onStart() {
+    	super.onStart();
+    	
+    	
+    }
+    
+    @Override
+    protected void onSaveInstanceState(Bundle bundle) {
+    	super.onSaveInstanceState(bundle);
+    	//TODO save our state
     }
     
     @Override
