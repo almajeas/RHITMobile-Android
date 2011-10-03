@@ -85,7 +85,6 @@ public class MainActivity extends MapActivity {
     	super.onStart();
     	
     	if (textLayer == null) {
-    		//TODO cancel an old task
             LoadOverlays loadOverlays = new LoadOverlays();
             taskManager.addTask(loadOverlays);
             loadOverlays.execute();

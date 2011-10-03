@@ -38,6 +38,7 @@ public class TaskManager {
 		for (AsyncTask task : tasks) {
 			task.cancel(false);
 		}
+		tasks.clear();
 	}
 
 }
