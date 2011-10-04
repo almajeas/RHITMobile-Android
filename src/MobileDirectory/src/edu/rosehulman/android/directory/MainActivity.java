@@ -23,8 +23,10 @@ import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.Overlay;
 
+import edu.rosehulman.android.directory.db.DbIterator;
 import edu.rosehulman.android.directory.db.MapAreaAdapter;
 import edu.rosehulman.android.directory.db.VersionsAdapter;
+import edu.rosehulman.android.directory.model.MapArea;
 import edu.rosehulman.android.directory.model.MapAreaCollection;
 import edu.rosehulman.android.directory.model.VersionType;
 import edu.rosehulman.android.directory.service.MobileDirectoryService;
@@ -41,6 +43,7 @@ public class MainActivity extends MapActivity {
     private LocationManager locationManager;
     private LocationListener locationListener;
 
+    private BuildingOverlayLayer buildingLayer;
     private TextOverlayLayer textLayer;
     
     private MyLocationOverlay myLocation;
@@ -194,10 +197,32 @@ public class MainActivity extends MapActivity {
     	
     	overlays.add(myLocation);
     	
+    	if (buildingLayer != null)
+    		overlays.add(buildingLayer);
+    	
     	if (textLayer != null)
     		overlays.add(textLayer);
     	
     	mapView.invalidate();
+    }
+    
+    private void generateBuildings() {
+    	BuildingOverlayLayer buildings = new BuildingOverlayLayer();
+    	
+    	MapAreaAdapter buildingAdapter = new MapAreaAdapter();
+    	buildingAdapter.open();
+    	
+    	DbIterator<MapArea> iterator = buildingAdapter.getBuildingIterator();
+    	while (iterator.hasNext()) {
+    		MapArea area = iterator.getNext();
+    		buildingAdapter.loadCorners(area);
+    		buildings.addMapArea(area);
+    	}
+    	
+    	buildingAdapter.close();
+    	
+    	this.buildingLayer = buildings;
+    	rebuildOverlays();
     }
     
 	private class LoadOverlays extends AsyncTask<Void, Void, TextOverlayLayer> {
@@ -302,6 +327,7 @@ public class MainActivity extends MapActivity {
 			MainActivity.this.textLayer = textLayer;
 			rebuildOverlays();
 	        MainActivity.this.setProgressBarIndeterminateVisibility(false);
+	        generateBuildings();
 		}
 		
 		@Override

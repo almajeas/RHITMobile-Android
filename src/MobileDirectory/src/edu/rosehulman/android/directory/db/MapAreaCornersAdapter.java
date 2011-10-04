@@ -41,6 +41,20 @@ public class MapAreaCornersAdapter extends TableAdapter {
 		return db.query(TABLE_NAME, projection, KEY_MAP_AREA + "=?", args, null, null, KEY_ITEM);
 	}
 	
+	public LatLon[] getCorners(int buildingId) {
+		Cursor cursor = getBuildingCornersCursor(buildingId);
+		LatLon[] corners = new LatLon[cursor.getCount()];
+		int iLat = cursor.getColumnIndex(KEY_LAT);
+		int iLon = cursor.getColumnIndex(KEY_LON);
+		while (cursor.moveToNext()) {
+			int i = cursor.getPosition();
+			int lat = cursor.getInt(iLat);
+			int lon = cursor.getInt(iLon);
+			corners[i] = new LatLon(lat, lon);
+		}
+		return corners;
+	}
+	
 	
 
 }

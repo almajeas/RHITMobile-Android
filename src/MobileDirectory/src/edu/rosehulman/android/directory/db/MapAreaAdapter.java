@@ -2,6 +2,7 @@ package edu.rosehulman.android.directory.db;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import edu.rosehulman.android.directory.model.LatLon;
 import edu.rosehulman.android.directory.model.MapArea;
 
 public class MapAreaAdapter extends TableAdapter {
@@ -43,6 +44,15 @@ public class MapAreaAdapter extends TableAdapter {
 		return cornersAdapter.getBuildingCornersCursor(buildingId);
 	}
 	
+	public DbIterator<MapArea> getBuildingIterator() {
+		Cursor cursor = db.query(TABLE_NAME, null, null, null, null, null, null);
+		return new BuildingIterator(cursor);
+	}
+	
+	public void loadCorners(MapArea area) {
+		area.corners = cornersAdapter.getCorners(area.id);
+	}
+	
 	public void replaceBuildings(MapArea[] newData) {
 		db.beginTransaction();
 		
@@ -70,4 +80,26 @@ public class MapAreaAdapter extends TableAdapter {
 		db.endTransaction();
 	}
 	
+	private class BuildingIterator extends DbIterator<MapArea> {
+
+		public BuildingIterator(Cursor cursor) {
+			super(cursor);
+		}
+
+		@Override
+		protected MapArea convertRow(Cursor cursor) {
+			MapArea area = new MapArea();
+			area.id = cursor.getInt(cursor.getColumnIndex(KEY_ID));
+			area.name = cursor.getString(cursor.getColumnIndex(KEY_NAME));
+			area.description = cursor.getString(cursor.getColumnIndex(KEY_DESCRIPTION));
+			area.labelOnHybrid = getBoolean(cursor, cursor.getColumnIndex(KEY_LABEL_ON_HYBRID));
+			area.minZoomLevel = cursor.getInt(cursor.getColumnIndex(KEY_MIN_ZOOM_LEVEL));
+			int lat = cursor.getInt(cursor.getColumnIndex(KEY_CENTER_LAT));
+			int lon = cursor.getInt(cursor.getColumnIndex(KEY_CENTER_LON));
+			area.center = new LatLon(lat, lon);
+			
+			return area;
+		}
+		
+	}
 }

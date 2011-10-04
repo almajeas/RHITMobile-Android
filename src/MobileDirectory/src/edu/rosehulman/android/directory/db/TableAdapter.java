@@ -62,4 +62,10 @@ public abstract class TableAdapter {
 		return cursor.getString(0);
 	}
 	
+	protected boolean getBoolean(Cursor cursor, int column) {
+		int val = cursor.getInt(column);
+		assert(val == 0 || val == 1);
+		return val == 1;
+	}
+	
 }
