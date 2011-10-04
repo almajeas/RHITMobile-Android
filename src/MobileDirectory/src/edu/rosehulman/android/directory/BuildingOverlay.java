@@ -1,10 +1,12 @@
 package edu.rosehulman.android.directory;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.Point;
 import android.graphics.Paint.Join;
 import android.graphics.Paint.Style;
 
@@ -14,14 +16,18 @@ import com.google.android.maps.Overlay;
 import com.google.android.maps.Projection;
 
 import edu.rosehulman.android.directory.model.MapArea;
+import edu.rosehulman.android.directory.util.BoundingBox;
+import edu.rosehulman.android.directory.util.BoundingPath;
+import edu.rosehulman.android.directory.util.Point;
 
 public class BuildingOverlay extends Overlay implements Overlay.Snappable {
 	
 	private MapArea mapArea;
 	
-	//private BoundingPath path;
-	//private BoundingBox bounds;
-	
+	private BoundingPath path;
+	private BoundingBox bounds;
+
+	private android.graphics.Point pt;
 	
 	private static Paint paintFill;
 	private static Paint paintStroke;
@@ -42,15 +48,17 @@ public class BuildingOverlay extends Overlay implements Overlay.Snappable {
 	public BuildingOverlay(MapArea mapArea) {
 		this.mapArea = mapArea;
 		
-		//List<Point> points = new ArrayList<Point>(mapArea.corners.length);
-		//for (int i = 0; i < mapArea.corners.length; i++) {
-		//	points.add(new Point(mapArea.corners[i].lat, mapArea.corners[i].lon));
-		//}
-		//path = new BoundingPath(points);
-		//bounds = path.getBoundingBox();
+		List<Point> points = new ArrayList<Point>(mapArea.corners.length);
+		for (int i = 0; i < mapArea.corners.length; i++) {
+			points.add(new Point(mapArea.corners[i].lat, mapArea.corners[i].lon));
+		}
+		path = new BoundingPath(points);
+		bounds = path.getBoundingBox();
 	}
 	
-	private Point pt;
+	public BoundingBox getBounds() {
+		return bounds;
+	}
 	
 	@Override
 	public void draw(Canvas canvas, MapView mapView, boolean shadow) {
@@ -72,31 +80,16 @@ public class BuildingOverlay extends Overlay implements Overlay.Snappable {
 		canvas.drawPath(path, paintFill);		
 		canvas.drawPath(path, paintStroke);
 	}
-	
-	@Override
-	public boolean onTap(GeoPoint p, MapView mapView) {
-		Point pt = mapView.getProjection().toPixels(p, null);
-		Point snapPoint = new Point();
-		boolean snap = onSnapToItem(pt.x, pt.y, snapPoint, mapView);
-		
-		if (snap) {
-			mapView.getController().animateTo(mapView.getProjection().fromPixels(snapPoint.x, snapPoint.y));
-		}
-		
-		return snap;
-	}
 
 	@Override
-	public boolean onSnapToItem(int x, int y, Point snapPoint, MapView mapView) {
-		//Point pt1 = mapView.getProjection().toPixels(topLeft, null);
-		//Point pt2 = mapView.getProjection().toPixels(bottomRight, null);
+	public boolean onSnapToItem(int x, int y, android.graphics.Point snapPoint, MapView mapView) {
+		Projection proj = mapView.getProjection();
+		GeoPoint geoPt = proj.fromPixels(x, y);
 		
-		//boolean snap = (pt1.x <= x) && (x <= pt2.x) && (pt1.y <= y) && (y <= pt2.y);
-		
-		//snapPoint.x = (pt1.x + pt2.x) / 2;
-		//snapPoint.y = (pt1.y + pt2.y) / 2;
-		
-		//return snap;
+		if (bounds.contains(geoPt.getLatitudeE6(), geoPt.getLongitudeE6())) {
+			proj.toPixels(mapArea.center.asGeoPoint(), snapPoint);
+			return true;
+		}
 		return false;
 	}
 

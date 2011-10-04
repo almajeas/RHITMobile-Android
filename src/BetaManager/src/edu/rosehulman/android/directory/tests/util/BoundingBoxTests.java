@@ -56,4 +56,20 @@ public class BoundingBoxTests extends TestCase {
 		assertTrue(insideLeft.intersects(insideLeft));
 	}
 
+	public void testContains() {
+		//simple checks
+		assertTrue(left.contains(-5, 5));
+		assertFalse(left.contains(5, 5));
+		assertFalse(left.contains(-5, 15));
+		assertFalse(left.contains(-15, 5));
+		assertFalse(left.contains(-5, -5));
+		
+		//corners
+		assertTrue(right.contains(1, 5));
+		assertTrue(right.contains(5, -10));
+		
+		//edges
+		assertTrue(left.contains(0, 5));
+	}
+	
 }

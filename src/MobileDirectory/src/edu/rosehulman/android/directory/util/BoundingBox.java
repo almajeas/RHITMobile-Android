@@ -62,5 +62,16 @@ public class BoundingBox implements BoundingArea {
 	public boolean equals(Object other) {
 		return this.equals((BoundingBox)other);
 	}
+	
+	/**
+	 * Determines if the given point is contained within this bounding box
+	 * 
+	 * @param x The x coordinate
+	 * @param y The y coordinate
+	 * @return True if the point is contained within the bounding box
+	 */
+	public boolean contains(int x, int y) {
+		return (x >= left) && (x <= right) && (y >= bottom) && (y <= top);
+	}
 
 }
