@@ -32,8 +32,8 @@ public class MockJsonClient extends JsonClient {
 		
 		try {
 			if ("mapareas".equals(path)) {
-				if (params.containsKey("Version") &&
-						"0.1".equals(params.get("Version"))) {
+				if (params.containsKey("version") &&
+						"0.1".equals(params.get("version"))) {
 					//data up to date
 					return null;
 				}

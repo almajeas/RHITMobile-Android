@@ -24,7 +24,9 @@ import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.Overlay;
 
 import edu.rosehulman.android.directory.db.MapAreaAdapter;
+import edu.rosehulman.android.directory.db.VersionsAdapter;
 import edu.rosehulman.android.directory.model.MapAreaCollection;
+import edu.rosehulman.android.directory.model.VersionType;
 import edu.rosehulman.android.directory.service.MobileDirectoryService;
 
 /**
@@ -249,11 +251,16 @@ public class MainActivity extends MapActivity {
 		protected TextOverlayLayer doInBackground(Void... args) {
 
 			//check for updated map areas
-	        MobileDirectoryService service = new MobileDirectoryService();
+			VersionsAdapter versionsAdapter = new VersionsAdapter();
+			versionsAdapter.open();
+	        
+			MobileDirectoryService service = new MobileDirectoryService();
+	    	String version = versionsAdapter.getVersion(VersionType.MAP_AREAS);
+	    	versionsAdapter.close();
+			
 	        MapAreaCollection collection = null;
 	        try {
-	        	//TODO current data version, if available
-				collection = service.getMapAreas(null);
+	        	collection = service.getMapAreas(version);
 			} catch (Exception e) {
 				Log.e(C.TAG, "Failed to download new map areas", e);
 				//just use our old data, it is likely up to date
@@ -262,12 +269,21 @@ public class MainActivity extends MapActivity {
 			if (isCancelled()) {
 				return null;
 			}
-	        
+			
+			if (collection == null) {
+				//data was up to date
+				return buildLayer();
+			}
+
 			//replace the building data with the new data
 	        MapAreaAdapter buildingAdapter = new MapAreaAdapter();
 	        buildingAdapter.open();
 	        buildingAdapter.replaceBuildings(collection.mapAreas);
 	        buildingAdapter.close();
+	        
+	        versionsAdapter.open();
+	        versionsAdapter.setVersion(VersionType.MAP_AREAS, collection.version);
+	        versionsAdapter.close();
 	        if (isCancelled()) {
 				return null;
 			}

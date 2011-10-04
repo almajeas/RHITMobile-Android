@@ -43,7 +43,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		return instance;
 	}
 
-	private static final int DATABASE_VERSION = 6;
+	private static final int DATABASE_VERSION = 7;
 
 	private static final String TABLE_MAP_AREAS = "MapAreas";
 	private static final String CREATE_TABLE_MAP_AREAS =
@@ -66,6 +66,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 				", Lat INTEGER NOT NULL" + 
 				", Lon INTEGER NOT NULL" +
 				");";
+	
+	private static final String TABLE_VERSIONS = "Versions";
+	private static final String CREATE_TABLE_VERSIONS =
+			"CREATE TABLE " + TABLE_VERSIONS + " " +
+				"( _Id INTEGER PRIMARY KEY" +
+				", Version TEXT NOT NULL" +
+				");";
 
 	private DatabaseHelper(Context context, String dbName) {
 		super(context, dbName, null, DATABASE_VERSION);
@@ -75,12 +82,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 	public void onCreate(SQLiteDatabase db) {
 		db.execSQL(CREATE_TABLE_MAP_AREA_CORNERS);
 		db.execSQL(CREATE_TABLE_MAP_AREAS);
+		db.execSQL(CREATE_TABLE_VERSIONS);
 	}
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 		db.execSQL("DROP TABLE IF EXISTS " + TABLE_MAP_AREA_CORNERS);
 		db.execSQL("DROP TABLE IF EXISTS " + TABLE_MAP_AREAS);
+		db.execSQL("DROP TABLE IF EXISTS " + TABLE_VERSIONS);
+		
 		onCreate(db);
 	}
 

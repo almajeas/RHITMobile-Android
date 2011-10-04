@@ -1,5 +1,6 @@
 package edu.rosehulman.android.directory.db;
 
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
@@ -46,6 +47,19 @@ public abstract class TableAdapter {
 	 */
 	public void close() {
 		db.close();
+	}
+
+	/**
+	 * Convert the result of a single cell into a String
+	 * 
+	 * @param cursor An active cursor, with a single column and row
+	 * @return the String contained in the only cell
+	 */
+	protected String getString(Cursor cursor) {
+		assert(cursor.getColumnCount() == 1);
+		assert(cursor.getCount() == 1);
+		cursor.moveToFirst();
+		return cursor.getString(0);
 	}
 	
 }

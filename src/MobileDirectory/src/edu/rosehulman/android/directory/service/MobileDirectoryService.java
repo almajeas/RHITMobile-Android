@@ -46,6 +46,10 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 		}
 		
 		JSONObject root = client.execute();
+		if (root == null) {
+			return null;
+		}
+		
 		return MapAreaCollection.deserialize(root);
 	}
 
