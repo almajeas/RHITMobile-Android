@@ -82,7 +82,7 @@ public class TextOverlayLayer extends Overlay {
 				red.setAlpha(200);
 				red.setStrokeWidth(2.0f);
 				red.setStyle(Style.STROKE);
-				canvas.drawRect(box.left, box.top, box.right, box.bottom, red);				
+				canvas.drawRect(box.left, box.bottom, box.right, box.top, red);				
 			}
 		}
 		
