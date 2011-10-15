@@ -39,9 +39,13 @@ public class BuildingOverlayLayer extends Overlay {
 				BoundingBox bounds = building.getBounds();
 				int spanLat = bounds.right - bounds.left;
 				int spanLon = bounds.top - bounds.bottom;
+				ViewController controller = new ViewController(mapView);
+				GeoPoint dest = mapView.getProjection().fromPixels(snapPoint.x, snapPoint.y);
+				Point center = new Point(mapView.getWidth() / 2, mapView.getHeight() / 4 * 3);
+				controller.animateTo(dest, center, spanLat, spanLon);
 				//TODO zoom to building
 				//mapView.getController().zoomToSpan(spanLat, spanLon);
-				mapView.getController().animateTo(mapView.getProjection().fromPixels(pt.x, pt.y));
+				//mapView.getController().animateTo(mapView.getProjection().fromPixels(pt.x, pt.y));
 				selected = building;
 				mapView.invalidate();
 				return true;
