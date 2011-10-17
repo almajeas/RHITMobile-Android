@@ -1,9 +1,12 @@
 package edu.rosehulman.android.directory.service;
 
-import edu.rosehulman.android.directory.model.MapAreaCollection;
+import edu.rosehulman.android.directory.model.LocationCollection;
 
 public interface IMobileDirectoryService {
 	
-	public MapAreaCollection getMapAreas(String currentVersion) throws Exception;
+	public LocationCollection getAllLocationData(String currentVersion) throws Exception;
+	
+	@Deprecated
+	public LocationCollection getMapAreas(String currentVersion) throws Exception;
 
 }

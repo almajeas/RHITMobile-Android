@@ -5,7 +5,6 @@ import java.util.List;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationProvider;
@@ -24,10 +23,10 @@ import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.Overlay;
 
 import edu.rosehulman.android.directory.db.DbIterator;
-import edu.rosehulman.android.directory.db.MapAreaAdapter;
+import edu.rosehulman.android.directory.db.LocationAdapter;
 import edu.rosehulman.android.directory.db.VersionsAdapter;
-import edu.rosehulman.android.directory.model.MapArea;
-import edu.rosehulman.android.directory.model.MapAreaCollection;
+import edu.rosehulman.android.directory.model.Location;
+import edu.rosehulman.android.directory.model.LocationCollection;
 import edu.rosehulman.android.directory.model.VersionType;
 import edu.rosehulman.android.directory.service.MobileDirectoryService;
 
@@ -117,7 +116,7 @@ public class MainActivity extends MapActivity {
         locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
         locationListener = new LocationListener() {
 			@Override
-			public void onLocationChanged(Location location) {
+			public void onLocationChanged(android.location.Location location) {
 				Log.v(C.TAG, location.toString());
 			}
 
@@ -209,13 +208,13 @@ public class MainActivity extends MapActivity {
     private void generateBuildings() {
     	BuildingOverlayLayer buildings = new BuildingOverlayLayer();
     	
-    	MapAreaAdapter buildingAdapter = new MapAreaAdapter();
+    	LocationAdapter buildingAdapter = new LocationAdapter();
     	buildingAdapter.open();
     	
-    	DbIterator<MapArea> iterator = buildingAdapter.getBuildingIterator();
+    	DbIterator<Location> iterator = buildingAdapter.getBuildingIterator();
     	while (iterator.hasNext()) {
-    		MapArea area = iterator.getNext();
-    		buildingAdapter.loadCorners(area);
+    		Location area = iterator.getNext();
+    		buildingAdapter.loadMapArea(area, true);
     		buildings.addMapArea(area);
     	}
     	
@@ -229,7 +228,7 @@ public class MainActivity extends MapActivity {
 
 		private TextOverlayLayer buildLayer() {
 			//get our db
-	        MapAreaAdapter buildingAdapter = new MapAreaAdapter();
+	        LocationAdapter buildingAdapter = new LocationAdapter();
 	        TextOverlayLayer textLayer = new TextOverlayLayer();
 	        buildingAdapter.open();
 	        
@@ -283,9 +282,9 @@ public class MainActivity extends MapActivity {
 	    	String version = versionsAdapter.getVersion(VersionType.MAP_AREAS);
 	    	versionsAdapter.close();
 			
-	        MapAreaCollection collection = null;
+	        LocationCollection collection = null;
 	        try {
-	        	collection = service.getMapAreas(version);
+	        	collection = service.getAllLocationData(version);
 			} catch (Exception e) {
 				Log.e(C.TAG, "Failed to download new map areas", e);
 				//just use our old data, it is likely up to date
@@ -301,7 +300,7 @@ public class MainActivity extends MapActivity {
 			}
 
 			//replace the building data with the new data
-	        MapAreaAdapter buildingAdapter = new MapAreaAdapter();
+	        LocationAdapter buildingAdapter = new LocationAdapter();
 	        buildingAdapter.open();
 	        buildingAdapter.replaceBuildings(collection.mapAreas);
 	        buildingAdapter.close();

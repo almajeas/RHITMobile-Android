@@ -6,23 +6,24 @@ import java.util.List;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Path;
 import android.graphics.Paint.Join;
 import android.graphics.Paint.Style;
+import android.graphics.Path;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.Projection;
 
-import edu.rosehulman.android.directory.model.MapArea;
+import edu.rosehulman.android.directory.model.Location;
+import edu.rosehulman.android.directory.model.MapAreaData;
 import edu.rosehulman.android.directory.util.BoundingBox;
 import edu.rosehulman.android.directory.util.BoundingPath;
 import edu.rosehulman.android.directory.util.Point;
 
 public class BuildingOverlay extends Overlay implements Overlay.Snappable {
 	
-	private MapArea mapArea;
+	private Location mapArea;
 	
 	private BoundingPath path;
 	private BoundingBox bounds;
@@ -45,12 +46,13 @@ public class BuildingOverlay extends Overlay implements Overlay.Snappable {
 		paintStroke.setStyle(Style.STROKE);		
 	}
 	
-	public BuildingOverlay(MapArea mapArea) {
+	public BuildingOverlay(Location mapArea) {
 		this.mapArea = mapArea;
+		MapAreaData mapData = mapArea.mapData;
 		
-		List<Point> points = new ArrayList<Point>(mapArea.corners.length);
-		for (int i = 0; i < mapArea.corners.length; i++) {
-			points.add(new Point(mapArea.corners[i].lat, mapArea.corners[i].lon));
+		List<Point> points = new ArrayList<Point>(mapData.corners.length);
+		for (int i = 0; i < mapData.corners.length; i++) {
+			points.add(new Point(mapData.corners[i].lat, mapData.corners[i].lon));
 		}
 		path = new BoundingPath(points);
 		bounds = path.getBoundingBox();
@@ -65,16 +67,17 @@ public class BuildingOverlay extends Overlay implements Overlay.Snappable {
 		if (shadow) return;
 		
 		Projection proj = mapView.getProjection();
+		MapAreaData mapData = mapArea.mapData;
 		
 		Path path = new Path();
-		pt = proj.toPixels(mapArea.corners[0].asGeoPoint(), pt);
+		pt = proj.toPixels(mapData.corners[0].asGeoPoint(), pt);
 		path.moveTo(pt.x, pt.y);
 		
-		for (int i = 1; i < mapArea.corners.length; i++) {
-			proj.toPixels(mapArea.corners[i].asGeoPoint(), pt);
+		for (int i = 1; i < mapData.corners.length; i++) {
+			proj.toPixels(mapData.corners[i].asGeoPoint(), pt);
 			path.lineTo(pt.x, pt.y);
 		}
-		proj.toPixels(mapArea.corners[0].asGeoPoint(), pt);
+		proj.toPixels(mapData.corners[0].asGeoPoint(), pt);
 		path.lineTo(pt.x, pt.y);
 	
 		canvas.drawPath(path, paintFill);		

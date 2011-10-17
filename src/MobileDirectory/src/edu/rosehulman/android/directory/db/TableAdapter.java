@@ -68,4 +68,28 @@ public abstract class TableAdapter {
 		return val == 1;
 	}
 	
+
+	protected String columns(String... args) {
+		StringBuilder builder = new StringBuilder(" ");
+		for (String arg : args) {
+			builder.append(arg);
+			builder.append(",");
+		}
+		builder.setCharAt(builder.length() - 1, ' ');
+		return builder.toString();
+	}
+	
+	protected String column(String table, String column) {
+		return table + "." + column;
+	}
+	
+	protected String tables(String... args) {
+		//TODO implement
+		return args[0];
+	}
+	
+	protected String table(String name, String alias) {
+		return name + " " + alias;
+	}
+	
 }

@@ -8,7 +8,7 @@ import android.os.AsyncTask;
 /**
  * Manage a set of tasks associated with an Activity.
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings("rawtypes")
 public class TaskManager {
 	
 	private Set<AsyncTask> tasks;

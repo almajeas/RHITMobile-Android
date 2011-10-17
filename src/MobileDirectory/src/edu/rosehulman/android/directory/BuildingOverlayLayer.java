@@ -10,7 +10,7 @@ import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 
-import edu.rosehulman.android.directory.model.MapArea;
+import edu.rosehulman.android.directory.model.Location;
 import edu.rosehulman.android.directory.util.BoundingBox;
 
 public class BuildingOverlayLayer extends Overlay {
@@ -23,7 +23,7 @@ public class BuildingOverlayLayer extends Overlay {
 		overlays = new ArrayList<BuildingOverlay>();
 	}
 	
-	public void addMapArea(MapArea area) {
+	public void addMapArea(Location area) {
 		BuildingOverlay overlay = new BuildingOverlay(area);
 		
 		overlays.add(overlay);

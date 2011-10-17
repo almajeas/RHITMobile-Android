@@ -1,6 +1,5 @@
 package edu.rosehulman.android.directory.tests.ui;
 
-import android.content.Intent;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.UiThreadTest;
 

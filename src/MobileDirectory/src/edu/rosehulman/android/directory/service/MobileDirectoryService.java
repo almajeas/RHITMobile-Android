@@ -2,7 +2,7 @@ package edu.rosehulman.android.directory.service;
 
 import org.json.JSONObject;
 
-import edu.rosehulman.android.directory.model.MapAreaCollection;
+import edu.rosehulman.android.directory.model.LocationCollection;
 
 /**
  * Wraps logic of communicating with the mobile directory web service into
@@ -39,7 +39,23 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 	}*/
 	
 	@Override
-	public MapAreaCollection getMapAreas(String currentVersion) throws Exception {
+	public LocationCollection getAllLocationData(String currentVersion) throws Exception {
+		JsonClient client = factory.makeJsonClient(HOST, PORT, "locations/data/all");
+		if (currentVersion != null) {
+			client.addParameter("version", currentVersion);
+		}
+		
+		JSONObject root = client.execute();
+		if (root == null) {
+			return null;
+		}
+		
+		return LocationCollection.deserialize(root);
+	}
+	
+	@Override
+	@Deprecated
+	public LocationCollection getMapAreas(String currentVersion) throws Exception {
 		JsonClient client = factory.makeJsonClient(HOST, PORT, "mapareas");
 		if (currentVersion != null) {
 			client.addParameter("version", currentVersion);
@@ -50,7 +66,7 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 			return null;
 		}
 		
-		return MapAreaCollection.deserialize(root);
+		return LocationCollection.deserialize(root);
 	}
 
 }

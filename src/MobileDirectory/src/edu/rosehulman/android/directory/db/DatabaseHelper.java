@@ -43,25 +43,35 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		return instance;
 	}
 
-	private static final int DATABASE_VERSION = 7;
+	private static final int DATABASE_VERSION = 9;
 
-	private static final String TABLE_MAP_AREAS = "MapAreas";
-	private static final String CREATE_TABLE_MAP_AREAS =
-			"CREATE TABLE " + TABLE_MAP_AREAS + " " +
+	private static final String TABLE_LOCATIONS = "Locations";
+	private static final String CREATE_TABLE_LOCATIONS =
+			"CREATE TABLE " + TABLE_LOCATIONS + " " +
 				"( _Id INTEGER PRIMARY KEY" +
+				", MapAreaId INTEGER" +
+				", ParentId INTEGER" +
 				", Name TEXT NOT NULL" +
 				", Description TEXT" +
-				", LabelOnHybrid INTEGER NOT NULL" +
-				", MinZoomLevel INTEGER NOT NULL" +
 				", CenterLat INTEGER NOT NULL" + 
 				", CenterLon INTEGER NOT NULL" +
+				", IsPOI INTEGER NOT NULL" +
+				", IsOnQuickList INTEGER NOT NULL" +
+				");";
+	
+	private static final String TABLE_MAP_AREA_DATA = "MapAreaData";
+	private static final String CREATE_TABLE_MAP_AREA_DATA =
+			"CREATE TABLE " + TABLE_MAP_AREA_DATA + " " +
+				"( _Id INTEGER PRIMARY KEY AUTOINCREMENT" +
+				", LabelOnHybrid INTEGER NOT NULL" +
+				", MinZoomLevel INTEGER NOT NULL" +
 				");";
 	
 	private static final String TABLE_MAP_AREA_CORNERS = "MapAreaCorners";
 	private static final String CREATE_TABLE_MAP_AREA_CORNERS =
 			"CREATE TABLE " + TABLE_MAP_AREA_CORNERS + " " +
 				"( _Id INTEGER PRIMARY KEY AUTOINCREMENT" +
-				", MapArea INTEGER REFERENCES MapAreas(_Id)" +
+				", MapAreaId INTEGER REFERENCES MapAreaData(_Id)" +
 				", Item INTEGER NOT NULL" +
 				", Lat INTEGER NOT NULL" + 
 				", Lon INTEGER NOT NULL" +
@@ -80,16 +90,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
+		db.execSQL(CREATE_TABLE_MAP_AREA_DATA);
 		db.execSQL(CREATE_TABLE_MAP_AREA_CORNERS);
-		db.execSQL(CREATE_TABLE_MAP_AREAS);
+		db.execSQL(CREATE_TABLE_LOCATIONS);
 		db.execSQL(CREATE_TABLE_VERSIONS);
 	}
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		db.execSQL("DROP TABLE IF EXISTS " + TABLE_MAP_AREA_CORNERS);
-		db.execSQL("DROP TABLE IF EXISTS " + TABLE_MAP_AREAS);
 		db.execSQL("DROP TABLE IF EXISTS " + TABLE_VERSIONS);
+		db.execSQL("DROP TABLE IF EXISTS " + TABLE_LOCATIONS);
+		db.execSQL("DROP TABLE IF EXISTS " + TABLE_MAP_AREA_CORNERS);
+		db.execSQL("DROP TABLE IF EXISTS " + TABLE_MAP_AREA_DATA);
 		
 		onCreate(db);
 	}
