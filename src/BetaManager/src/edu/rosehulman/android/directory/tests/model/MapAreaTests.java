@@ -7,6 +7,7 @@ import org.json.JSONObject;
 
 import edu.rosehulman.android.directory.model.LatLon;
 import edu.rosehulman.android.directory.model.Location;
+import edu.rosehulman.android.directory.model.MapAreaData;
 
 public class MapAreaTests extends TestCase {
 	
@@ -25,12 +26,17 @@ public class MapAreaTests extends TestCase {
 		
 		String json = "{\"Center\":" +
 				"{\"Lat\":39.4837285367578,\"Long\":-87.3244470512428}," +
+				"MapArea: {" +
 				"\"Corners\":[{\"Lat\":39.4837632915625,\"Long\":-87.3247013316994}]," +
+				"\"LabelOnHybrid\":true," +
+				"\"MinZoomLevel\":15}," +
 				"\"Description\":\"Test Description\"," +
 				"\"Id\":4," +
-				"\"LabelOnHybrid\":true," +
-				"\"MinZoomLevel\":15," +
-				"\"Name\":\"Crapo Hall\"}";
+				"\"Name\":\"Crapo Hall\"," +
+				"\"Parent\":1500," +
+				"\"IsPOI\":true," +
+				"\"OnQuickList\":true" +
+				"}";
 		JSONObject root = new JSONObject(json);
 		
 		Location o = Location.deserialize(root);
@@ -45,11 +51,17 @@ public class MapAreaTests extends TestCase {
 		assertEquals(4, o.id);
 		assertEquals(true, o.mapData.labelOnHybrid);
 		assertEquals(15, o.mapData.minZoomLevel);
-		assertEquals("Crapo Hall", o.name);		
+		assertEquals("Crapo Hall", o.name);
+		assertEquals(1500, o.parentId);
+		assertTrue(o.isPOI);
+		assertTrue(o.isOnQuickList);
 	}
 	
 	public void testHasCorners() {
 		Location o = new Location("Test", 0, 0);
+		assertNull(o.mapData);
+		
+		o.mapData = new MapAreaData();
 		assertFalse(o.mapData.hasCorners());
 		
 		o.mapData.corners = new LatLon[0];

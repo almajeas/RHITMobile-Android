@@ -11,7 +11,7 @@ public class MapAreaCollectionTests extends TestCase {
 	
 	public void testDeserialize() throws JSONException {
 		
-		JSONObject root = new JSONObject("{\"Areas\":[],\"Version\":0.1}");
+		JSONObject root = new JSONObject("{\"Locations\":[],\"Version\":0.1}");
 		
 		LocationCollection o = LocationCollection.deserialize(root);
 		
