@@ -66,6 +66,10 @@ public class BuildingOverlay extends Overlay implements Overlay.Snappable {
 		return mapArea.id;
 	}
 	
+	public Location getLocation() {
+		return mapArea;
+	}
+	
 	@Override
 	public void draw(Canvas canvas, MapView mapView, boolean shadow) {
 		if (shadow) return;

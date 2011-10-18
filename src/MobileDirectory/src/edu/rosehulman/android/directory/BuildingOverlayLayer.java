@@ -5,10 +5,13 @@ import java.util.List;
 
 import android.graphics.Canvas;
 import android.graphics.Point;
+import android.view.View;
+import android.view.ViewGroup.LayoutParams;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
+import com.readystatesoftware.mapviewballoons.BalloonOverlayView;
 
 import edu.rosehulman.android.directory.model.Location;
 import edu.rosehulman.android.directory.util.BoundingBox;
@@ -87,6 +90,17 @@ public class BuildingOverlayLayer extends Overlay {
 	
 	private void setSelected(BuildingOverlay overlay) {
 		selected = overlay;
+		Location location = overlay.getLocation();
+		BalloonOverlayView balloon = new BalloonOverlayView(mapView.getContext(), 0);
+		GeoPoint point = location.center.asGeoPoint();
+		MapView.LayoutParams params = new MapView.LayoutParams(
+				LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, point,
+				MapView.LayoutParams.BOTTOM_CENTER);
+		params.mode = MapView.LayoutParams.MODE_MAP;
+		balloon.setText(location.name, location.description);
+		balloon.setVisibility(View.VISIBLE);
+		
+		mapView.addView(balloon, params);
 	}
 	
 	private void moveToSelected(GeoPoint dest) {
