@@ -18,14 +18,15 @@ public class BuildingOverlayLayer extends Overlay {
 	private List<BuildingOverlay> overlays;
 	private Point pt;
 	private BuildingOverlay selected;
+	private MapView mapView;
 	
-	public BuildingOverlayLayer() {
+	public BuildingOverlayLayer(MapView mapView) {
 		overlays = new ArrayList<BuildingOverlay>();
+		this.mapView = mapView;
 	}
 	
 	public void addMapArea(Location area) {
 		BuildingOverlay overlay = new BuildingOverlay(area);
-		
 		overlays.add(overlay);
 	}
 	
@@ -36,18 +37,9 @@ public class BuildingOverlayLayer extends Overlay {
 		Point snapPoint = new Point();
 		for (BuildingOverlay building : overlays) {
 			if (building.onSnapToItem(pt.x, pt.y, snapPoint, mapView)) {
-				BoundingBox bounds = building.getBounds();
-				int spanLat = bounds.right - bounds.left;
-				int spanLon = bounds.top - bounds.bottom;
-				ViewController controller = new ViewController(mapView);
 				GeoPoint dest = mapView.getProjection().fromPixels(snapPoint.x, snapPoint.y);
-				Point center = new Point(mapView.getWidth() / 2, mapView.getHeight() / 4 * 3);
-				controller.animateTo(dest, center, spanLat, spanLon);
-				//TODO zoom to building
-				//mapView.getController().zoomToSpan(spanLat, spanLon);
-				//mapView.getController().animateTo(mapView.getProjection().fromPixels(pt.x, pt.y));
-				selected = building;
-				mapView.invalidate();
+				setSelected(building);
+				moveToSelected(dest);
 				return true;
 			}
 		}
@@ -67,6 +59,44 @@ public class BuildingOverlayLayer extends Overlay {
 			overlay.draw(canvas, mapView, shadow);
 		}
 		*/
+	}
+
+	public long getSelectedBuilding() {
+		if (selected == null) {
+			return -1;
+		}
+		
+		return selected.getID();
+	}
+	
+	public boolean setSelectedBuilding(long id) {
+		if (id < 0) {
+			setSelected(null);
+			return true;
+		}
+		
+		for (BuildingOverlay building : overlays) {
+			if (building.getID() == id) {
+				setSelected(building);
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	private void setSelected(BuildingOverlay overlay) {
+		selected = overlay;
+	}
+	
+	private void moveToSelected(GeoPoint dest) {
+		BoundingBox bounds = selected.getBounds();
+		int spanLat = bounds.right - bounds.left;
+		int spanLon = bounds.top - bounds.bottom;
+		ViewController controller = new ViewController(mapView);
+		Point center = new Point(mapView.getWidth() / 2, mapView.getHeight() / 4 * 3);
+		controller.animateTo(dest, center, spanLat, spanLon);
+		mapView.invalidate();
 	}
 
 }

@@ -35,6 +35,8 @@ import edu.rosehulman.android.directory.service.MobileDirectoryService;
  * Main entry point into MobileDirectory
  */
 public class MainActivity extends MapActivity {
+	
+    private static final String BUILDING_SELECTED_ID = "BuildingSelectedId";
 
 	private BetaManagerManager betaManager;
 
@@ -50,6 +52,8 @@ public class MainActivity extends MapActivity {
     private MyLocationOverlay myLocation;
     
     private TaskManager taskManager;
+    
+    private Bundle savedInstanceState;
     
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -79,6 +83,12 @@ public class MainActivity extends MapActivity {
 	        GeoPoint center = new GeoPoint(39483760, -87325929);
 	        mapView.getController().setCenter(center);
 	        mapView.getController().zoomToSpan(6241, 13894);    
+	    } else {
+	    	this.savedInstanceState = savedInstanceState;
+	    	
+	    	//restore state
+
+	    	
 	    }
 
         mapView.setBuiltInZoomControls(true);
@@ -101,6 +111,9 @@ public class MainActivity extends MapActivity {
     protected void onSaveInstanceState(Bundle bundle) {
     	super.onSaveInstanceState(bundle);
     	//TODO save our state
+    	if (buildingLayer != null) {
+    		bundle.putLong(BUILDING_SELECTED_ID, buildingLayer.getSelectedBuilding());
+    	}
     }
     
     @Override
@@ -217,7 +230,7 @@ public class MainActivity extends MapActivity {
 	    private TextOverlayLayer textLayer;
 
 	    private void generateBuildings() {
-	    	BuildingOverlayLayer buildings = new BuildingOverlayLayer();
+	    	BuildingOverlayLayer buildings = new BuildingOverlayLayer(mapView);
 	    	
 	    	LocationAdapter buildingAdapter = new LocationAdapter();
 	    	buildingAdapter.open();
@@ -230,6 +243,10 @@ public class MainActivity extends MapActivity {
 	    	}
 	    	
 	    	buildingAdapter.close();
+	    	
+	    	if (savedInstanceState != null) {
+	    		buildings.setSelectedBuilding(savedInstanceState.getLong(BUILDING_SELECTED_ID));
+	    	}
 	    	
 	    	this.buildingLayer = buildings;
 	    }
