@@ -61,7 +61,7 @@ public class ViewController {
 				int newLevel = mapView.getZoomLevel();
 				controller.setZoom(level);
 				
-				if (level < newLevel) {
+				if (level < newLevel - 1) {
 					controller.zoomInFixing(p.x, p.y);
 				} else if (level > newLevel) {
 					controller.zoomOutFixing(p.x, p.y);
