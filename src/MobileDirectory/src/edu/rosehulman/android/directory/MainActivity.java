@@ -48,6 +48,7 @@ public class MainActivity extends MapActivity {
     private POILayer poiLayer;
     private BuildingOverlayLayer buildingLayer;
     private TextOverlayLayer textLayer;
+    private EventOverlay eventLayer;
     
     private MyLocationOverlay myLocation;
     
@@ -66,6 +67,7 @@ public class MainActivity extends MapActivity {
         
         mapView = (MapView)findViewById(R.id.mapview);
         myLocation = new MyLocationOverlay(this, mapView);
+        eventLayer = new EventOverlay();
         
         if (savedInstanceState == null) {
         	
@@ -87,8 +89,6 @@ public class MainActivity extends MapActivity {
 	    	this.savedInstanceState = savedInstanceState;
 	    	
 	    	//restore state
-
-	    	
 	    }
 
         mapView.setBuiltInZoomControls(true);
@@ -209,6 +209,7 @@ public class MainActivity extends MapActivity {
     	List<Overlay> overlays = mapView.getOverlays();
     	overlays.clear();
     	
+    	overlays.add(eventLayer);
     	overlays.add(myLocation);
     	
     	if (buildingLayer != null)
@@ -221,6 +222,23 @@ public class MainActivity extends MapActivity {
     		overlays.add(poiLayer);
     	
     	mapView.invalidate();
+    }
+    
+    private class EventOverlay extends Overlay {
+    	
+    	@Override
+    	public boolean onTap(GeoPoint p, MapView mapView) {
+    		//tap not handled by any other overlay
+    		if (buildingLayer != null) {
+    			buildingLayer.setSelectedBuilding(-1);
+    		}
+    		
+    		if (poiLayer != null) {
+    			poiLayer.setFocus(null);
+    		}
+    		
+    		return true;
+    	}
     }
     
 	private class LoadOverlays extends AsyncTask<Void, Void, Void> {
