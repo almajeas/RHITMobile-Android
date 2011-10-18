@@ -92,7 +92,7 @@ public class LocationAdapter extends TableAdapter {
 	 * 
 	 */
 	public DbIterator<Location> getPOIIterator() {
-		String where = KEY_IS_POI + " ='1'";
+		String where = KEY_IS_POI + " ='1' AND " + KEY_MAP_AREA_ID + " IS NULL";
 		
 		Cursor cursor = db.query(TABLE_NAME, null, where, null, null, null, null);
 		return new BuildingIterator(cursor);

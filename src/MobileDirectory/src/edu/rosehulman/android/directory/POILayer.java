@@ -3,6 +3,7 @@ package edu.rosehulman.android.directory;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
@@ -15,6 +16,8 @@ import com.readystatesoftware.mapviewballoons.BalloonItemizedOverlay;
 import edu.rosehulman.android.directory.model.Location;
 
 public class POILayer extends BalloonItemizedOverlay<OverlayItem> {
+
+	private static final int MIN_ZOOM_LEVEL = 19;
 	
 	private List<OverlayItem> poi;
 
@@ -24,9 +27,7 @@ public class POILayer extends BalloonItemizedOverlay<OverlayItem> {
 	}
 	
 	public void add(Location location) {
-		String snippet = location.description + " " + location.description + "\n";
-		snippet = snippet + snippet + snippet + snippet;
-		OverlayItem overlay = new OverlayItem(location.center.asGeoPoint(), location.name, snippet);
+		OverlayItem overlay = new OverlayItem(location.center.asGeoPoint(), location.name, location.description);
 		poi.add(overlay);
 		populate();
 	}
@@ -52,7 +53,16 @@ public class POILayer extends BalloonItemizedOverlay<OverlayItem> {
 		MapView mapView = getMapView();
 		ViewController controller = new ViewController(mapView);
 		Point pt = new Point(mapView.getWidth() / 2, mapView.getHeight() / 4 * 3);
+		//TODO determine correct span
 		controller.animateTo(center, pt, 0, 0);
+	}
+	
+	@Override
+	public void draw(Canvas canvas, MapView mapView, boolean shadow) {
+		if (mapView.getZoomLevel() < MIN_ZOOM_LEVEL)
+			return;
+		
+		super.draw(canvas, mapView, shadow);
 	}
 
 }
