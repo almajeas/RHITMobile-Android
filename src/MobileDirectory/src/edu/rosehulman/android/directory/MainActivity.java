@@ -236,7 +236,7 @@ public class MainActivity extends MapActivity {
 	    
 	    private void generatePOI() {
 	    	Drawable marker = getResources().getDrawable(R.drawable.map_marker);
-	    	POILayer poi = new POILayer(marker);
+	    	POILayer poi = new POILayer(marker, mapView);
 
 	    	LocationAdapter buildingAdapter = new LocationAdapter();
 	    	buildingAdapter.open();

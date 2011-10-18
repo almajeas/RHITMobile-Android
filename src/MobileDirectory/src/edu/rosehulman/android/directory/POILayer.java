@@ -6,17 +6,18 @@ import java.util.List;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 
-import com.google.android.maps.ItemizedOverlay;
+import com.google.android.maps.MapView;
 import com.google.android.maps.OverlayItem;
+import com.readystatesoftware.mapviewballoons.BalloonItemizedOverlay;
 
 import edu.rosehulman.android.directory.model.Location;
 
-public class POILayer extends ItemizedOverlay<OverlayItem> {
+public class POILayer extends BalloonItemizedOverlay<OverlayItem> {
 	
 	private List<OverlayItem> poi;
 
-	public POILayer(Drawable defaultMarker) {
-		super(boundCenter(defaultMarker));
+	public POILayer(Drawable defaultMarker, MapView mapView) {
+		super(boundCenter(defaultMarker), mapView);
 		poi = new ArrayList<OverlayItem>();
 	}
 	
@@ -37,7 +38,7 @@ public class POILayer extends ItemizedOverlay<OverlayItem> {
 	}
 	
 	@Override
-	protected boolean onTap(int index) {
+	protected boolean onBalloonTap(int index, OverlayItem item) {
 		Log.d(C.TAG, "Tapped: " + index);
 		return true;
 	}
