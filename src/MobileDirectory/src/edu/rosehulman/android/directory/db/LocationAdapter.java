@@ -86,6 +86,19 @@ public class LocationAdapter extends TableAdapter {
 	}
 	
 	/**
+	 * Iterate over every point of interest in the database
+	 * 
+	 * @return An iterator over Location objects
+	 * 
+	 */
+	public DbIterator<Location> getPOIIterator() {
+		String where = KEY_IS_POI + " ='1'";
+		
+		Cursor cursor = db.query(TABLE_NAME, null, where, null, null, null, null);
+		return new BuildingIterator(cursor);
+	}
+	
+	/**
 	 * Populate MapArea information in a Location
 	 * 
 	 * @param area The location to populate

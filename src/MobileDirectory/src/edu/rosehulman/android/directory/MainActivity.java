@@ -5,6 +5,7 @@ import java.util.List;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.drawable.Drawable;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationProvider;
@@ -42,6 +43,7 @@ public class MainActivity extends MapActivity {
     private LocationManager locationManager;
     private LocationListener locationListener;
 
+    private POILayer poiLayer;
     private BuildingOverlayLayer buildingLayer;
     private TextOverlayLayer textLayer;
     
@@ -201,6 +203,9 @@ public class MainActivity extends MapActivity {
     	
     	if (textLayer != null)
     		overlays.add(textLayer);
+
+    	if (poiLayer != null)
+    		overlays.add(poiLayer);
     	
     	mapView.invalidate();
     }
@@ -221,6 +226,25 @@ public class MainActivity extends MapActivity {
     	buildingAdapter.close();
     	
     	this.buildingLayer = buildings;
+    	rebuildOverlays();
+    }
+    
+    private void generatePOI() {
+    	Drawable marker = getResources().getDrawable(R.drawable.map_marker);
+    	POILayer poi = new POILayer(marker);
+
+    	LocationAdapter buildingAdapter = new LocationAdapter();
+    	buildingAdapter.open();
+    	
+    	DbIterator<Location> iterator = buildingAdapter.getPOIIterator();
+    	while (iterator.hasNext()) {
+    		Location location = iterator.getNext();
+    		poi.add(location);
+    	}
+    	
+    	buildingAdapter.close();
+    	
+    	this.poiLayer = poi;
     	rebuildOverlays();
     }
     
@@ -326,7 +350,9 @@ public class MainActivity extends MapActivity {
 			MainActivity.this.textLayer = textLayer;
 			rebuildOverlays();
 	        MainActivity.this.setProgressBarIndeterminateVisibility(false);
+	        //FIXME move off of main thread
 	        generateBuildings();
+	        generatePOI();
 		}
 		
 		@Override
