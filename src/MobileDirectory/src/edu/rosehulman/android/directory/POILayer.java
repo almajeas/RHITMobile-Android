@@ -3,9 +3,11 @@ package edu.rosehulman.android.directory;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 
+import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapView;
 import com.google.android.maps.OverlayItem;
 import com.readystatesoftware.mapviewballoons.BalloonItemizedOverlay;
@@ -22,7 +24,9 @@ public class POILayer extends BalloonItemizedOverlay<OverlayItem> {
 	}
 	
 	public void add(Location location) {
-		OverlayItem overlay = new OverlayItem(location.center.asGeoPoint(), location.name, location.description);
+		String snippet = location.description + " " + location.description + "\n";
+		snippet = snippet + snippet + snippet + snippet;
+		OverlayItem overlay = new OverlayItem(location.center.asGeoPoint(), location.name, snippet);
 		poi.add(overlay);
 		populate();
 	}
@@ -41,6 +45,14 @@ public class POILayer extends BalloonItemizedOverlay<OverlayItem> {
 	protected boolean onBalloonTap(int index, OverlayItem item) {
 		Log.d(C.TAG, "Tapped: " + index);
 		return true;
+	}
+	
+	@Override
+	protected void animateTo(int index, GeoPoint center) {
+		MapView mapView = getMapView();
+		ViewController controller = new ViewController(mapView);
+		Point pt = new Point(mapView.getWidth() / 2, mapView.getHeight() / 4 * 3);
+		controller.animateTo(center, pt, 0, 0);
 	}
 
 }
