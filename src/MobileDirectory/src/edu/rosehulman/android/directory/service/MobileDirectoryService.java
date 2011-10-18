@@ -38,6 +38,9 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 		}
 	}*/
 	
+	/*	 NativeStart.main(String[]) line: not available [native method]
+	 */
+	
 	@Override
 	public LocationCollection getAllLocationData(String currentVersion) throws Exception {
 		JsonClient client = factory.makeJsonClient(HOST, PORT, "locations/data/all");

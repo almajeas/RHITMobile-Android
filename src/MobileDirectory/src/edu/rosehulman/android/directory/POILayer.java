@@ -16,7 +16,7 @@ public class POILayer extends ItemizedOverlay<OverlayItem> {
 	private List<OverlayItem> poi;
 
 	public POILayer(Drawable defaultMarker) {
-		super(boundCenterBottom(defaultMarker));
+		super(boundCenter(defaultMarker));
 		poi = new ArrayList<OverlayItem>();
 	}
 	

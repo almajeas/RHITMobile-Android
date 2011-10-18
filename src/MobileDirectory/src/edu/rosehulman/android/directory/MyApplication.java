@@ -13,6 +13,8 @@ import edu.rosehulman.android.directory.service.WebClientFactory;
  */
 public class MyApplication extends Application {
 	
+	public static boolean CHECK_UI_THREAD = true;
+	
 	public SQLiteOpenHelper dbHelper;
 	
 	public BetaManagerManager betaManagerManager;

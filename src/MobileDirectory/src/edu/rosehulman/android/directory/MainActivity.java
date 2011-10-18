@@ -210,50 +210,52 @@ public class MainActivity extends MapActivity {
     	mapView.invalidate();
     }
     
-    private void generateBuildings() {
-    	BuildingOverlayLayer buildings = new BuildingOverlayLayer();
-    	
-    	LocationAdapter buildingAdapter = new LocationAdapter();
-    	buildingAdapter.open();
-    	
-    	DbIterator<Location> iterator = buildingAdapter.getBuildingIterator();
-    	while (iterator.hasNext()) {
-    		Location area = iterator.getNext();
-    		buildingAdapter.loadMapArea(area, true);
-    		buildings.addMapArea(area);
-    	}
-    	
-    	buildingAdapter.close();
-    	
-    	this.buildingLayer = buildings;
-    	rebuildOverlays();
-    }
-    
-    private void generatePOI() {
-    	Drawable marker = getResources().getDrawable(R.drawable.map_marker);
-    	POILayer poi = new POILayer(marker);
+	private class LoadOverlays extends AsyncTask<Void, Void, Void> {
+		
+	    private POILayer poiLayer;
+	    private BuildingOverlayLayer buildingLayer;
+	    private TextOverlayLayer textLayer;
 
-    	LocationAdapter buildingAdapter = new LocationAdapter();
-    	buildingAdapter.open();
-    	
-    	DbIterator<Location> iterator = buildingAdapter.getPOIIterator();
-    	while (iterator.hasNext()) {
-    		Location location = iterator.getNext();
-    		poi.add(location);
-    	}
-    	
-    	buildingAdapter.close();
-    	
-    	this.poiLayer = poi;
-    	rebuildOverlays();
-    }
-    
-	private class LoadOverlays extends AsyncTask<Void, Void, TextOverlayLayer> {
+	    private void generateBuildings() {
+	    	BuildingOverlayLayer buildings = new BuildingOverlayLayer();
+	    	
+	    	LocationAdapter buildingAdapter = new LocationAdapter();
+	    	buildingAdapter.open();
+	    	
+	    	DbIterator<Location> iterator = buildingAdapter.getBuildingIterator();
+	    	while (iterator.hasNext()) {
+	    		Location area = iterator.getNext();
+	    		buildingAdapter.loadMapArea(area, true);
+	    		buildings.addMapArea(area);
+	    	}
+	    	
+	    	buildingAdapter.close();
+	    	
+	    	this.buildingLayer = buildings;
+	    }
+	    
+	    private void generatePOI() {
+	    	Drawable marker = getResources().getDrawable(R.drawable.map_marker);
+	    	POILayer poi = new POILayer(marker);
 
-		private TextOverlayLayer buildLayer() {
+	    	LocationAdapter buildingAdapter = new LocationAdapter();
+	    	buildingAdapter.open();
+	    	
+	    	DbIterator<Location> iterator = buildingAdapter.getPOIIterator();
+	    	while (iterator.hasNext()) {
+	    		Location location = iterator.getNext();
+	    		poi.add(location);
+	    	}
+	    	
+	    	buildingAdapter.close();
+	    	
+	    	this.poiLayer = poi;
+	    }
+
+		private void generateText() {
 			//get our db
 	        LocationAdapter buildingAdapter = new LocationAdapter();
-	        TextOverlayLayer textLayer = new TextOverlayLayer();
+	        textLayer = new TextOverlayLayer();
 	        buildingAdapter.open();
 	        
 	        //build out text overlays
@@ -292,11 +294,18 @@ public class MainActivity extends MapActivity {
 	        buildingOverlays.close();
 	        
 	        buildingAdapter.close();
-	        return textLayer;
+		}
+		
+		private void buildLayers() {
+			generateText();
+			publishProgress();
+			generateBuildings();
+			publishProgress();
+			generatePOI();	
 		}
 		
 		@Override
-		protected TextOverlayLayer doInBackground(Void... args) {
+		protected Void doInBackground(Void... args) {
 
 			//check for updated map areas
 			VersionsAdapter versionsAdapter = new VersionsAdapter();
@@ -312,7 +321,8 @@ public class MainActivity extends MapActivity {
 			} catch (Exception e) {
 				Log.e(C.TAG, "Failed to download new map areas", e);
 				//just use our old data, it is likely up to date
-				return buildLayer();
+				buildLayers();
+				return null;
 			}
 			if (isCancelled()) {
 				return null;
@@ -320,7 +330,8 @@ public class MainActivity extends MapActivity {
 			
 			if (collection == null) {
 				//data was up to date
-				return buildLayer();
+				buildLayers();
+				return null;
 			}
 
 			//replace the building data with the new data
@@ -336,7 +347,8 @@ public class MainActivity extends MapActivity {
 				return null;
 			}
 	        
-	        return buildLayer();
+	        buildLayers();
+	        return null;
 		}
 		
 		@Override
@@ -344,15 +356,23 @@ public class MainActivity extends MapActivity {
 			MainActivity.this.setProgressBarIndeterminateVisibility(true);
 		}
 		
-		@Override
-		protected void onPostExecute(TextOverlayLayer textLayer) {
-			//add the overlay to the map
+		private void updateOverlays() {
+			MainActivity.this.poiLayer = poiLayer;
+			MainActivity.this.buildingLayer = buildingLayer;
 			MainActivity.this.textLayer = textLayer;
 			rebuildOverlays();
+		}
+		
+		@Override
+		protected void onProgressUpdate(Void... values) {
+	    	updateOverlays();
+		}
+		
+		@Override
+		protected void onPostExecute(Void res) {
+			//add the overlay to the map;
+			updateOverlays();
 	        MainActivity.this.setProgressBarIndeterminateVisibility(false);
-	        //FIXME move off of main thread
-	        generateBuildings();
-	        generatePOI();
 		}
 		
 		@Override

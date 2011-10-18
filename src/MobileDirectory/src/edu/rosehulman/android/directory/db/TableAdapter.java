@@ -1,5 +1,6 @@
 package edu.rosehulman.android.directory.db;
 
+import edu.rosehulman.android.directory.MyApplication;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -37,6 +38,8 @@ public abstract class TableAdapter {
 			db = null;
 		}
 		db = dbOpenHelper.getWritableDatabase();
+	
+		verifyThread();
 	}
 	
 	/**
@@ -90,6 +93,21 @@ public abstract class TableAdapter {
 	
 	protected String table(String name, String alias) {
 		return name + " " + alias;
+	}
+
+	private static void verifyThread() {
+		if (!MyApplication.CHECK_UI_THREAD)
+			return;
+		
+		//make sure we are not the main thread
+		StackTraceElement stack[] = Thread.currentThread().getStackTrace();
+		for (StackTraceElement frame : stack) {
+			if ("main".equals(frame.getMethodName()) && 
+					frame.getClassName().contains("NativeStart") && 
+					frame.isNativeMethod()) {
+				throw new RuntimeException("DB access on UI thread");
+			}
+		}
 	}
 	
 }
