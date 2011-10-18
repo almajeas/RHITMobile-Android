@@ -22,6 +22,7 @@ public class BuildingOverlayLayer extends Overlay {
 	private Point pt;
 	private BuildingOverlay selected;
 	private MapView mapView;
+	private BalloonOverlayView balloon;
 	
 	public BuildingOverlayLayer(MapView mapView) {
 		overlays = new ArrayList<BuildingOverlay>();
@@ -90,17 +91,35 @@ public class BuildingOverlayLayer extends Overlay {
 	
 	private void setSelected(BuildingOverlay overlay) {
 		selected = overlay;
-		Location location = overlay.getLocation();
-		BalloonOverlayView balloon = new BalloonOverlayView(mapView.getContext(), 0);
-		GeoPoint point = location.center.asGeoPoint();
-		MapView.LayoutParams params = new MapView.LayoutParams(
-				LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, point,
-				MapView.LayoutParams.BOTTOM_CENTER);
-		params.mode = MapView.LayoutParams.MODE_MAP;
-		balloon.setText(location.name, location.description);
-		balloon.setVisibility(View.VISIBLE);
 		
-		mapView.addView(balloon, params);
+		if (overlay == null) {
+			if (balloon != null) {
+				balloon.setVisibility(View.GONE);
+			}
+		} else {		
+			Location location = overlay.getLocation();
+			boolean recycle = (balloon != null);
+			if (!recycle) {
+				balloon = new BalloonOverlayView(mapView.getContext(), 0);	
+			}
+			
+			balloon.setVisibility(View.GONE);
+			
+			GeoPoint point = location.center.asGeoPoint();
+			MapView.LayoutParams params = new MapView.LayoutParams(
+					LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, point,
+					MapView.LayoutParams.BOTTOM_CENTER);
+			params.mode = MapView.LayoutParams.MODE_MAP;
+			balloon.setText(location.name, location.description);
+			balloon.setVisibility(View.VISIBLE);
+			
+			if (recycle) {
+				balloon.setLayoutParams(params);
+			} else {
+				mapView.addView(balloon, params);
+			}
+		}
+		
 	}
 	
 	private void moveToSelected(GeoPoint dest) {
