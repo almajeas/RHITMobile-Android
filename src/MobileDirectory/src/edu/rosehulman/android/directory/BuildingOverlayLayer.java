@@ -62,9 +62,11 @@ public class BuildingOverlayLayer extends Overlay {
 			selected.draw(canvas, mapView, shadow);
 		}
 		
+		/*
 		for (Overlay overlay : overlays) {
 			overlay.draw(canvas, mapView, shadow);
 		}
+		*/
 	}
 
 }
