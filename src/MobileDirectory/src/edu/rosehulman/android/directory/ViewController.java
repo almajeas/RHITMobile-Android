@@ -49,8 +49,25 @@ public class ViewController {
 		
 		GeoPoint destPoint = new GeoPoint(center.getLatitudeE6() - dLat, center.getLongitudeE6() - dLon);
 		
-		controller.animateTo(destPoint);
-		//TODO zoom in/out
+		final Point p = pt;
+		final int latSpan = spanLat;
+		final int lonSpan = spanLon;
+		
+		controller.animateTo(destPoint, new Runnable() {
+			@Override
+			public void run() {
+				int level = mapView.getZoomLevel();
+				controller.zoomToSpan(latSpan, lonSpan);
+				int newLevel = mapView.getZoomLevel();
+				controller.setZoom(level);
+				
+				if (level < newLevel) {
+					controller.zoomInFixing(p.x, p.y);
+				} else if (level > newLevel) {
+					controller.zoomOutFixing(p.x, p.y);
+				}
+			}
+		});
 	}
 	
 	/**
@@ -58,7 +75,6 @@ public class ViewController {
 	 */
 	public void cancel() {
 		controller.stopAnimation(false);
-		//TODO stop our animation timer
 	}
 	
 }
