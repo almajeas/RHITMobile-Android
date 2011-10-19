@@ -64,6 +64,16 @@ public class LocationAdapter extends TableAdapter {
 	}
 	
 	/**
+	 * Return a cursor over items on the quick list
+	 * 
+	 * @return A new Cursor with ids and names
+	 */
+	public Cursor getQuickListCursor() {
+		String[] projection = new String[] {KEY_ID, KEY_NAME};
+		return db.query(TABLE_NAME, projection, KEY_IS_ON_QUICK_LIST + "=1", null, null, null, KEY_NAME);
+	}
+	
+	/**
 	 * Return a cursor over building corners
 	 * 
 	 * @param buildingId the map area id to iterate over

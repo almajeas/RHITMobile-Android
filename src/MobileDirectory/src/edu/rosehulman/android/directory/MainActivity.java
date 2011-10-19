@@ -3,8 +3,12 @@ package edu.rosehulman.android.directory;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.database.Cursor;
+import android.database.DataSetObserver;
 import android.graphics.drawable.Drawable;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -15,7 +19,12 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.ListAdapter;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
@@ -184,6 +193,10 @@ public class MainActivity extends MapActivity {
         return true;
     }
     
+    private void showTopLocations() {
+    	new TopLocations().execute();
+    }
+    
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         //handle item selection
@@ -193,6 +206,9 @@ public class MainActivity extends MapActivity {
             return true;
         case R.id.location:
         	mapView.getController().animateTo(myLocation.getMyLocation());
+        	return true;
+        case R.id.top_level:
+        	showTopLocations();
         	return true;
         default:
             return super.onOptionsItemSelected(item);
@@ -239,6 +255,48 @@ public class MainActivity extends MapActivity {
     		
     		return true;
     	}
+    }
+    
+    private class TopLocations extends AsyncTask<Void, Void, Void> {
+    	private int[] ids;
+		private String[] names;
+    	
+		@Override
+		protected Void doInBackground(Void... params) {
+			LocationAdapter locationAdapter = new LocationAdapter();
+			locationAdapter.open();
+			
+			Cursor cursor = locationAdapter.getQuickListCursor();
+			
+			int iId = cursor.getColumnIndex(LocationAdapter.KEY_ID);
+			int iName = cursor.getColumnIndex(LocationAdapter.KEY_NAME);
+			
+			ids = new int[cursor.getCount()];
+			names = new String[cursor.getCount()];
+			
+			for (int i = 0; cursor.moveToNext(); i++) {
+				ids[i] = cursor.getInt(iId);
+				names[i] = cursor.getString(iName);
+			}
+			
+			locationAdapter.close();
+			return null;
+		}
+		
+		@Override
+		protected void onPostExecute(Void res) {
+	    	AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
+	    		.setTitle("Top Locations")
+	    		.setItems(names, new OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						Toast.makeText(MainActivity.this, "Thank you", Toast.LENGTH_SHORT).show();
+					}
+				})
+				.create();
+	    	dialog.show();
+		}
+    	
     }
     
 	private class LoadOverlays extends AsyncTask<Void, Void, Void> {

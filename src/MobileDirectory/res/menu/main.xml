@@ -2,15 +2,18 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 	<group android:id="@+id/beta_channel">
 	    <item android:id="@+id/beta_manager"
-	          android:icon="@drawable/icon"
+	          android:icon="@android:drawable/ic_menu_manage"
 	          android:title="Beta Manager" />
     </group>
     <group android:id="@+id/location_items">
 	    <item android:id="@+id/location"
-	          android:icon="@drawable/icon"
+	          android:icon="@android:drawable/ic_menu_mylocation"
 	          android:title="My Location" />
     </group>
+    <item android:id="@+id/top_level"
+          android:icon="@android:drawable/ic_menu_directions"
+          android:title="Top Locations" />
     <item android:id="@+id/help"
-          android:icon="@drawable/icon"
+          android:icon="@android:drawable/ic_menu_help"
           android:title="Help" />
 </menu>
