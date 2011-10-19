@@ -34,12 +34,26 @@ public class ViewController {
 	 * @param spanLon How much longitude should be visible on the screen
 	 */
 	public void animateTo(GeoPoint center, Point pt, int spanLat, int spanLon) {
+		final int level = mapView.getZoomLevel();
+		controller.zoomToSpan(spanLat, spanLon);
+		final int newLevel = mapView.getZoomLevel();
+		controller.setZoom(level);
+		
+		animateTo(center, pt, newLevel);
+	}
+	
+	/**
+	 * Animate to a location on the map
+	 * 
+	 * @param center The GeoPoint that we want to 'center'
+	 * @param pt The location on the screen center should be located
+	 * @param zoomLevel The zoom level to approach
+	 */
+	public void animateTo(GeoPoint center, Point pt, final int zoomLevel) {
 		Projection projection = mapView.getProjection();
 		int centerX = mapView.getWidth() / 2;
 		int centerY = mapView.getHeight() / 2;
-		
-		//TODO zoom out if necessary so that the point is in view
-		
+
 		//@assert projection.toPixels(center, null).equals(pt);
 		
 		GeoPoint currentCenter = projection.fromPixels(centerX, centerY);
@@ -49,21 +63,15 @@ public class ViewController {
 		
 		GeoPoint destPoint = new GeoPoint(center.getLatitudeE6() - dLat, center.getLongitudeE6() - dLon);
 		
+		final int currentZoomLevel = mapView.getZoomLevel();
 		final Point p = pt;
-		final int latSpan = spanLat;
-		final int lonSpan = spanLon;
 		
 		controller.animateTo(destPoint, new Runnable() {
 			@Override
 			public void run() {
-				int level = mapView.getZoomLevel();
-				controller.zoomToSpan(latSpan, lonSpan);
-				int newLevel = mapView.getZoomLevel();
-				controller.setZoom(level);
-				
-				if (level < newLevel - 1) {
+				if (currentZoomLevel < zoomLevel - 1) {
 					controller.zoomInFixing(p.x, p.y);
-				} else if (level > newLevel) {
+				} else if (currentZoomLevel > zoomLevel) {
 					controller.zoomOutFixing(p.x, p.y);
 				}
 			}
