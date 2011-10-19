@@ -290,7 +290,11 @@ public class MainActivity extends MapActivity {
 	    		.setItems(names, new OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						Toast.makeText(MainActivity.this, "Thank you", Toast.LENGTH_SHORT).show();
+						if (!buildingLayer.setSelectedBuilding(ids[which])) {
+							//TODO POI
+							Toast.makeText(MainActivity.this, "TODO: POI", Toast.LENGTH_SHORT).show();	
+						}
+						
 					}
 				})
 				.create();

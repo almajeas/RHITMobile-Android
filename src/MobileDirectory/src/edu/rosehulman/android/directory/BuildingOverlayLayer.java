@@ -82,6 +82,7 @@ public class BuildingOverlayLayer extends Overlay {
 		for (BuildingOverlay building : overlays) {
 			if (building.getID() == id) {
 				setSelected(building);
+				moveToSelected(building.getLocation().center.asGeoPoint());
 				return true;
 			}
 		}
