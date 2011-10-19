@@ -19,22 +19,44 @@ public class POILayer extends BalloonItemizedOverlay<OverlayItem> {
 
 	private static final int MIN_ZOOM_LEVEL = 19;
 	
-	private List<OverlayItem> poi;
+	private class PointOfInterest {
+		public Location location;
+		public OverlayItem poi;
+		
+		public PointOfInterest(Location location, OverlayItem poi) {
+			this.location = location;
+			this.poi = poi;
+		}
+	}
+	
+	private List<PointOfInterest> poi;
 
 	public POILayer(Drawable defaultMarker, MapView mapView) {
 		super(boundCenter(defaultMarker), mapView);
-		poi = new ArrayList<OverlayItem>();
+		poi = new ArrayList<PointOfInterest>();
 	}
 	
 	public void add(Location location) {
 		OverlayItem overlay = new OverlayItem(location.center.asGeoPoint(), location.name, location.description);
-		poi.add(overlay);
+		poi.add(new PointOfInterest(location, overlay));
 		populate();
+	}
+	
+	public boolean setFocus(long id) {
+		for (int i = 0; i < poi.size(); i++) {
+			PointOfInterest poi = this.poi.get(i);
+			if (poi.location.id == id) {
+				this.onTap(i);
+				return true;
+			}
+		}
+		
+		return false;
 	}
 
 	@Override
 	protected OverlayItem createItem(int i) {
-		return poi.get(i);
+		return poi.get(i).poi;
 	}
 
 	@Override

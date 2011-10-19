@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.database.Cursor;
-import android.database.DataSetObserver;
 import android.graphics.drawable.Drawable;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -19,11 +18,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
-import android.widget.ListAdapter;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.maps.GeoPoint;
@@ -110,7 +105,7 @@ public class MainActivity extends MapActivity {
     	super.onStart();
     	
     	if (textLayer == null) {
-            LoadOverlays loadOverlays = new LoadOverlays();
+    		LoadOverlays loadOverlays = new LoadOverlays(savedInstanceState == null);
             taskManager.addTask(loadOverlays);
             loadOverlays.execute();
     	}
@@ -291,8 +286,7 @@ public class MainActivity extends MapActivity {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						if (!buildingLayer.setSelectedBuilding(ids[which])) {
-							//TODO POI
-							Toast.makeText(MainActivity.this, "TODO: POI", Toast.LENGTH_SHORT).show();	
+							poiLayer.setFocus(ids[which]);	
 						}
 						
 					}
@@ -305,10 +299,16 @@ public class MainActivity extends MapActivity {
     
 	private class LoadOverlays extends AsyncTask<Void, Void, Void> {
 		
+		private boolean refreshData;
+		
 	    private POILayer poiLayer;
 	    private BuildingOverlayLayer buildingLayer;
 	    private TextOverlayLayer textLayer;
 
+		public LoadOverlays(boolean refreshData) {
+			this.refreshData = refreshData;
+		}
+		
 	    private void generateBuildings() {
 	    	BuildingOverlayLayer buildings = new BuildingOverlayLayer(mapView);
 	    	
@@ -403,6 +403,12 @@ public class MainActivity extends MapActivity {
 		
 		@Override
 		protected Void doInBackground(Void... args) {
+			
+			if (!refreshData) {
+				//skip update
+				buildLayers();
+				return null;
+			}
 
 			//check for updated map areas
 			VersionsAdapter versionsAdapter = new VersionsAdapter();
