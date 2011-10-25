@@ -335,11 +335,7 @@ public class MainActivity extends MapActivity {
 	    	}
 	    	
 	    	buildingAdapter.close();
-	    	
-	    	if (savedInstanceState != null) {
-	    		buildings.setSelectedBuilding(savedInstanceState.getLong(BUILDING_SELECTED_ID));
-	    	}
-	    	
+
 	    	this.buildingLayer = buildings;
 	    }
 	    
@@ -487,6 +483,11 @@ public class MainActivity extends MapActivity {
 		protected void onPostExecute(Void res) {
 			//add the overlay to the map;
 			updateOverlays();
+			
+	    	if (savedInstanceState != null) {
+	    		MainActivity.this.buildingLayer.setSelectedBuilding(savedInstanceState.getLong(BUILDING_SELECTED_ID));
+	    	}
+			
 	        MainActivity.this.setProgressBarIndeterminateVisibility(false);
 		}
 		
