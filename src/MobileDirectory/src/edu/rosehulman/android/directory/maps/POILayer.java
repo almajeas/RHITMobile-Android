@@ -16,6 +16,9 @@ import com.readystatesoftware.mapviewballoons.BalloonItemizedOverlay;
 import edu.rosehulman.android.directory.C;
 import edu.rosehulman.android.directory.model.Location;
 
+/**
+ * Overlay containing Point Of Interest markers
+ */
 public class POILayer extends BalloonItemizedOverlay<OverlayItem> implements ManageableOverlay {
 
 	private static final int MIN_ZOOM_LEVEL = 19;
@@ -34,17 +37,34 @@ public class POILayer extends BalloonItemizedOverlay<OverlayItem> implements Man
 	
 	private List<PointOfInterest> poi;
 
+	/**
+	 * Create a new POILayer
+	 * 
+	 * @param defaultMarker A Drawable to use to render each point of interest
+	 * @param mapView The MapView that this overlay will be rendered on
+	 */
 	public POILayer(Drawable defaultMarker, MapView mapView) {
 		super(boundCenter(defaultMarker), mapView);
 		poi = new ArrayList<PointOfInterest>();
 	}
 	
+	/**
+	 * Add a new location to the overlay
+	 * 
+	 * @param location The Location to render
+	 */
 	public void add(Location location) {
 		OverlayItem overlay = new OverlayItem(location.center.asGeoPoint(), location.name, location.description);
 		poi.add(new PointOfInterest(location, overlay));
 		populate();
 	}
 	
+	/**
+	 * Focus a particular POI
+	 * 
+	 * @param id The ID of the POI to focus
+	 * @return True if the POI was found; false otherwise
+	 */
 	public boolean setFocus(long id) {
 		for (int i = 0; i < poi.size(); i++) {
 			PointOfInterest poi = this.poi.get(i);

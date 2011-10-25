@@ -3,6 +3,9 @@ package edu.rosehulman.android.directory.util;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A collection of BoundingAreas with operations on that collection
+ */
 public class Region {
 	
 	private List<BoundingArea> boundingAreas;

@@ -76,7 +76,7 @@ public class MainActivity extends MapActivity {
         
         mapView = (MapView)findViewById(R.id.mapview);
         
-        overlayManager = new OverlayManager(mapView);
+        overlayManager = new OverlayManager();
         myLocation = new MyLocationOverlay(this, mapView);
         eventLayer = new EventOverlay();
         

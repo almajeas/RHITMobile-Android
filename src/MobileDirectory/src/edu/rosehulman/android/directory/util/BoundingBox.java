@@ -6,9 +6,13 @@ package edu.rosehulman.android.directory.util;
  */
 public class BoundingBox implements BoundingArea {
 	
+	/** The left coordinate */
 	public int left;
+	/** The right coordinate */
 	public int right;
+	/** The top coordinate */
 	public int top;
+	/** The bottom coordinate */
 	public int bottom;
 	
 	/**
@@ -53,6 +57,12 @@ public class BoundingBox implements BoundingArea {
 		return this.intersects((BoundingBox)other);
 	}
 	
+	/**
+	 * Determine if this instance is equal to a BoundingBox
+	 *  
+	 * @param o The BoundingBox to compare to
+	 * @return True if equal; false otherwise
+	 */
 	public boolean equals(BoundingBox o) {
 		return (left == o.left) && (right == o.right) && 
 			(top == o.top) && (bottom == o.bottom); 

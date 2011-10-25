@@ -2,14 +2,30 @@ package edu.rosehulman.android.directory.util;
 
 import java.util.List;
 
+/**
+ * Represents a path through space
+ */
 public class BoundingPath implements BoundingArea {
 	
+	/**
+	 * The ordered list of points that represent the path
+	 */
 	protected List<Point> points;
 	
+	/**
+	 * Create a new BoundingPath
+	 * 
+	 * @param points the points to initialize the path with
+	 */
 	public BoundingPath(List<Point> points) {
 		this.points = points;
 	}
 	
+	/**
+	 * Calculate the path's bounding box
+	 * 
+	 * @return a bounding box instance
+	 */
 	public BoundingBox getBoundingBox() {
 		if (points == null || points.size() == 0) {
 			return null;

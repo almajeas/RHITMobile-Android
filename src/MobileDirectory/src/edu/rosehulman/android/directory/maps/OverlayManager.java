@@ -3,21 +3,23 @@ package edu.rosehulman.android.directory.maps;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.android.maps.MapView;
-
 /**
  * Manage common attributes and functionality between different overlays
  */
 public class OverlayManager {
 	
-	private MapView mapView;
 	private List<ManageableOverlay> overlays;
 		
-	public OverlayManager(MapView mapView) {
+	/**
+	 * Create a new OverlayManager
+	 */
+	public OverlayManager() {
 		overlays = new ArrayList<ManageableOverlay>();
-		this.mapView = mapView;
 	}
 	
+	/**
+	 * Clear the list of overlays that we are managing
+	 */
 	public void clear() {
 		for (ManageableOverlay overlay : overlays) {
 			overlay.setManager(null);
@@ -25,6 +27,11 @@ public class OverlayManager {
 		overlays.clear();
 	}
 	
+	/**
+	 * Adds an overlay to the manager
+	 * 
+	 * @param overlay The overlay to manage
+	 */
 	public void addOverlay(ManageableOverlay overlay) {
 		this.overlays.add(overlay);
 		overlay.setManager(new OverlayController(overlay));

@@ -21,6 +21,9 @@ import edu.rosehulman.android.directory.util.BoundingBox;
 import edu.rosehulman.android.directory.util.BoundingPath;
 import edu.rosehulman.android.directory.util.Point;
 
+/**
+ * An overlay for an individual building
+ */
 public class BuildingOverlay extends Overlay implements Overlay.Snappable {
 	
 	private Location mapArea;
@@ -46,6 +49,11 @@ public class BuildingOverlay extends Overlay implements Overlay.Snappable {
 		paintStroke.setStyle(Style.STROKE);		
 	}
 	
+	/**
+	 * Creates a new BuildingOverlay
+	 * 
+	 * @param mapArea The location to initialize from
+	 */
 	public BuildingOverlay(Location mapArea) {
 		this.mapArea = mapArea;
 		MapAreaData mapData = mapArea.mapData;
@@ -58,14 +66,29 @@ public class BuildingOverlay extends Overlay implements Overlay.Snappable {
 		bounds = path.getBoundingBox();
 	}
 	
+	/**
+	 * Determine the bounding box around this building
+	 * 
+	 * @return A BoundingBox instance
+	 */
 	public BoundingBox getBounds() {
 		return bounds;
 	}
 	
+	/**
+	 * Get the ID of the location this overlay is associated with
+	 * 
+	 * @return The ID of the location
+	 */
 	public long getID() {
 		return mapArea.id;
 	}
 	
+	/**
+	 * Get the location this location is associated with
+	 * 
+	 * @return The location this location is associated with
+	 */
 	public Location getLocation() {
 		return mapArea;
 	}

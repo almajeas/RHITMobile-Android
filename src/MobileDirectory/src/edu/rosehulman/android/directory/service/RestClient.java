@@ -21,8 +21,12 @@ import org.apache.http.message.BasicNameValuePair;
  */
 public abstract class RestClient {
 
+	/** The set of parameters added to the query string */
 	protected List<NameValuePair> queryParams;
+	
+	/** The path of the request */
 	protected String path;
+	
 	private String host;
 	private int port;
 	private HttpMethod method;

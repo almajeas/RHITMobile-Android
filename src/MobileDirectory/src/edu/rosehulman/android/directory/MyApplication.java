@@ -13,14 +13,28 @@ import edu.rosehulman.android.directory.service.WebClientFactory;
  */
 public class MyApplication extends Application {
 	
+	/**
+	 * Should we check for intensive work on the UI thread?
+	 */
 	public static boolean CHECK_UI_THREAD = false;
 	
+	/**
+	 * The global database helper
+	 */
 	public SQLiteOpenHelper dbHelper;
 	
+	/**
+	 * The global BetaManagerManager
+	 */
 	public BetaManagerManager betaManagerManager;
 	
 	private static MyApplication instance;
 	
+	/**
+	 * Get the globally accessible application instance
+	 * 
+	 * @return The one instance of MyApplication
+	 */
 	public static MyApplication getInstance() {
 		return instance;
 	}

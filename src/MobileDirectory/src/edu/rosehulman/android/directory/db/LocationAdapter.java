@@ -5,6 +5,9 @@ import android.database.Cursor;
 import edu.rosehulman.android.directory.model.LatLon;
 import edu.rosehulman.android.directory.model.Location;
 
+/**
+ * Performs operations on the database using location model objects
+ */
 public class LocationAdapter extends TableAdapter {
 	
 	public static final String TABLE_NAME = "Locations";

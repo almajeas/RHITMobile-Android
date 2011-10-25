@@ -5,6 +5,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import edu.rosehulman.android.directory.model.MapAreaData;
 
+/**
+ * Performs operations on the database using intermediate MapArea objects
+ */
 public class MapAreaDataAdapter extends TableAdapter {
 
 	public static final String TABLE_NAME = "MapAreaData";
@@ -15,6 +18,11 @@ public class MapAreaDataAdapter extends TableAdapter {
 	
 	private MapAreaCornersAdapter cornersAdapter;
 	
+	/**
+	 * Creates a new MapAreaDataAdapter
+	 * 
+	 * @param db The database connection to use
+	 */
 	public MapAreaDataAdapter(SQLiteDatabase db) {
 		super(db);
 		cornersAdapter = new MapAreaCornersAdapter(db);

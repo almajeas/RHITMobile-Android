@@ -5,6 +5,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import edu.rosehulman.android.directory.model.LatLon;
 
+/**
+ * Provides operations on the database using location model objects
+ */
 public class MapAreaCornersAdapter extends TableAdapter {
 	
 	public static final String TABLE_NAME = "MapAreaCorners";
@@ -15,6 +18,11 @@ public class MapAreaCornersAdapter extends TableAdapter {
 	public static final String KEY_LAT = "Lat";
 	public static final String KEY_LON = "Lon";
 	
+	/**
+	 * Creates a new MapAreaCornersAdapter
+	 * 
+	 * @param db The database connection to use
+	 */
 	public MapAreaCornersAdapter(SQLiteDatabase db) {
 		super(db);
 	}

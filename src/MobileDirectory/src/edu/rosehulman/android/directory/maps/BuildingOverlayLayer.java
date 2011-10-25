@@ -16,6 +16,9 @@ import com.readystatesoftware.mapviewballoons.BalloonOverlayView;
 import edu.rosehulman.android.directory.model.Location;
 import edu.rosehulman.android.directory.util.BoundingBox;
 
+/**
+ * An Overlay that contains building overlays
+ */
 public class BuildingOverlayLayer extends Overlay implements ManageableOverlay {
 	
 	private List<BuildingOverlay> overlays;
@@ -26,11 +29,21 @@ public class BuildingOverlayLayer extends Overlay implements ManageableOverlay {
 	
 	private OverlayManagerControl manager;
 	
+	/**
+	 * Create a new BuildingOverlayLayer
+	 * 
+	 * @param mapView The MapView that will contain this overlay
+	 */
 	public BuildingOverlayLayer(MapView mapView) {
 		overlays = new ArrayList<BuildingOverlay>();
 		this.mapView = mapView;
 	}
 	
+	/**
+	 * Add a new location to the overlay
+	 * 
+	 * @param area The Location to add
+	 */
 	public void addMapArea(Location area) {
 		BuildingOverlay overlay = new BuildingOverlay(area);
 		overlays.add(overlay);
@@ -67,6 +80,11 @@ public class BuildingOverlayLayer extends Overlay implements ManageableOverlay {
 		*/
 	}
 
+	/**
+	 * Gets the ID of the currently selected building
+	 * 
+	 * @return The ID of the currently selected building, or -1
+	 */
 	public long getSelectedBuilding() {
 		if (selected == null) {
 			return -1;
@@ -75,6 +93,13 @@ public class BuildingOverlayLayer extends Overlay implements ManageableOverlay {
 		return selected.getID();
 	}
 	
+	/**
+	 * Sets the ID of the currently selected building. 
+	 * Also animates to the selected building
+	 * 
+	 * @param id The ID of the building to select, or -1 to clear the selection
+	 * @return True if the ID was found; false otherwise
+	 */
 	public boolean setSelectedBuilding(long id) {
 		if (id < 0) {
 			setSelected(null);
