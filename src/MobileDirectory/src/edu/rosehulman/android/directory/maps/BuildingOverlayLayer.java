@@ -1,4 +1,4 @@
-package edu.rosehulman.android.directory;
+package edu.rosehulman.android.directory.maps;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,8 +13,6 @@ import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 import com.readystatesoftware.mapviewballoons.BalloonOverlayView;
 
-import edu.rosehulman.android.directory.maps.ManageableOverlay;
-import edu.rosehulman.android.directory.maps.OverlayManagerControl;
 import edu.rosehulman.android.directory.model.Location;
 import edu.rosehulman.android.directory.util.BoundingBox;
 

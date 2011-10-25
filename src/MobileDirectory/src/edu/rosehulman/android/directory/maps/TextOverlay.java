@@ -1,4 +1,4 @@
-package edu.rosehulman.android.directory;
+package edu.rosehulman.android.directory.maps;
 
 import java.util.ArrayList;
 import java.util.List;

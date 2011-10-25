@@ -1,4 +1,4 @@
-package edu.rosehulman.android.directory;
+package edu.rosehulman.android.directory.maps;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,8 +13,7 @@ import com.google.android.maps.MapView;
 import com.google.android.maps.OverlayItem;
 import com.readystatesoftware.mapviewballoons.BalloonItemizedOverlay;
 
-import edu.rosehulman.android.directory.maps.ManageableOverlay;
-import edu.rosehulman.android.directory.maps.OverlayManagerControl;
+import edu.rosehulman.android.directory.C;
 import edu.rosehulman.android.directory.model.Location;
 
 public class POILayer extends BalloonItemizedOverlay<OverlayItem> implements ManageableOverlay {
