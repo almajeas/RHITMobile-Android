@@ -19,7 +19,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.Window;
-import android.widget.Toast;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
@@ -30,6 +29,7 @@ import com.google.android.maps.Overlay;
 import edu.rosehulman.android.directory.db.DbIterator;
 import edu.rosehulman.android.directory.db.LocationAdapter;
 import edu.rosehulman.android.directory.db.VersionsAdapter;
+import edu.rosehulman.android.directory.maps.OverlayManager;
 import edu.rosehulman.android.directory.model.Location;
 import edu.rosehulman.android.directory.model.LocationCollection;
 import edu.rosehulman.android.directory.model.VersionType;
@@ -49,11 +49,11 @@ public class MainActivity extends MapActivity {
     private LocationManager locationManager;
     private LocationListener locationListener;
 
+    private OverlayManager overlayManager;
     private POILayer poiLayer;
     private BuildingOverlayLayer buildingLayer;
     private TextOverlayLayer textLayer;
     private EventOverlay eventLayer;
-    
     private MyLocationOverlay myLocation;
     
     private TaskManager taskManager;
@@ -70,6 +70,8 @@ public class MainActivity extends MapActivity {
         betaManager = new BetaManagerManager(this);
         
         mapView = (MapView)findViewById(R.id.mapview);
+        
+        overlayManager = new OverlayManager(mapView);
         myLocation = new MyLocationOverlay(this, mapView);
         eventLayer = new EventOverlay();
         
@@ -223,14 +225,19 @@ public class MainActivity extends MapActivity {
     	overlays.add(eventLayer);
     	overlays.add(myLocation);
     	
-    	if (buildingLayer != null)
+    	if (buildingLayer != null) {
     		overlays.add(buildingLayer);
+    		overlayManager.addOverlay(buildingLayer);
+    	}
     	
-    	if (textLayer != null)
+    	if (textLayer != null) {
     		overlays.add(textLayer);
+    	}
 
-    	if (poiLayer != null)
+    	if (poiLayer != null) {
     		overlays.add(poiLayer);
+    		overlayManager.addOverlay(poiLayer);
+    	}
     	
     	mapView.invalidate();
     }

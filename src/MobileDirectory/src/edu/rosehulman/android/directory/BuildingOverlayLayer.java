@@ -13,16 +13,20 @@ import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 import com.readystatesoftware.mapviewballoons.BalloonOverlayView;
 
+import edu.rosehulman.android.directory.maps.ManageableOverlay;
+import edu.rosehulman.android.directory.maps.OverlayManagerControl;
 import edu.rosehulman.android.directory.model.Location;
 import edu.rosehulman.android.directory.util.BoundingBox;
 
-public class BuildingOverlayLayer extends Overlay {
+public class BuildingOverlayLayer extends Overlay implements ManageableOverlay {
 	
 	private List<BuildingOverlay> overlays;
 	private Point pt;
 	private BuildingOverlay selected;
 	private MapView mapView;
 	private BalloonOverlayView balloon;
+	
+	private OverlayManagerControl manager;
 	
 	public BuildingOverlayLayer(MapView mapView) {
 		overlays = new ArrayList<BuildingOverlay>();
@@ -97,7 +101,7 @@ public class BuildingOverlayLayer extends Overlay {
 			if (balloon != null) {
 				balloon.setVisibility(View.GONE);
 			}
-		} else {		
+		} else {
 			Location location = overlay.getLocation();
 			boolean recycle = (balloon != null);
 			if (!recycle) {
@@ -119,6 +123,10 @@ public class BuildingOverlayLayer extends Overlay {
 			} else {
 				mapView.addView(balloon, params);
 			}
+			
+			if (manager != null) {
+				manager.markSelected();
+			}
 		}
 		
 	}
@@ -131,6 +139,16 @@ public class BuildingOverlayLayer extends Overlay {
 		Point center = new Point(mapView.getWidth() / 2, mapView.getHeight() / 4 * 3);
 		controller.animateTo(dest, center, spanLat, spanLon);
 		mapView.invalidate();
+	}
+
+	@Override
+	public void clearSelection() {
+		setSelected(null);
+	}
+
+	@Override
+	public void setManager(OverlayManagerControl manager) {
+		this.manager = manager;
 	}
 
 }

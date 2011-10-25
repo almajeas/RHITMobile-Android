@@ -13,11 +13,15 @@ import com.google.android.maps.MapView;
 import com.google.android.maps.OverlayItem;
 import com.readystatesoftware.mapviewballoons.BalloonItemizedOverlay;
 
+import edu.rosehulman.android.directory.maps.ManageableOverlay;
+import edu.rosehulman.android.directory.maps.OverlayManagerControl;
 import edu.rosehulman.android.directory.model.Location;
 
-public class POILayer extends BalloonItemizedOverlay<OverlayItem> {
+public class POILayer extends BalloonItemizedOverlay<OverlayItem> implements ManageableOverlay {
 
 	private static final int MIN_ZOOM_LEVEL = 19;
+	
+	private OverlayManagerControl manager;
 	
 	private class PointOfInterest {
 		public Location location;
@@ -72,6 +76,9 @@ public class POILayer extends BalloonItemizedOverlay<OverlayItem> {
 	
 	@Override
 	protected void animateTo(int index, GeoPoint center) {
+		if (manager != null) {
+			manager.markSelected();
+		}
 		MapView mapView = getMapView();
 		ViewController controller = new ViewController(mapView);
 		Point pt = new Point(mapView.getWidth() / 2, mapView.getHeight() / 4 * 3);
@@ -84,6 +91,16 @@ public class POILayer extends BalloonItemizedOverlay<OverlayItem> {
 			return;
 		
 		super.draw(canvas, mapView, shadow);
+	}
+
+	@Override
+	public void clearSelection() {
+		this.setFocus(null);
+	}
+
+	@Override
+	public void setManager(OverlayManagerControl manager) {
+		this.manager = manager;
 	}
 
 }
