@@ -18,6 +18,7 @@
 			android:key="BETA_ENABLED"
 			android:title="Use Beta Manager"
 			android:summary="Enable/Disable integration of BetaManager"
+			android:defaultValue="true"
 			/>
 			
 		<CheckBoxPreference 

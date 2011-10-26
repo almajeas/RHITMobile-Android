@@ -81,7 +81,7 @@ public class BetaManagerManager extends ContextWrapper {
      * @return True if enabled; false otherwise
      */
     public boolean isBetaEnabled() {
-    	return getBooleanParameter(PREF_BETA_ENABLED, false);    	
+    	return getBooleanParameter(PREF_BETA_ENABLED, true);    	
     }
     
     /**
