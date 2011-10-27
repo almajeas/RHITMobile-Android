@@ -2,10 +2,7 @@ package edu.rosehulman.android.directory.beta.service;
 
 import org.json.JSONObject;
 
-import android.util.Log;
-
 import edu.rosehulman.android.directory.beta.model.LatestBuilds;
-import edu.rosehulman.android.directory.beta.service.JsonClient;
 
 public class BetaService {
 	
