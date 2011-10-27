@@ -2,19 +2,8 @@ package edu.rosehulman.android.directory.beta;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.Pattern;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.BasicResponseHandler;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -34,18 +23,16 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings.Secure;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.TextView;
 import android.widget.Toast;
+import edu.rosehulman.android.directory.beta.service.BetaService;
 
 /**
  * Activity used to register users for the beta program
  */
 public class RegisterActivity extends Activity {
-    
-	private static String TAG = "RegisterActivity";
     
     private TextView txtEmail;
     private TextView txtName;
@@ -227,52 +214,24 @@ public class RegisterActivity extends Activity {
         private boolean register(String email, String name) {
 
         	try {
-    	    	HttpClient http = new DefaultHttpClient();
-    	    	HttpPost post = new HttpPost("http://mobile.csse.rose-hulman.edu/beta/actions.cgi");
+        		BetaService service = new BetaService();
+        		String authToken = service.register(email, getDeviceIdentifier(), getOSInfo(), 
+        				getModel(), getBuild(),
+        				name, getCarrier());
     	    	
-    	    	List<NameValuePair> params = new ArrayList<NameValuePair>();
-    	    	params.add(new BasicNameValuePair("action", "register"));
-    	    	params.add(new BasicNameValuePair("email", email));
-    	    	if (!"".equals(name))
-    	    		params.add(new BasicNameValuePair("name", name));
-    	    	params.add(new BasicNameValuePair("deviceIdentifier", getDeviceIdentifier()));
-    	    	params.add(new BasicNameValuePair("platform", "android"));
-    	    	String carrier = getCarrier();
-    	    	if (carrier != null)
-    	    		params.add(new BasicNameValuePair("carrier", carrier));
-    	    	params.add(new BasicNameValuePair("OSInfo", getOSInfo()));
-    	    	params.add(new BasicNameValuePair("model", getModel()));
-    	    	params.add(new BasicNameValuePair("buildNumber", getBuild()));
-    	    	
-    			post.setEntity(new UrlEncodedFormEntity(params));
-    			ResponseHandler<String> handler = new BasicResponseHandler();
-    			String result = http.execute(post, handler);
-    			JSONObject root = new JSONObject(result);
-    			
-    			boolean success = root.getBoolean("success");
-    			if (!success) {
-    				Log.e(TAG , root.getJSONArray("errors").toString());
+    			if (authToken == null) {
     				return false;
     			}
     			
-    			//root.getBoolean("newUser");
-    			//root.getBoolean("newDevice");
-
     			//save our auth token
     			Resources res = getResources();
     			
     			SharedPreferences prefs = getSharedPreferences(res.getString(R.string.prefs_main), MODE_PRIVATE);
     			Editor edit = prefs.edit();
-    	        edit.putString(res.getString(R.string.pref_auth_token), root.getString("authToken"));
-    	        edit.commit();	        
+    	        edit.putString(res.getString(R.string.pref_auth_token), authToken);
+    	        edit.commit();
     	        
-    		} catch (ClientProtocolException e) {
-    			e.printStackTrace();
-    			return false;
-    		} catch (IOException e) {
-    			e.printStackTrace();
-    			return false;
-    		} catch (JSONException e) {
+    		} catch (Exception e) {
     			e.printStackTrace();
     			return false;
     		}
