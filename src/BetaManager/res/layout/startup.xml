@@ -4,7 +4,7 @@
   android:orientation="vertical"
   android:layout_width="fill_parent"
   android:layout_height="fill_parent">
-    <TextView android:id="@+id/textView1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Welcome to the Beta Manager.  This screen will check for updates/register you for the beta program and can only be launched by running the main applicaiton."></TextView>
+    <TextView android:id="@+id/textView1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Welcome to the Beta Manager.  This screen will check for updates/register you for the beta program and can only be launched by running the main application."></TextView>
     <Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Dismiss" android:id="@+id/btnDismiss"></Button>
     
 </LinearLayout>
