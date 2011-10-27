@@ -2,12 +2,16 @@ package edu.rosehulman.android.directory.beta.service;
 
 import org.json.JSONObject;
 
+import android.util.Log;
+
+import edu.rosehulman.android.directory.beta.model.LatestBuilds;
 import edu.rosehulman.android.directory.beta.service.JsonClient;
 
 public class BetaService {
 	
 	private static final String HOST = "mobile.csse.rose-hulman.edu";
 	private static final int PORT = 80;
+	private static final String PATH = "beta/actions.cgi";
 	
 	public BetaService() {
 	}
@@ -15,7 +19,7 @@ public class BetaService {
 	public String register(String email, String deviceIdentifier, String osInfo, 
 			String model, String buildNumber, 
 			String name, String carrier) throws Exception {
-		JsonClient client = new JsonClient(HOST, PORT, "beta/actions.cgi");
+		JsonClient client = new JsonClient(HOST, PORT, PATH);
 		
 		//set static parameters
 		client.addParameter("action", "register");
@@ -45,6 +49,22 @@ public class BetaService {
 		//root.getBoolean("newUser");
 		//root.getBoolean("newDevice");
         return root.getString("authToken");
+	}
+	
+	public LatestBuilds getLatestBuilds() throws Exception {
+		JsonClient client = new JsonClient(HOST, PORT, PATH);
+
+		client.addParameter("action", "getLatestBuilds");
+		client.addParameter("platform", "android");
+		
+		JSONObject root = client.execute();
+		
+		boolean success = root.getBoolean("success");
+		if (!success) {
+			return null;
+		}
+		
+		return LatestBuilds.deserialize(root);
 	}
 
 }
