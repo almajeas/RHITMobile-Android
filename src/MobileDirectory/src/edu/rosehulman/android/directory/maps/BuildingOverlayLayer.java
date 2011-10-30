@@ -3,9 +3,12 @@ package edu.rosehulman.android.directory.maps;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Point;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup.LayoutParams;
 
 import com.google.android.maps.GeoPoint;
@@ -13,6 +16,7 @@ import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 import com.readystatesoftware.mapviewballoons.BalloonOverlayView;
 
+import edu.rosehulman.android.directory.LocationActivity;
 import edu.rosehulman.android.directory.model.Location;
 import edu.rosehulman.android.directory.util.BoundingBox;
 
@@ -129,6 +133,19 @@ public class BuildingOverlayLayer extends Overlay implements ManageableOverlay {
 			boolean recycle = (balloon != null);
 			if (!recycle) {
 				balloon = new BalloonOverlayView(mapView.getContext(), 0);	
+				balloon.setOnTouchListener(new OnTouchListener() {
+					@Override
+					public boolean onTouch(View v, MotionEvent event) {
+						if (event.getAction() != MotionEvent.ACTION_UP)
+							return false;
+						
+						Context context = mapView.getContext();
+						Location loc = selected.getLocation();
+						context.startActivity(LocationActivity.createIntent(context, loc));
+						
+						return true;
+					}
+				});
 			}
 			
 			balloon.setVisibility(View.GONE);

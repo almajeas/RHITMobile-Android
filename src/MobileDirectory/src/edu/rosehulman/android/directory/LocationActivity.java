@@ -1,6 +1,8 @@
 package edu.rosehulman.android.directory;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,6 +20,12 @@ public class LocationActivity extends Activity {
     
     private TextView name;
     private TextView description;
+    
+    public static Intent createIntent(Context context, Location location) {
+		Intent intent = new Intent(context, LocationActivity.class);
+		intent.putExtra(LocationActivity.EXTRA_LOCATION, location);
+		return intent;
+    }
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {

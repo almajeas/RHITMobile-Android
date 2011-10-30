@@ -3,18 +3,16 @@ package edu.rosehulman.android.directory.maps;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.content.Intent;
+import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapView;
 import com.google.android.maps.OverlayItem;
 import com.readystatesoftware.mapviewballoons.BalloonItemizedOverlay;
 
-import edu.rosehulman.android.directory.C;
 import edu.rosehulman.android.directory.LocationActivity;
 import edu.rosehulman.android.directory.model.Location;
 
@@ -91,11 +89,10 @@ public class POILayer extends BalloonItemizedOverlay<OverlayItem> implements Man
 	
 	@Override
 	protected boolean onBalloonTap(int index, OverlayItem item) {
-		Log.d(C.TAG, "Tapped: " + index);
-		Intent intent = new Intent(getMapView().getContext(), LocationActivity.class);
+		Context context = getMapView().getContext();
 		Location loc = poi.get(index).location;
-		intent.putExtra(LocationActivity.EXTRA_LOCATION, loc);
-		getMapView().getContext().startActivity(intent);
+		context.startActivity(LocationActivity.createIntent(context, loc));
+		
 		return true;
 	}
 	
