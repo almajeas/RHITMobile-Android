@@ -6,15 +6,14 @@ import java.util.List;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Point;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnTouchListener;
 import android.view.ViewGroup.LayoutParams;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 import com.readystatesoftware.mapviewballoons.BalloonOverlayView;
+import com.readystatesoftware.mapviewballoons.BalloonOverlayView.OnTapListener;
 
 import edu.rosehulman.android.directory.LocationActivity;
 import edu.rosehulman.android.directory.model.Location;
@@ -133,12 +132,9 @@ public class BuildingOverlayLayer extends Overlay implements ManageableOverlay {
 			boolean recycle = (balloon != null);
 			if (!recycle) {
 				balloon = new BalloonOverlayView(mapView.getContext(), 0);	
-				balloon.setOnTouchListener(new OnTouchListener() {
+				balloon.setOnTapListener(new OnTapListener() {
 					@Override
-					public boolean onTouch(View v, MotionEvent event) {
-						if (event.getAction() != MotionEvent.ACTION_UP)
-							return false;
-						
+					public boolean onTap(View v) {
 						Context context = mapView.getContext();
 						Location loc = selected.getLocation();
 						context.startActivity(LocationActivity.createIntent(context, loc));
