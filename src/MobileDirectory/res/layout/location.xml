@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    android:padding="10dip"
     android:orientation="vertical" >
 
     <TextView
@@ -20,19 +21,22 @@
     <LinearLayout
         android:id="@+id/linearLayout1"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:paddingTop="5dip" >
 
         <Button
             android:id="@+id/btnShowOnMap"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_weight="1.0"
             android:drawableTop="@android:drawable/ic_menu_mapmode"
-            android:text="Show On Map" />
+            android:text="Map" />
 
         <Button
             android:id="@+id/btnDirections"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_weight="1.0"
             android:enabled="false"
             android:drawableTop="@android:drawable/ic_menu_directions"
             android:text="Directions" />
