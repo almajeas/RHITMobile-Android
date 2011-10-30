@@ -43,6 +43,21 @@ public class LocationAdapter extends TableAdapter {
 	}
 	
 	/**
+	 * Loads a location from the database
+	 * 
+	 * @param id The id of the location to load
+	 * @return A new Location instance without loaded corners
+	 */
+	public Location getLocation(long id) {
+		String where = KEY_ID + "=?";
+		String[] args = new String[] {String.valueOf(id)};
+		
+		Cursor cursor = db.query(TABLE_NAME, null, where, args, null, null, null);
+		cursor.moveToFirst();
+		return convertCursorRow(cursor);
+	}
+	
+	/**
 	 * Query for building overlay information
 	 * 
 	 * @param textVisible Should buildings with visible text be returned
@@ -162,35 +177,40 @@ public class LocationAdapter extends TableAdapter {
 		db.endTransaction();
 	}
 	
+	private long getNullableId(Cursor cursor, int columnIndex) {
+		if (cursor.isNull(columnIndex)) {
+			return -1;
+		}
+		
+		return cursor.getLong(columnIndex);
+	}
+	
+	private Location convertCursorRow(Cursor cursor) {
+		Location area = new Location();
+		
+		area.id = cursor.getLong(cursor.getColumnIndex(KEY_ID));
+		area.parentId = getNullableId(cursor, cursor.getColumnIndex(KEY_PARENT_ID));
+		area.mapAreaId = getNullableId(cursor, cursor.getColumnIndex(KEY_MAP_AREA_ID));
+		area.name = cursor.getString(cursor.getColumnIndex(KEY_NAME));
+		area.description = cursor.getString(cursor.getColumnIndex(KEY_DESCRIPTION));
+		area.isPOI = getBoolean(cursor, cursor.getColumnIndex(KEY_IS_POI));
+		area.isOnQuickList = getBoolean(cursor, cursor.getColumnIndex(KEY_IS_ON_QUICK_LIST));
+		int lat = cursor.getInt(cursor.getColumnIndex(KEY_CENTER_LAT));
+		int lon = cursor.getInt(cursor.getColumnIndex(KEY_CENTER_LON));
+		area.center = new LatLon(lat, lon);
+		
+		return area;
+	}
+	
 	private class BuildingIterator extends DbIterator<Location> {
 
 		public BuildingIterator(Cursor cursor) {
 			super(cursor);
 		}
-		
-		private long getNullableId(Cursor cursor, int columnIndex) {
-			if (cursor.isNull(columnIndex)) {
-				return -1;
-			}
-			
-			return cursor.getLong(columnIndex);
-		}
 
 		@Override
 		protected Location convertRow(Cursor cursor) {
-			Location area = new Location();
-			area.id = cursor.getLong(cursor.getColumnIndex(KEY_ID));
-			area.parentId = getNullableId(cursor, cursor.getColumnIndex(KEY_PARENT_ID));
-			area.mapAreaId = getNullableId(cursor, cursor.getColumnIndex(KEY_MAP_AREA_ID));
-			area.name = cursor.getString(cursor.getColumnIndex(KEY_NAME));
-			area.description = cursor.getString(cursor.getColumnIndex(KEY_DESCRIPTION));
-			area.isPOI = getBoolean(cursor, cursor.getColumnIndex(KEY_IS_POI));
-			area.isOnQuickList = getBoolean(cursor, cursor.getColumnIndex(KEY_IS_ON_QUICK_LIST));
-			int lat = cursor.getInt(cursor.getColumnIndex(KEY_CENTER_LAT));
-			int lon = cursor.getInt(cursor.getColumnIndex(KEY_CENTER_LON));
-			area.center = new LatLon(lat, lon);
-			
-			return area;
+			return convertCursorRow(cursor);
 		}
 		
 	}

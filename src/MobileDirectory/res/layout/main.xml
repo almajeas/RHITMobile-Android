@@ -4,11 +4,7 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     >
-	<TextView  
-	    android:layout_width="fill_parent" 
-	    android:layout_height="wrap_content" 
-	    android:text="@string/hello"
-	    />
+
 	<com.google.android.maps.MapView
         android:id="@+id/mapview"
         android:layout_width="fill_parent"

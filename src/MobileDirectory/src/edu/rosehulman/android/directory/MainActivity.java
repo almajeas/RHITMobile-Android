@@ -196,7 +196,9 @@ public class MainActivity extends MapActivity {
     }
     
     private void showTopLocations() {
-    	new TopLocations().execute();
+    	TopLocations task = new TopLocations();
+    	taskManager.addTask(task);
+    	task.execute();
     }
     
     @Override
