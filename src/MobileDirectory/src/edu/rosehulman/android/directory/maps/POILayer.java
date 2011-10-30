@@ -94,7 +94,7 @@ public class POILayer extends BalloonItemizedOverlay<OverlayItem> implements Man
 		Log.d(C.TAG, "Tapped: " + index);
 		Intent intent = new Intent(getMapView().getContext(), LocationActivity.class);
 		Location loc = poi.get(index).location;
-		intent.putExtra(LocationActivity.EXTRA_LOCATION_ID, loc.id);
+		intent.putExtra(LocationActivity.EXTRA_LOCATION, loc);
 		getMapView().getContext().startActivity(intent);
 		return true;
 	}

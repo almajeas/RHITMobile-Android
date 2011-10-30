@@ -3,7 +3,10 @@ package edu.rosehulman.android.directory.model;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class Location {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class Location implements Parcelable{
 
 	/** Unique identifier for this Location */
 	public long id;
@@ -75,5 +78,49 @@ public class Location {
 		
 		return res;
 	}
+
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeLong(id);
+		dest.writeLong(parentId);
+		dest.writeLong(mapAreaId);
+		dest.writeString(name);
+		dest.writeString(description);
+		dest.writeInt(center.lat);
+		dest.writeInt(center.lon);
+		//dest.writeBooleanArray(new boolean[] {isPOI, isOnQuickList});
+	}
+	
+	public static final Parcelable.Creator<Location> CREATOR = new Parcelable.Creator<Location>() {
+
+		@Override
+		public Location createFromParcel(Parcel in) {
+			Location res = new Location();
+			
+			res.id = in.readLong();
+			res.parentId = in.readLong();
+			res.mapAreaId = in.readLong();
+			res.name = in.readString();
+			res.description = in.readString();
+			res.center = new LatLon(in.readInt(), in.readInt());
+			
+			//boolean[] bools = in.createBooleanArray();
+			//in.readBooleanArray(bools);
+			//TODO something better for the booleans
+			
+			return res;
+		}
+
+		@Override
+		public Location[] newArray(int size) {
+			return new Location[size];
+		}
+		
+	};
 
 }
