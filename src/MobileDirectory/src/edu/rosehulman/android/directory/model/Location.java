@@ -27,22 +27,13 @@ public class Location implements Parcelable {
 	public LatLon center;
 	
 	/** Alternate names for this location, or null if not loaded */
-	//TODO implement
 	public String[] altNames;
 	
 	/** Relevant links associated with this location */
-	//TODO implement
 	public Hyperlink[] links;
 	
 	/** The type of this location */
-	//TODO implement
 	public LocationType type;
-	
-	/** Is the location a point of interest? */
-	//public boolean isPOI;
-	
-	/** Is the location on the quick list? */
-	//public boolean isOnQuickList;
 	
 	/** The id of the map area (or -1 if unavailable) */
 	public long mapAreaId;
@@ -99,9 +90,6 @@ public class Location implements Parcelable {
 			res.links[i] = Hyperlink.deserialize(links.getJSONObject(i));
 		}
 		
-		//res.isPOI = root.getBoolean("IsPOI");
-		//res.isOnQuickList = root.getBoolean("OnQuickList");
-		
 		res.type = typeMap.get(root.getString("Type"));
 		
 		if (!root.isNull("MapArea")) {
@@ -138,7 +126,11 @@ public class Location implements Parcelable {
 		dest.writeString(description);
 		dest.writeInt(center.lat);
 		dest.writeInt(center.lon);
-		//dest.writeBooleanArray(new boolean[] {isPOI, isOnQuickList});
+		dest.writeInt(type.ordinal());
+		
+		dest.writeStringArray(altNames);
+		dest.writeTypedArray(links, 0);
+		
 	}
 	
 	public static final Parcelable.Creator<Location> CREATOR = new Parcelable.Creator<Location>() {
@@ -153,10 +145,10 @@ public class Location implements Parcelable {
 			res.name = in.readString();
 			res.description = in.readString();
 			res.center = new LatLon(in.readInt(), in.readInt());
+			res.type = LocationType.fromOrdinal(in.readInt());
 			
-			//boolean[] bools = in.createBooleanArray();
-			//in.readBooleanArray(bools);
-			//TODO something better for the booleans
+			res.altNames = in.createStringArray();
+			res.links = in.createTypedArray(Hyperlink.CREATOR);
 			
 			return res;
 		}

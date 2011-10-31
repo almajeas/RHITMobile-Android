@@ -236,7 +236,7 @@ public class LocationAdapter extends TableAdapter {
 		area.mapAreaId = getNullableId(cursor, cursor.getColumnIndex(KEY_MAP_AREA_ID));
 		area.name = cursor.getString(cursor.getColumnIndex(KEY_NAME));
 		area.description = cursor.getString(cursor.getColumnIndex(KEY_DESCRIPTION));
-		area.type = LocationType.fromInt(cursor.getInt(cursor.getColumnIndex(KEY_TYPE)));
+		area.type = LocationType.fromOrdinal(cursor.getInt(cursor.getColumnIndex(KEY_TYPE)));
 		int lat = cursor.getInt(cursor.getColumnIndex(KEY_CENTER_LAT));
 		int lon = cursor.getInt(cursor.getColumnIndex(KEY_CENTER_LON));
 		area.center = new LatLon(lat, lon);

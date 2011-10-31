@@ -33,7 +33,7 @@ public enum LocationType {
 		}
 	}
 	
-	public static LocationType fromInt(int ordinal) {
+	public static LocationType fromOrdinal(int ordinal) {
 		return types.get(ordinal);
 	}
 }
