@@ -188,7 +188,9 @@ public class LocationActivity extends Activity {
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 			LightLocation child = children[position];
-			//TODO load full location
+			LoadChildLocation loadChild = new LoadChildLocation();
+			taskManager.addTask(loadChild);
+			loadChild.execute(child.id);
 		}
 	};
 	
@@ -221,4 +223,31 @@ public class LocationActivity extends Activity {
 		}
 		
 	}
+	
+	private class LoadChildLocation extends AsyncTask<Long, Void, Location> {
+
+		@Override
+		protected Location doInBackground(Long... params) {
+			
+			long id = params[0];
+					
+			LocationAdapter locationAdapter = new LocationAdapter();
+			locationAdapter.open();
+			
+			Location location = locationAdapter.getLocation(id);
+			locationAdapter.loadAlternateNames(location);
+			locationAdapter.loadHyperlinks(location);
+			
+			locationAdapter.close();
+			return location;
+		}
+		
+		@Override
+		protected void onPostExecute(Location res) {
+			Intent intent = createIntent(LocationActivity.this, res);
+			LocationActivity.this.startActivity(intent);
+		}
+		
+	}
+	
 }
