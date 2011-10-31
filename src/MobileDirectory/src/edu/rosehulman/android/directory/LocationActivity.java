@@ -8,10 +8,14 @@ import java.util.Map;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.Window;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
@@ -121,5 +125,16 @@ public class LocationActivity extends Activity {
     	String[] from = new String[] {"name"};
     	int[] to = new int[] {R.id.name};
         links.setAdapter(new SimpleAdapter(this, data, R.layout.hyperlink_item, from, to));
+        links.setOnItemClickListener(linkClickListener);
     }
+    
+    private OnItemClickListener linkClickListener = new OnItemClickListener() {
+		@Override
+		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+			Hyperlink link = location.links[position];
+			Intent intent = new Intent(Intent.ACTION_VIEW);
+			intent.setData(Uri.parse(link.url));
+			startActivity(intent);
+		}
+	};
 }
