@@ -2,8 +2,10 @@ package edu.rosehulman.android.directory.db;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import edu.rosehulman.android.directory.model.Hyperlink;
 import edu.rosehulman.android.directory.model.LatLon;
 import edu.rosehulman.android.directory.model.Location;
+import edu.rosehulman.android.directory.model.LocationType;
 
 /**
  * Performs operations on the database using location model objects
@@ -19,13 +21,15 @@ public class LocationAdapter extends TableAdapter {
 	public static final String KEY_DESCRIPTION = "Description";
 	public static final String KEY_CENTER_LAT = "CenterLat";
 	public static final String KEY_CENTER_LON = "CenterLon";
-	public static final String KEY_IS_POI = "IsPOI";
-	public static final String KEY_IS_ON_QUICK_LIST = "IsOnQuickList";
+	public static final String KEY_TYPE = "Type";
 	
 	private MapAreaDataAdapter areasAdapter;
+	private AlternateNamesAdapter namesAdapter;
+	private HyperlinksAdapter linksAdapter;
 	
 	/**
 	 * Creates a new LocationAdapter with its connection to the database closed
+	 * @param db 
 	 */
 	public LocationAdapter() {
 	}
@@ -34,12 +38,16 @@ public class LocationAdapter extends TableAdapter {
 	public void open() {
 		super.open();
 		areasAdapter = new MapAreaDataAdapter(db);
+		namesAdapter = new AlternateNamesAdapter(db);
+		linksAdapter = new HyperlinksAdapter(db);
 	}
 	
 	@Override
 	public void close() {
 		super.close();
 		areasAdapter = null;
+		linksAdapter = null;
+		namesAdapter = null;
 	}
 	
 	/**
@@ -88,7 +96,10 @@ public class LocationAdapter extends TableAdapter {
 	 */
 	public Cursor getQuickListCursor() {
 		String[] projection = new String[] {KEY_ID, KEY_NAME};
-		return db.query(TABLE_NAME, projection, KEY_IS_ON_QUICK_LIST + "=1", null, null, null, KEY_NAME);
+		String where = KEY_TYPE + "=?";
+		String[] args = new String[] {String.valueOf(LocationType.ON_QUICK_LIST.ordinal())};
+		
+		return db.query(TABLE_NAME, projection, where, args, null, null, KEY_NAME);
 	}
 	
 	/**
@@ -120,9 +131,12 @@ public class LocationAdapter extends TableAdapter {
 	 * 
 	 */
 	public DbIterator<Location> getPOIIterator() {
-		String where = KEY_IS_POI + " ='1' AND " + KEY_MAP_AREA_ID + " IS NULL";
+		String typeClause = KEY_TYPE + "=?";
+		String where = "(" + typeClause + " OR " + typeClause + ") AND " + KEY_MAP_AREA_ID + " IS NULL";
+		String[] args = new String[] {String.valueOf(LocationType.POINT_OF_INTEREST.ordinal()),
+										String.valueOf(LocationType.ON_QUICK_LIST.ordinal())};
 		
-		Cursor cursor = db.query(TABLE_NAME, null, where, null, null, null, null);
+		Cursor cursor = db.query(TABLE_NAME, null, where, args, null, null, null);
 		return new BuildingIterator(cursor);
 	}
 	
@@ -137,6 +151,24 @@ public class LocationAdapter extends TableAdapter {
 	}
 	
 	/**
+	 * Populate alternate names associated with a Location
+	 * 
+	 * @param location The location to populate
+	 */
+	public void loadAlternateNames(Location location) {
+		location.altNames = namesAdapter.getAlternateNames(location.id);
+	}
+	
+	/**
+	 * Populate Hyperlink information in a Location
+	 * 
+	 * @param location The location to populate
+	 */
+	public void loadHyperlinks(Location location) {
+		location.links = linksAdapter.getHyperlinks(location.id);
+	}
+	
+	/**
 	 * Remove all Locations from the database and replace them with the supplied data
 	 * 
 	 * @param newData the locations to add to the database
@@ -145,32 +177,43 @@ public class LocationAdapter extends TableAdapter {
 		db.beginTransaction();
 		
 		//delete all records
+		namesAdapter.clear();
+		linksAdapter.clear();
 		db.delete(TABLE_NAME, null, null);
 		areasAdapter.clear();
 		
 		//add each building to the database
-		for (Location building : newData) {
+		for (Location location : newData) {
 			
 			ContentValues values = new ContentValues();
-			values.put(KEY_ID, building.id);
+			values.put(KEY_ID, location.id);
 			
 			//add the corresponding map area first
-			if (building.mapData != null) {
-				long mapAreaId = areasAdapter.add(building.mapData);
+			if (location.mapData != null) {
+				long mapAreaId = areasAdapter.add(location.mapData);
 				values.put(KEY_MAP_AREA_ID, mapAreaId);
 			}
 			
-			if (building.parentId >= 0)
-				values.put(KEY_PARENT_ID, building.parentId);
-			values.put(KEY_NAME, building.name);
-			if (building.description != null)
-				values.put(KEY_DESCRIPTION, building.description);
-			values.put(KEY_CENTER_LAT, building.center.lat);
-			values.put(KEY_CENTER_LON, building.center.lon);
-			values.put(KEY_IS_POI, building.isPOI);
-			values.put(KEY_IS_ON_QUICK_LIST, building.isOnQuickList);
+			if (location.parentId >= 0)
+				values.put(KEY_PARENT_ID, location.parentId);
+			values.put(KEY_NAME, location.name);
+			if (location.description != null)
+				values.put(KEY_DESCRIPTION, location.description);
+			values.put(KEY_CENTER_LAT, location.center.lat);
+			values.put(KEY_CENTER_LON, location.center.lon);
+			values.put(KEY_TYPE, location.type.ordinal());
 			
 			db.insert(TABLE_NAME, null, values);
+
+			//add any alternate names
+			for (String name : location.altNames){
+				namesAdapter.addName(location.id, name);
+			}
+			
+			//add any hyperlinks
+			for (Hyperlink link : location.links){
+				linksAdapter.addHyperlink(location.id, link);
+			}
 		}
 		
 		db.setTransactionSuccessful();
@@ -193,8 +236,7 @@ public class LocationAdapter extends TableAdapter {
 		area.mapAreaId = getNullableId(cursor, cursor.getColumnIndex(KEY_MAP_AREA_ID));
 		area.name = cursor.getString(cursor.getColumnIndex(KEY_NAME));
 		area.description = cursor.getString(cursor.getColumnIndex(KEY_DESCRIPTION));
-		area.isPOI = getBoolean(cursor, cursor.getColumnIndex(KEY_IS_POI));
-		area.isOnQuickList = getBoolean(cursor, cursor.getColumnIndex(KEY_IS_ON_QUICK_LIST));
+		area.type = LocationType.fromInt(cursor.getInt(cursor.getColumnIndex(KEY_TYPE)));
 		int lat = cursor.getInt(cursor.getColumnIndex(KEY_CENTER_LAT));
 		int lon = cursor.getInt(cursor.getColumnIndex(KEY_CENTER_LON));
 		area.center = new LatLon(lat, lon);

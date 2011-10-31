@@ -7,9 +7,10 @@ import org.json.JSONObject;
 
 import edu.rosehulman.android.directory.model.LatLon;
 import edu.rosehulman.android.directory.model.Location;
+import edu.rosehulman.android.directory.model.LocationType;
 import edu.rosehulman.android.directory.model.MapAreaData;
 
-public class MapAreaTests extends TestCase {
+public class LocationTests extends TestCase {
 	
 	public void testBasicConstructor() {
 		LatLon latLon = new LatLon(39.4821800526708, -87.3222422754326);
@@ -30,10 +31,13 @@ public class MapAreaTests extends TestCase {
 				"\"Corners\":[{\"Lat\":39.4837632915625,\"Long\":-87.3247013316994}]," +
 				"\"LabelOnHybrid\":true," +
 				"\"MinZoomLevel\":15}," +
+				"\"AltNames\":[\"Math land\"]," +
+				"\"Links\":[]," +
 				"\"Description\":\"Test Description\"," +
 				"\"Id\":4," +
 				"\"Name\":\"Crapo Hall\"," +
 				"\"Parent\":1500," +
+				"\"Type\":\"QL\"," +
 				"\"IsPOI\":true," +
 				"\"OnQuickList\":true" +
 				"}";
@@ -53,8 +57,9 @@ public class MapAreaTests extends TestCase {
 		assertEquals(15, o.mapData.minZoomLevel);
 		assertEquals("Crapo Hall", o.name);
 		assertEquals(1500, o.parentId);
-		assertTrue(o.isPOI);
-		assertTrue(o.isOnQuickList);
+		assertEquals(LocationType.ON_QUICK_LIST, o.type);
+		assertEquals(1, o.altNames.length);
+		assertEquals("Math land", o.altNames[0]);
 	}
 	
 	public void testHasCorners() {

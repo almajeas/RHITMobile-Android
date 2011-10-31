@@ -1,12 +1,15 @@
 package edu.rosehulman.android.directory.model;
 
+import java.util.HashMap;
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class Location implements Parcelable{
+public class Location implements Parcelable {
 
 	/** Unique identifier for this Location */
 	public long id;
@@ -23,11 +26,23 @@ public class Location implements Parcelable{
 	/** The center point of this Location */
 	public LatLon center;
 	
+	/** Alternate names for this location, or null if not loaded */
+	//TODO implement
+	public String[] altNames;
+	
+	/** Relevant links associated with this location */
+	//TODO implement
+	public Hyperlink[] links;
+	
+	/** The type of this location */
+	//TODO implement
+	public LocationType type;
+	
 	/** Is the location a point of interest? */
-	public boolean isPOI;
+	//public boolean isPOI;
 	
 	/** Is the location on the quick list? */
-	public boolean isOnQuickList;
+	//public boolean isOnQuickList;
 	
 	/** The id of the map area (or -1 if unavailable) */
 	public long mapAreaId;
@@ -69,16 +84,46 @@ public class Location implements Parcelable{
 			res.parentId = root.getInt("Parent");
 		res.name = root.getString("Name");
 		res.description = root.getString("Description");
-		res.isPOI = root.getBoolean("IsPOI");
-		res.isOnQuickList = root.getBoolean("OnQuickList");
+		
 		res.center = LatLon.deserialize(root.getJSONObject("Center"));
+		
+		JSONArray altNames = root.getJSONArray("AltNames");
+		res.altNames = new String[altNames.length()];
+		for (int i = 0; i < res.altNames.length; i++) {
+			res.altNames[i] = altNames.getString(i);
+		}
+		
+		JSONArray links = root.getJSONArray("Links");
+		res.links = new Hyperlink[links.length()];
+		for (int i = 0; i < res.links.length; i++) {
+			res.links[i] = Hyperlink.deserialize(links.getJSONObject(i));
+		}
+		
+		//res.isPOI = root.getBoolean("IsPOI");
+		//res.isOnQuickList = root.getBoolean("OnQuickList");
+		
+		res.type = typeMap.get(root.getString("Type"));
+		
 		if (!root.isNull("MapArea")) {
 			res.mapData = MapAreaData.deserialize(root.getJSONObject("MapArea"));
 		}
 		
 		return res;
 	}
+	
+	private static HashMap<String, LocationType> typeMap;
 
+	static {
+		typeMap = new HashMap<String, LocationType>();
+		typeMap.put("NL", LocationType.NORMAL);
+		typeMap.put("PI", LocationType.POINT_OF_INTEREST);
+		typeMap.put("QL", LocationType.ON_QUICK_LIST);
+		typeMap.put("MB", LocationType.MENS_BATHROOM);
+		typeMap.put("WB", LocationType.WOMENS_BATHROOM);
+		typeMap.put("UB", LocationType.UNISEX_BATHROOM);
+		typeMap.put("PR", LocationType.PRINTER);
+	}
+	
 	@Override
 	public int describeContents() {
 		return 0;

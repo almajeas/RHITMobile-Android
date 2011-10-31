@@ -43,7 +43,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		return instance;
 	}
 
-	private static final int DATABASE_VERSION = 9;
+	private static final int DATABASE_VERSION = 10;
 
 	private static final String TABLE_LOCATIONS = "Locations";
 	private static final String CREATE_TABLE_LOCATIONS =
@@ -55,8 +55,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 				", Description TEXT" +
 				", CenterLat INTEGER NOT NULL" + 
 				", CenterLon INTEGER NOT NULL" +
-				", IsPOI INTEGER NOT NULL" +
-				", IsOnQuickList INTEGER NOT NULL" +
+				", Type INTEGER NOT NULL" +
 				");";
 	
 	private static final String TABLE_MAP_AREA_DATA = "MapAreaData";
@@ -77,6 +76,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 				", Lon INTEGER NOT NULL" +
 				");";
 	
+	private static final String TABLE_HYPERLINKS = "Hyperlinks";
+	private static final String CREATE_TABLE_HYPERLINKS =
+			"CREATE TABLE " + TABLE_HYPERLINKS + " " +
+				"( _Id INTEGER PRIMARY KEY AUTOINCREMENT" +
+				", LocationId INTEGER REFERENCES Locations(_Id)" +
+				", Name TEXT NOT NULL" +
+				", Url TEXT NOT NULL" +
+				");";
+	
+	private static final String TABLE_ALTERNATE_NAMES = "AltNames";
+	private static final String CREATE_TABLE_ALTERNATE_NAMES =
+			"CREATE TABLE " + TABLE_ALTERNATE_NAMES + " " +
+				"( _Id INTEGER PRIMARY KEY AUTOINCREMENT" +
+				", LocationId INTEGER REFERENCES Locations(_Id)" +
+				", Name TEXT NOT NULL" +
+				");";
+	
 	private static final String TABLE_VERSIONS = "Versions";
 	private static final String CREATE_TABLE_VERSIONS =
 			"CREATE TABLE " + TABLE_VERSIONS + " " +
@@ -93,12 +109,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		db.execSQL(CREATE_TABLE_MAP_AREA_DATA);
 		db.execSQL(CREATE_TABLE_MAP_AREA_CORNERS);
 		db.execSQL(CREATE_TABLE_LOCATIONS);
+		db.execSQL(CREATE_TABLE_ALTERNATE_NAMES);
+		db.execSQL(CREATE_TABLE_HYPERLINKS);
 		db.execSQL(CREATE_TABLE_VERSIONS);
 	}
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 		db.execSQL("DROP TABLE IF EXISTS " + TABLE_VERSIONS);
+		db.execSQL("DROP TABLE IF EXISTS " + TABLE_ALTERNATE_NAMES);
+		db.execSQL("DROP TABLE IF EXISTS " + TABLE_HYPERLINKS);
 		db.execSQL("DROP TABLE IF EXISTS " + TABLE_LOCATIONS);
 		db.execSQL("DROP TABLE IF EXISTS " + TABLE_MAP_AREA_CORNERS);
 		db.execSQL("DROP TABLE IF EXISTS " + TABLE_MAP_AREA_DATA);
