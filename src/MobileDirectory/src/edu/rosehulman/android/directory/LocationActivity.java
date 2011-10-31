@@ -9,6 +9,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -19,7 +20,10 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
+import edu.rosehulman.android.directory.db.DbIterator;
+import edu.rosehulman.android.directory.db.LocationAdapter;
 import edu.rosehulman.android.directory.model.Hyperlink;
+import edu.rosehulman.android.directory.model.LightLocation;
 import edu.rosehulman.android.directory.model.Location;
 
 public class LocationActivity extends Activity {
@@ -33,7 +37,13 @@ public class LocationActivity extends Activity {
     private TextView name;
     private TextView description;
     
-    private ListView links;
+    private View linksGroup;
+    private View childrenGroup;
+    
+    private ListView linksList;
+    private ListView childrenList;
+    
+    private LightLocation[] children;
     
     public static Intent createIntent(Context context, Location location) {
 		Intent intent = new Intent(context, LocationActivity.class);
@@ -51,7 +61,14 @@ public class LocationActivity extends Activity {
         
         name = (TextView)findViewById(R.id.name);
         description = (TextView)findViewById(R.id.description);
-        links = (ListView)findViewById(R.id.links);
+        linksList = (ListView)findViewById(R.id.links);
+        childrenList = (ListView)findViewById(R.id.children);
+        
+        linksGroup = findViewById(R.id.linksGroup);
+        childrenGroup = findViewById(R.id.childrenGroup);
+        
+        linksList.setOnItemClickListener(linkClickListener);
+        childrenList.setOnItemClickListener(childClickListener);
         
         location = getIntent().getParcelableExtra(EXTRA_LOCATION);
         
@@ -68,6 +85,10 @@ public class LocationActivity extends Activity {
     	super.onStart();
     	
     	updateLocation();
+    	
+    	LoadLocationExtras loadExtras = new LoadLocationExtras();
+    	taskManager.addTask(loadExtras);
+    	loadExtras.execute(location);
     }
     
     @Override
@@ -111,21 +132,46 @@ public class LocationActivity extends Activity {
         }
     }
     
+    private void updateLinks() {
+    	if (location.links.length > 0) {
+	    	List<Map<String, ?>> data = new ArrayList<Map<String, ?>>();
+	    	for (Hyperlink link : location.links) {
+	    		Map<String, String> row = new HashMap<String, String>();
+				row.put("name", link.name);
+				data.add(row);
+			}
+	    	String[] from = new String[] {"name"};
+	    	int[] to = new int[] {R.id.name};
+	        linksList.setAdapter(new SimpleAdapter(this, data, R.layout.hyperlink_item, from, to));
+	        linksGroup.setVisibility(View.VISIBLE);
+    	} else {
+    		linksGroup.setVisibility(View.GONE);
+    	}
+    }
+    
+    private void updateInnerLocations() {
+    	if (children != null && children.length > 0) {
+	    	List<Map<String, ?>> data = new ArrayList<Map<String, ?>>();
+	    	for (LightLocation child : children) {
+	    		Map<String, String> row = new HashMap<String, String>();
+				row.put("name", child.name);
+				data.add(row);
+			}
+	    	String[] from = new String[] {"name"};
+	    	int[] to = new int[] {R.id.name};
+	        childrenList.setAdapter(new SimpleAdapter(this, data, R.layout.inner_item, from, to));
+	        childrenGroup.setVisibility(View.VISIBLE);
+    	} else {
+    		childrenGroup.setVisibility(View.GONE);
+    	}
+    }
+    
     private void updateLocation() {
     	name.setText(location.name);
     	description.setText(location.description);
-
-    	List<Map<String, ?>> data = new ArrayList<Map<String, ?>>();
-    	for (Hyperlink link : location.links) {
-    		Map<String, String> row = new HashMap<String, String>();
-			row.put("name", link.name);
-			row.put("url", link.url);
-			data.add(row);
-		}
-    	String[] from = new String[] {"name"};
-    	int[] to = new int[] {R.id.name};
-        links.setAdapter(new SimpleAdapter(this, data, R.layout.hyperlink_item, from, to));
-        links.setOnItemClickListener(linkClickListener);
+    	
+    	updateLinks();
+    	updateInnerLocations();
     }
     
     private OnItemClickListener linkClickListener = new OnItemClickListener() {
@@ -137,4 +183,42 @@ public class LocationActivity extends Activity {
 			startActivity(intent);
 		}
 	};
+	
+    private OnItemClickListener childClickListener = new OnItemClickListener() {
+		@Override
+		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+			LightLocation child = children[position];
+			//TODO load full location
+		}
+	};
+	
+	private class LoadLocationExtras extends AsyncTask<Location, Void, Void> {
+
+		private LightLocation[] children;
+		
+		@Override
+		protected Void doInBackground(Location... params) {
+			Location loc = params[0];
+			
+			LocationAdapter locationAdapter = new LocationAdapter();
+			locationAdapter.open();
+			
+			DbIterator<LightLocation> locations = locationAdapter.getChildren(loc.id);
+			children = new LightLocation[locations.getCount()];
+			for (int i = 0; locations.hasNext(); i++) {
+				children[i] = locations.getNext();
+			}
+			
+			locationAdapter.close();
+			return null;
+		}
+		
+		@Override
+		protected void onPostExecute(Void res) {
+			LocationActivity.this.children = children;
+			
+			updateLocation();
+		}
+		
+	}
 }

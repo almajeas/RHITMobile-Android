@@ -20,6 +20,7 @@ public class PopulateLocation extends AsyncTask<Location, Void, Location> {
 		locationAdapter.open();
 		locationAdapter.loadHyperlinks(loc);
 		locationAdapter.loadAlternateNames(loc);
+		locationAdapter.close();
 		
 		return loc;
 	}

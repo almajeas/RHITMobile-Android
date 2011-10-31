@@ -48,4 +48,13 @@ public abstract class DbIterator<T> {
 		return convertRow(cursor);
 	}
 	
+	/**
+	 * Determines the number or records in the iterator
+	 * 
+	 * @return The number of objects that will be returned
+	 */
+	public int getCount() {
+		return cursor.getCount();
+	}
+	
 }

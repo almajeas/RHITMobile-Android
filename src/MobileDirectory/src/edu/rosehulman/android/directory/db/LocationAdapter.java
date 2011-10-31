@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import edu.rosehulman.android.directory.model.Hyperlink;
 import edu.rosehulman.android.directory.model.LatLon;
+import edu.rosehulman.android.directory.model.LightLocation;
 import edu.rosehulman.android.directory.model.Location;
 import edu.rosehulman.android.directory.model.LocationType;
 
@@ -121,7 +122,7 @@ public class LocationAdapter extends TableAdapter {
 		String where = KEY_MAP_AREA_ID + " IS NOT NULL";
 		
 		Cursor cursor = db.query(TABLE_NAME, null, where, null, null, null, null);
-		return new BuildingIterator(cursor);
+		return new LocationIterator(cursor);
 	}
 	
 	/**
@@ -137,7 +138,22 @@ public class LocationAdapter extends TableAdapter {
 										String.valueOf(LocationType.ON_QUICK_LIST.ordinal())};
 		
 		Cursor cursor = db.query(TABLE_NAME, null, where, args, null, null, null);
-		return new BuildingIterator(cursor);
+		return new LocationIterator(cursor);
+	}
+	
+	/**
+	 * Get the children to this location
+	 * 
+	 * @param id The id of the parent location
+	 * @return A cursor with _Id and Name fields
+	 */
+	public DbIterator<LightLocation> getChildren(long id) {
+		String[] projection = new String[] {KEY_ID, KEY_NAME};
+		String where = KEY_PARENT_ID + "=?";
+		String[] args = new String[] {String.valueOf(id)};
+		
+		Cursor cursor = db.query(TABLE_NAME, projection, where, args, null, null, null);
+		return new LightLocationIterator(cursor);
 	}
 	
 	/**
@@ -244,15 +260,30 @@ public class LocationAdapter extends TableAdapter {
 		return area;
 	}
 	
-	private class BuildingIterator extends DbIterator<Location> {
+	private class LocationIterator extends DbIterator<Location> {
 
-		public BuildingIterator(Cursor cursor) {
+		public LocationIterator(Cursor cursor) {
 			super(cursor);
 		}
 
 		@Override
 		protected Location convertRow(Cursor cursor) {
 			return convertCursorRow(cursor);
+		}
+		
+	}
+	
+	private class LightLocationIterator extends DbIterator<LightLocation> {
+
+		public LightLocationIterator(Cursor cursor) {
+			super(cursor);
+		}
+
+		@Override
+		protected LightLocation convertRow(Cursor cursor) {
+			long id = cursor.getLong(cursor.getColumnIndex(KEY_ID));
+			String name = cursor.getString(cursor.getColumnIndex(KEY_NAME));
+			return new LightLocation(id, name);
 		}
 		
 	}
