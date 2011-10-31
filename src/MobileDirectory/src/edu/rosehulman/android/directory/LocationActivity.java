@@ -1,5 +1,10 @@
 package edu.rosehulman.android.directory;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -7,7 +12,10 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
+import android.widget.ListView;
+import android.widget.SimpleAdapter;
 import android.widget.TextView;
+import edu.rosehulman.android.directory.model.Hyperlink;
 import edu.rosehulman.android.directory.model.Location;
 
 public class LocationActivity extends Activity {
@@ -20,6 +28,8 @@ public class LocationActivity extends Activity {
     
     private TextView name;
     private TextView description;
+    
+    private ListView links;
     
     public static Intent createIntent(Context context, Location location) {
 		Intent intent = new Intent(context, LocationActivity.class);
@@ -37,6 +47,7 @@ public class LocationActivity extends Activity {
         
         name = (TextView)findViewById(R.id.name);
         description = (TextView)findViewById(R.id.description);
+        links = (ListView)findViewById(R.id.links);
         
         location = getIntent().getParcelableExtra(EXTRA_LOCATION);
         
@@ -99,5 +110,16 @@ public class LocationActivity extends Activity {
     private void updateLocation() {
     	name.setText(location.name);
     	description.setText(location.description);
+
+    	List<Map<String, ?>> data = new ArrayList<Map<String, ?>>();
+    	for (Hyperlink link : location.links) {
+    		Map<String, String> row = new HashMap<String, String>();
+			row.put("name", link.name);
+			row.put("url", link.url);
+			data.add(row);
+		}
+    	String[] from = new String[] {"name"};
+    	int[] to = new int[] {R.id.name};
+        links.setAdapter(new SimpleAdapter(this, data, R.layout.hyperlink_item, from, to));
     }
 }

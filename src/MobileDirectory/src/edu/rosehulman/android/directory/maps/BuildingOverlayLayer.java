@@ -133,11 +133,19 @@ public class BuildingOverlayLayer extends Overlay implements ManageableOverlay {
 			if (!recycle) {
 				balloon = new BalloonOverlayView(mapView.getContext(), 0);	
 				balloon.setOnTapListener(new OnTapListener() {
+
+					final Location loc = selected.getLocation();
+					
 					@Override
 					public boolean onTap(View v) {
-						Context context = mapView.getContext();
-						Location loc = selected.getLocation();
-						context.startActivity(LocationActivity.createIntent(context, loc));
+						new PopulateLocation(new Runnable() {
+							
+							@Override
+							public void run() {
+								Context context = mapView.getContext();
+								context.startActivity(LocationActivity.createIntent(context, loc));
+							}
+						}).execute(loc);
 						
 						return true;
 					}

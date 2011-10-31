@@ -89,9 +89,16 @@ public class POILayer extends BalloonItemizedOverlay<OverlayItem> implements Man
 	
 	@Override
 	protected boolean onBalloonTap(int index, OverlayItem item) {
-		Context context = getMapView().getContext();
-		Location loc = poi.get(index).location;
-		context.startActivity(LocationActivity.createIntent(context, loc));
+		final Location loc = poi.get(index).location;
+		
+		new PopulateLocation(new Runnable() {
+			
+			@Override
+			public void run() {
+				Context context = getMapView().getContext();
+				context.startActivity(LocationActivity.createIntent(context, loc));
+			}
+		}).execute(loc);
 		
 		return true;
 	}
