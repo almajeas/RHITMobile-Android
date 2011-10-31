@@ -132,24 +132,7 @@ public class BuildingOverlayLayer extends Overlay implements ManageableOverlay {
 			boolean recycle = (balloon != null);
 			if (!recycle) {
 				balloon = new BalloonOverlayView(mapView.getContext(), 0);	
-				balloon.setOnTapListener(new OnTapListener() {
-
-					final Location loc = selected.getLocation();
-					
-					@Override
-					public boolean onTap(View v) {
-						new PopulateLocation(new Runnable() {
-							
-							@Override
-							public void run() {
-								Context context = mapView.getContext();
-								context.startActivity(LocationActivity.createIntent(context, loc));
-							}
-						}).execute(loc);
-						
-						return true;
-					}
-				});
+				balloon.setOnTapListener(balloonTapListener);
 			}
 			
 			balloon.setVisibility(View.GONE);
@@ -194,5 +177,25 @@ public class BuildingOverlayLayer extends Overlay implements ManageableOverlay {
 	public void setManager(OverlayManagerControl manager) {
 		this.manager = manager;
 	}
+	
+	private OnTapListener balloonTapListener = new OnTapListener() {
+		
+		@Override
+		public boolean onTap(View v) {
+			
+			final Location loc = selected.getLocation();
+			
+			new PopulateLocation(new Runnable() {
+				
+				@Override
+				public void run() {
+					Context context = mapView.getContext();
+					context.startActivity(LocationActivity.createIntent(context, loc));
+				}
+			}).execute(loc);
+			
+			return true;
+		}
+	};
 
 }
