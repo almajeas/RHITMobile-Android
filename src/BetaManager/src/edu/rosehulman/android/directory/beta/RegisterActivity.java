@@ -215,9 +215,9 @@ public class RegisterActivity extends Activity {
 
         	try {
         		BetaService service = new BetaService();
-        		String authToken = service.register(email, getDeviceIdentifier(), getOSInfo(), 
-        				getModel(), getBuild(),
-        				name, getCarrier());
+        		String authToken = service.register(email, getDeviceIdentifier(), getBuild(),
+        				getOSInfo(), getModel(),
+        				name, getCarrier(), null);
     	    	
     			if (authToken == null) {
     				return false;

@@ -8,6 +8,7 @@ import java.util.List;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
@@ -23,6 +24,9 @@ public abstract class RestClient {
 
 	/** The set of parameters added to the query string */
 	protected List<NameValuePair> queryParams;
+	
+	/** The set of parameters added to the post body */
+	protected List<NameValuePair> postParams;
 	
 	/** The path of the request */
 	protected String path;
@@ -40,6 +44,7 @@ public abstract class RestClient {
 	 */
 	public RestClient(String host, int port, String path) {
 		this.queryParams = new LinkedList<NameValuePair>();
+		this.postParams = new LinkedList<NameValuePair>();
 		this.host = host;
 		this.port = port;
 		this.path = path;
@@ -57,6 +62,16 @@ public abstract class RestClient {
 	 */
 	public void addParameter(String name, String value) {
 		queryParams.add(new BasicNameValuePair(name, value));
+	}
+	
+	/**
+	 * Adds a parameter sent along with a post request
+	 * 
+	 * @param name The name of the parameter to add
+	 * @param value The value to associate with the parameter
+	 */
+	public void addPostParameter(String name, String value) {
+		postParams.add(new BasicNameValuePair(name, value));
 	}
 	
 	/**
@@ -93,6 +108,7 @@ public abstract class RestClient {
 			break;
 		case POST:
 			request = new HttpPost(uri);
+			((HttpPost)request).setEntity(new UrlEncodedFormEntity(postParams));
 			break;
 		default:
 			throw new UnsupportedOperationException("Invalid http method");
