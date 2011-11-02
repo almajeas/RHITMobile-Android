@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -67,8 +68,16 @@ public class LocationActivity extends Activity {
         linksGroup = findViewById(R.id.linksGroup);
         childrenGroup = findViewById(R.id.childrenGroup);
         
+        View btnShowOnMap = findViewById(R.id.btnShowOnMap);
+        
         linksList.setOnItemClickListener(linkClickListener);
         childrenList.setOnItemClickListener(childClickListener);
+        btnShowOnMap.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				btnShowOnMap_clicked();
+			}
+		});
         
         location = getIntent().getParcelableExtra(EXTRA_LOCATION);
         
@@ -130,6 +139,11 @@ public class LocationActivity extends Activity {
         default:
             return super.onOptionsItemSelected(item);
         }
+    }
+    
+    private void btnShowOnMap_clicked() {
+    	Intent intent = MainActivity.createIntent(this, location.id);
+    	startActivity(intent);
     }
     
     private void updateLinks() {

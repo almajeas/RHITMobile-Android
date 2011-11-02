@@ -6,6 +6,7 @@ import java.util.List;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.DialogInterface.OnClickListener;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
@@ -22,6 +23,7 @@ import android.view.Window;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
+import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.Overlay;
@@ -47,6 +49,16 @@ public class MainActivity extends MapActivity {
 	
     private static final String BUILDING_SELECTED_ID = "BuildingSelectedId";
 
+    public static final String EXTRA_IS_INTERNAL = "IS_INTERNAL";
+	public static final String EXTRA_BUILDING_ID = "BUILDING_ID";
+
+	public static Intent createIntent(Context context, long buildingId) {
+		Intent intent = new Intent(context, MainActivity.class);
+		intent.putExtra(EXTRA_IS_INTERNAL, true);
+		intent.putExtra(EXTRA_BUILDING_ID, buildingId);
+		return intent;
+	}
+	
 	private BetaManagerManager betaManager;
 
     private MapView mapView;
@@ -82,7 +94,8 @@ public class MainActivity extends MapActivity {
         
         if (savedInstanceState == null) {
         	
-		    if (betaManager.hasBetaManager() && betaManager.isBetaEnabled()) {
+        	Intent intent = getIntent();
+		    if (!intent.getBooleanExtra(EXTRA_IS_INTERNAL, false) && betaManager.hasBetaManager() && betaManager.isBetaEnabled()) {
 		       	if (betaManager.isBetaRegistered()) {
 		       		betaManager.launchBetaActivity(BetaManagerManager.ACTION_SHOW_STARTUP);	
 		       	} else {
@@ -93,9 +106,11 @@ public class MainActivity extends MapActivity {
 	        mapView.setSatellite(true);
 	        
 	        //center the map
+	        MapController controller = mapView.getController();
 	        GeoPoint center = new GeoPoint(39483760, -87325929);
-	        mapView.getController().setCenter(center);
-	        mapView.getController().zoomToSpan(6241, 13894);    
+	        controller.setCenter(center);
+	        controller.zoomToSpan(6241, 13894);
+	        
 	    } else {
 	    	this.savedInstanceState = savedInstanceState;
 	    	
@@ -486,8 +501,13 @@ public class MainActivity extends MapActivity {
 			//add the overlay to the map;
 			updateOverlays();
 			
+			Intent intent = getIntent();
+			
 	    	if (savedInstanceState != null) {
 	    		MainActivity.this.buildingLayer.setSelectedBuilding(savedInstanceState.getLong(BUILDING_SELECTED_ID));
+	    	} else if (intent.hasExtra(EXTRA_BUILDING_ID)) {
+	    		long id = intent.getLongExtra(EXTRA_BUILDING_ID, -1);
+	    		MainActivity.this.buildingLayer.setSelectedBuilding(id);
 	    	}
 			
 	        MainActivity.this.setProgressBarIndeterminateVisibility(false);
