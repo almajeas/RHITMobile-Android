@@ -126,11 +126,22 @@ public class BetaManagerManager extends ContextWrapper {
      * @param action The activity to start
      */
     public void launchBetaActivity(String action) {
-    	Intent intent = new Intent(action);
+    	Intent intent = getBetaIntent(action);
     	try {
     		startActivity(intent);
     	} catch (ActivityNotFoundException ex) {
     		Log.e(C.TAG, "Activity not found", ex);
     	}
+    }
+    
+    /**
+     * Retrieves the intent that should be started to perform a beta UI operation
+     * 
+     * @param action The activity to start
+     * @return An Intent object that should be launched 
+     */
+    public Intent getBetaIntent(String action) {
+    	Intent intent = new Intent(action);
+    	return intent;
     }
 }

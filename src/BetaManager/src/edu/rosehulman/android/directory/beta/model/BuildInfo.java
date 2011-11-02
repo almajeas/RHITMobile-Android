@@ -24,11 +24,11 @@ public class BuildInfo {
 	}
 	
 	public String getBetaManagerDownloadUrl() {
-		return downloadURL.split("|")[0];
+		return downloadURL.split("\\|")[0];
 	}
 
 	public String getMobileDownloadUrl() {
-		return downloadURL.split("|")[1];
+		return downloadURL.split("\\|")[1];
 	}
 	
 }

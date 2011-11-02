@@ -8,7 +8,7 @@ import android.util.Log;
 public class LatestBuilds {
 	
 	public BuildInfo official;
-	public BuildInfo latest;
+	public BuildInfo rolling;
 	
 	public static LatestBuilds deserialize(JSONObject root) throws JSONException {
 		LatestBuilds res = new LatestBuilds();
@@ -19,7 +19,9 @@ public class LatestBuilds {
 			res.official = BuildInfo.deserialize(root.getJSONObject("official"));
 		}
 		
-		res.latest = BuildInfo.deserialize(root.getJSONObject("latest"));
+		if (!root.isNull("rolling")) {
+			res.rolling = BuildInfo.deserialize(root.getJSONObject("rolling"));
+		}
 		
 		return res;
 	}

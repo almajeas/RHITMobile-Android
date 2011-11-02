@@ -3,11 +3,12 @@ package edu.rosehulman.android.directory;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.DialogInterface.OnClickListener;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.location.LocationListener;
@@ -51,6 +52,8 @@ public class MainActivity extends MapActivity {
 
     public static final String EXTRA_IS_INTERNAL = "IS_INTERNAL";
 	public static final String EXTRA_BUILDING_ID = "BUILDING_ID";
+
+	private static final int REQUEST_STARTUP_CODE = 4;
 
 	public static Intent createIntent(Context context, long buildingId) {
 		Intent intent = new Intent(context, MainActivity.class);
@@ -97,7 +100,8 @@ public class MainActivity extends MapActivity {
         	Intent intent = getIntent();
 		    if (!intent.getBooleanExtra(EXTRA_IS_INTERNAL, false) && betaManager.hasBetaManager() && betaManager.isBetaEnabled()) {
 		       	if (betaManager.isBetaRegistered()) {
-		       		betaManager.launchBetaActivity(BetaManagerManager.ACTION_SHOW_STARTUP);	
+		       		Intent betaIntent = betaManager.getBetaIntent(BetaManagerManager.ACTION_SHOW_STARTUP); 
+		       		startActivityForResult(betaIntent, REQUEST_STARTUP_CODE);	
 		       	} else {
 		       		betaManager.launchBetaActivity(BetaManagerManager.ACTION_SHOW_REGISTER);
 		       	}
@@ -120,6 +124,22 @@ public class MainActivity extends MapActivity {
         mapView.setBuiltInZoomControls(true);
         
         rebuildOverlays();
+    }
+    
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    	if (requestCode != REQUEST_STARTUP_CODE)
+    		return;
+    	
+    	switch (resultCode) {
+    		case Activity.RESULT_CANCELED:
+    			//The user declined an update, exit
+    			finish();
+    			break;
+    		case Activity.RESULT_OK:
+    			//We were up to date, continue on happily
+    			break;	
+    	}
     }
     
     @Override
