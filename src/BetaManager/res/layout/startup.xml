@@ -50,6 +50,27 @@
 	    		android:layout_height="wrap_content"
 	    		android:visibility="gone"
 	    		/>
+				    		
+			<edu.rosehulman.android.directory.beta.StartupStatusItem
+		        android:id="@+id/stepDownloading"
+	           	android:layout_width="fill_parent" 
+	    		android:layout_height="wrap_content"
+	    		android:visibility="gone"
+	    		/>
+				    		
+			<edu.rosehulman.android.directory.beta.StartupStatusItem
+		        android:id="@+id/stepUpdatingMobileDirectory"
+	           	android:layout_width="fill_parent" 
+	    		android:layout_height="wrap_content"
+	    		android:visibility="gone"
+	    		/>
+				    		
+			<edu.rosehulman.android.directory.beta.StartupStatusItem
+		        android:id="@+id/stepUpdatingBetaManager"
+	           	android:layout_width="fill_parent" 
+	    		android:layout_height="wrap_content"
+	    		android:visibility="gone"
+	    		/>
 			
 		</LinearLayout>
 	   	
