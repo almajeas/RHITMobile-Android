@@ -114,7 +114,6 @@ public class StartupActivity extends Activity {
 		mobilePath = new File(storageDirectory, "RHITMobile.apk");
         
 		//pick up where we left off
-		//*
         int state = getPreferences(MODE_PRIVATE).getInt(PREF_STATE, State.CHECKING_FOR_UPDATES.ordinal());
         currentState = State.fromOrdinal(state);
         Log.d("BetaManager", "Starting up in state: " + currentState.toString());
@@ -135,7 +134,6 @@ public class StartupActivity extends Activity {
             new CheckVersion().execute();
         	break;
         }
-        // */
     }
     
     @Override
