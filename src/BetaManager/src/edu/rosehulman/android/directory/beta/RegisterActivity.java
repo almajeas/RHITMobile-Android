@@ -4,6 +4,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.regex.Pattern;
 
+import org.apache.http.client.HttpResponseException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -23,6 +24,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings.Secure;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.TextView;
@@ -231,6 +233,9 @@ public class RegisterActivity extends Activity {
     	        edit.putString(res.getString(R.string.pref_auth_token), authToken);
     	        edit.commit();
     	        
+    		} catch (HttpResponseException ex) {
+    			Log.e("BetaManager", "Failed to register: " + ex.getMessage(), ex);
+    			return false;
     		} catch (Exception e) {
     			e.printStackTrace();
     			return false;

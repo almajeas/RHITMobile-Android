@@ -17,6 +17,8 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 
+import android.util.Log;
+
 /**
  * Provides common functionality for making REST web service calls
  */
@@ -108,6 +110,7 @@ public abstract class RestClient {
 			break;
 		case POST:
 			request = new HttpPost(uri);
+			Log.d("BetaManager", "Submitting post: " + URLEncodedUtils.format(postParams, "UTF-8"));
 			((HttpPost)request).setEntity(new UrlEncodedFormEntity(postParams));
 			break;
 		default:
