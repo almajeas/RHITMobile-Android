@@ -1,10 +1,80 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-  xmlns:android="http://schemas.android.com/apk/res/android"
-  android:orientation="vertical"
-  android:layout_width="fill_parent"
-  android:layout_height="fill_parent">
-    <TextView android:id="@+id/textView1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Welcome to the Beta Manager.  This screen will check for updates/register you for the beta program and can only be launched by running the main application."></TextView>
-    <Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Dismiss" android:id="@+id/btnDismiss"></Button>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:weightSum="1" >
+
+    <!-- 
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Welcome to the Beta Manager.  This screen will check for updates/register you for the beta program and can only be launched by running the main application." />
+
+    <Button
+        android:id="@+id/btnDismiss"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Dismiss" />
+         -->
+         
+         
+    <ScrollView
+    	android:id="@+id/scrollView1" 
+    	android:layout_width="fill_parent" 
+    	android:layout_height="wrap_content" 
+    	android:fillViewport="true"
+    	android:layout_weight="1.0" >
+    	
+	   	<!--<ListView 
+	        android:id="@+id/progress"
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content" />-->
+	        
+	    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		    android:layout_width="fill_parent"
+		    android:layout_height="wrap_content"
+		    android:orientation="vertical"
+		    >
+	    
+		    <edu.rosehulman.android.directory.beta.StartupStatusItem
+		        android:id="@+id/stepCheckForUpdates"
+	           	android:layout_width="fill_parent" 
+	    		android:layout_height="wrap_content"
+	    		/> 
+	    		
+			<edu.rosehulman.android.directory.beta.StartupStatusItem
+		        android:id="@+id/stepPromptForUpdate"
+	           	android:layout_width="fill_parent" 
+	    		android:layout_height="wrap_content"
+	    		android:visibility="gone"
+	    		/>
+			
+		</LinearLayout>
+	   	
+   	</ScrollView>
     
+    <LinearLayout
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content" 
+		android:background="@android:drawable/bottom_bar"
+		android:gravity="center_vertical|bottom">
+		<Button
+        	android:id="@+id/btnExit" 
+        	android:text="Back" 
+        	android:layout_width="6dip"
+        	android:layout_weight="1.0" 
+        	android:layout_height="wrap_content"
+        	/>
+        <Button 
+	        android:id="@+id/btnContinue" 
+	        android:text="Continue"
+	        android:layout_width="6dip"
+	        android:layout_weight="1.0"
+	        android:layout_height="wrap_content" 
+	        android:enabled="false"
+        	/>
+    </LinearLayout>
+
 </LinearLayout>
