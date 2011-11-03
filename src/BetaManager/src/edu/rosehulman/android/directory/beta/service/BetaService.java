@@ -6,7 +6,9 @@ import edu.rosehulman.android.directory.beta.model.LatestBuilds;
 
 public class BetaService {
 	
-	private static final String HOST = "rhitmobilebeta-test.heroku.com";
+	private static final String HOST = "rhitmobilebeta.heroku.com";
+	//private static final String HOST = "rhitmobilebeta-test.heroku.com";
+	
 	private static final int PORT = 80;
 	
 	public BetaService() {
