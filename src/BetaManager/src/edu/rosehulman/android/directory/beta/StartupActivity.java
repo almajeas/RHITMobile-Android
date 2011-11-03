@@ -13,7 +13,6 @@ import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -21,7 +20,6 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.Toast;
 import edu.rosehulman.android.directory.beta.StartupStatusItem.StatusState;
 import edu.rosehulman.android.directory.beta.model.BuildInfo;
 import edu.rosehulman.android.directory.beta.model.LatestBuilds;
@@ -36,6 +34,9 @@ public class StartupActivity extends Activity {
 	private StartupStatusItem stepDownloading;
 	private StartupStatusItem stepUpdatingMobileDirectory;
 	private StartupStatusItem stepUpdatingBetaManager;
+	
+	private File betaPath;
+	private File mobilePath;
 	
 	private static final String PREF_STATE = "STATE";
 	
@@ -106,29 +107,45 @@ public class StartupActivity extends Activity {
 			}
 		});
         
+        //build file paths
+        String storageDirectory = getExternalFilesDir(null) + "/updates/";
+		new File(storageDirectory).mkdirs();
+		betaPath = new File(storageDirectory, "BetaManager.apk");
+		mobilePath = new File(storageDirectory, "RHITMobile.apk");
+        
+		//pick up where we left off
+		//*
         int state = getPreferences(MODE_PRIVATE).getInt(PREF_STATE, State.CHECKING_FOR_UPDATES.ordinal());
         currentState = State.fromOrdinal(state);
+        Log.d("BetaManager", "Starting up in state: " + currentState.toString());
         switch (currentState) {
-        case INSTALLING_UPDATE2:
-        	//TODO verify that the app installed
-        	currentState = State.DONE_UPDATING;
+        case INSTALLING_UPDATE1:
+        	//TODO verify that the app is installed
+        	updateProgress(State.INSTALLING_UPDATE2);
+        	installApplication(betaPath);
         	break;
+        	
+        case INSTALLING_UPDATE2:
+        	//TODO verify that the app is installed
+        	updateProgress(State.DONE_UPDATING);
+        	break;
+        	
         default:
-        	currentState = State.CHECKING_FOR_UPDATES;
+        	updateProgress(State.CHECKING_FOR_UPDATES);
             new CheckVersion().execute();
         	break;
         }
-        updateProgress();
+        // */
     }
     
     @Override
     protected void onResume() {
     	super.onResume();
     	
-        IntentFilter filter = new IntentFilter();
-        filter.addAction("android.intent.action.PACKAGE_ADDED");
-        filter.addDataScheme("package");
-        this.registerReceiver(packageReceiver, filter);
+//        IntentFilter filter = new IntentFilter();
+//        filter.addAction("android.intent.action.PACKAGE_ADDED");
+//        filter.addDataScheme("package");
+//        this.registerReceiver(packageReceiver, filter);
     }
     
     @Override
@@ -142,7 +159,26 @@ public class StartupActivity extends Activity {
     protected void onDestroy() {
     	super.onPause();
     	
-    	this.unregisterReceiver(packageReceiver);
+    	//this.unregisterReceiver(packageReceiver);
+    }
+    
+    
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    	Log.d("BetaManager", "Received activity result: " + requestCode + ", " + resultCode);
+    	
+    	//if (requestCode != REQUEST_STARTUP_CODE)
+    	//	return;
+    	
+		updateProgress(State.INSTALLING_UPDATE2);
+		installApplication(betaPath);
+    	
+    	switch (resultCode) {
+    		case Activity.RESULT_CANCELED:
+    			break;
+    		case Activity.RESULT_OK:
+    			break;	
+    	}
     }
     
     private void btnExit_clicked() {
@@ -165,10 +201,11 @@ public class StartupActivity extends Activity {
     	}
     }
     
-    private void updateProgress() {
-    	this.getPreferences(MODE_PRIVATE).edit().putInt(PREF_STATE, currentState.ordinal()).commit();
+    private void updateProgress(State state) {
+    	currentState = state;
+    	this.getPreferences(MODE_PRIVATE).edit().putInt(PREF_STATE, state.ordinal()).commit();
     	
-    	switch (currentState) {
+    	switch (state) {
     	case NO_UPDATES:
     		btnContinue.setEnabled(true);
     		stepCheckForUpdates.setState(StatusState.SUCCESS);
@@ -202,11 +239,20 @@ public class StartupActivity extends Activity {
     	case INSTALLING_UPDATE1:
     		stepDownloading.setState(StatusState.SUCCESS);
     		stepUpdatingMobileDirectory.setVisibility(View.VISIBLE);
+    		stepUpdatingMobileDirectory.setState(StatusState.IN_PROGRESS);
     		break;
     		
     	case INSTALLING_UPDATE2:
+    		//possible to get here after restarting the application
+    		stepCheckForUpdates.setState(StatusState.SUCCESS);
+    		stepPromptForUpdate.setVisibility(View.VISIBLE);
+    		stepPromptForUpdate.setState(StatusState.SUCCESS);
+    		stepDownloading.setVisibility(View.VISIBLE);
+    		stepDownloading.setState(StatusState.SUCCESS);
+    		stepUpdatingMobileDirectory.setVisibility(View.VISIBLE);
     		stepUpdatingMobileDirectory.setState(StatusState.SUCCESS);
     		stepUpdatingBetaManager.setVisibility(View.VISIBLE);
+    		stepUpdatingBetaManager.setState(StatusState.IN_PROGRESS);
     		break;
     		
     	case DONE_UPDATING:
@@ -220,17 +266,17 @@ public class StartupActivity extends Activity {
     		stepUpdatingMobileDirectory.setState(StatusState.SUCCESS);
     		stepUpdatingBetaManager.setVisibility(View.VISIBLE);
     		stepUpdatingBetaManager.setState(StatusState.SUCCESS);
+    		btnContinue.setEnabled(true);
     		break;
     	}
     }
     
     private BroadcastReceiver packageReceiver = new BroadcastReceiver() {
 		@Override
-		public void onReceive(Context context, Intent intent) {
+		public void onReceive(Context context, Intent intent) {			
 			switch (currentState) {
 			case INSTALLING_UPDATE1:
-				currentState = State.INSTALLING_UPDATE2;
-				updateProgress();
+				updateProgress(State.INSTALLING_UPDATE2);
 				installApplication(betaPath);
 				break;
 			default:
@@ -239,14 +285,11 @@ public class StartupActivity extends Activity {
 		}
 	};
 	
-	private File betaPath;
-	private File mobilePath;
-	
 	private boolean installApplication(File path) {
 		try {
 			Intent promptInstall = new Intent(Intent.ACTION_VIEW)
 		    .setDataAndType(Uri.fromFile(path), "application/vnd.android.package-archive");
-			startActivity(promptInstall);
+			startActivityForResult(promptInstall, 42);
 		} catch (ActivityNotFoundException ex) {
 			return false;
 		}
@@ -263,11 +306,8 @@ public class StartupActivity extends Activity {
     	}
     	
     	private boolean downloadUpdates() {
-			String storageDirectory = getExternalFilesDir(null) + "/updates/";
-			new File(storageDirectory).mkdirs();
-			
-			betaPath = new File(storageDirectory, "BetaManager.apk");
-			mobilePath = new File(storageDirectory, "RHITMobile.apk");
+    		String storageDirectory = getExternalFilesDir(null) + "/updates/";
+    		new File(storageDirectory).mkdirs();
 			
     		try {
         		downloadFile(latestBuild.getBetaManagerDownloadUrl(), betaPath);
@@ -298,8 +338,7 @@ public class StartupActivity extends Activity {
 		
 		@Override
 		protected void onProgressUpdate(State... progress) {
-			currentState = progress[0];
-			updateProgress();
+			updateProgress(progress[0]);
 		}
 		
 		@Override
@@ -354,14 +393,14 @@ public class StartupActivity extends Activity {
     			
     			latestBuild = result;
     			
-    			currentState = State.UPDATES_AVAILABLE;
+    			updateProgress(State.UPDATES_AVAILABLE);
     		} else if (checkFailed) {
-    			currentState = State.UPDATE_CHECK_FAILED;
+    			updateProgress(State.UPDATE_CHECK_FAILED);
     		} else {
-    			currentState = State.NO_UPDATES;
+    			updateProgress(State.NO_UPDATES);
     		}
-    		updateProgress();
     	}
     	
     }
 }
+
