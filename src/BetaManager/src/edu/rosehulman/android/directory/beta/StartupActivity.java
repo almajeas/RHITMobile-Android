@@ -10,9 +10,10 @@ import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -36,6 +37,8 @@ public class StartupActivity extends Activity {
 	private StartupStatusItem stepUpdatingMobileDirectory;
 	private StartupStatusItem stepUpdatingBetaManager;
 	
+	private static final String PREF_STATE = "STATE";
+	
 	private State currentState = State.CHECKING_FOR_UPDATES;
 	
 	private BuildInfo latestBuild;
@@ -43,6 +46,7 @@ public class StartupActivity extends Activity {
 	private enum State {
 		CHECKING_FOR_UPDATES,
 		NO_UPDATES,
+		UPDATE_CHECK_FAILED,
 		UPDATES_AVAILABLE,
 		
 		DOWNLOADING_UPDATES,
@@ -51,7 +55,16 @@ public class StartupActivity extends Activity {
 		
 		DONE_UPDATING,
 		
-		DOWNLOADING_FAILED
+		DOWNLOADING_FAILED;
+		
+		public static State fromOrdinal(int ordinal) {
+			for (State state : State.values()) {
+				if (state.ordinal() == ordinal) {
+					return state;
+				}
+			}
+			return CHECKING_FOR_UPDATES;
+		}
 	}
 
     @Override
@@ -93,9 +106,43 @@ public class StartupActivity extends Activity {
 			}
 		});
         
+        int state = getPreferences(MODE_PRIVATE).getInt(PREF_STATE, State.CHECKING_FOR_UPDATES.ordinal());
+        currentState = State.fromOrdinal(state);
+        switch (currentState) {
+        case INSTALLING_UPDATE2:
+        	//TODO verify that the app installed
+        	currentState = State.DONE_UPDATING;
+        	break;
+        default:
+        	currentState = State.CHECKING_FOR_UPDATES;
+            new CheckVersion().execute();
+        	break;
+        }
         updateProgress();
-        
-        new CheckVersion().execute();
+    }
+    
+    @Override
+    protected void onResume() {
+    	super.onResume();
+    	
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("android.intent.action.PACKAGE_ADDED");
+        filter.addDataScheme("package");
+        this.registerReceiver(packageReceiver, filter);
+    }
+    
+    @Override
+    protected void onPause() {
+    	super.onPause();
+    	
+    	//this.unregisterReceiver(packageReceiver);
+    }
+
+    @Override
+    protected void onDestroy() {
+    	super.onPause();
+    	
+    	this.unregisterReceiver(packageReceiver);
     }
     
     private void btnExit_clicked() {
@@ -119,10 +166,17 @@ public class StartupActivity extends Activity {
     }
     
     private void updateProgress() {
+    	this.getPreferences(MODE_PRIVATE).edit().putInt(PREF_STATE, currentState.ordinal()).commit();
+    	
     	switch (currentState) {
     	case NO_UPDATES:
     		btnContinue.setEnabled(true);
     		stepCheckForUpdates.setState(StatusState.SUCCESS);
+    		break;
+    		
+    	case UPDATE_CHECK_FAILED:
+    		btnContinue.setEnabled(true);
+    		stepCheckForUpdates.setState(StatusState.ERROR);
     		break;
     		
     	case UPDATES_AVAILABLE:
@@ -170,19 +224,37 @@ public class StartupActivity extends Activity {
     	}
     }
     
+    private BroadcastReceiver packageReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			switch (currentState) {
+			case INSTALLING_UPDATE1:
+				currentState = State.INSTALLING_UPDATE2;
+				updateProgress();
+				installApplication(betaPath);
+				break;
+			default:
+				break;
+			}
+		}
+	};
+	
+	private File betaPath;
+	private File mobilePath;
+	
+	private boolean installApplication(File path) {
+		try {
+			Intent promptInstall = new Intent(Intent.ACTION_VIEW)
+		    .setDataAndType(Uri.fromFile(path), "application/vnd.android.package-archive");
+			startActivity(promptInstall);
+		} catch (ActivityNotFoundException ex) {
+			return false;
+		}
+		return true;
+	}
+    
     private class UpdateApplication extends AsyncTask<Void, State, Boolean>
     {
-    	
-    	private File betaPath;
-    	private File mobilePath;
-    	
-    	private void sleep(long time) {
-    		try {
-				Thread.sleep(time);
-			} catch (InterruptedException e)
-			{}
-    	}
-    	
     	private void downloadFile(String url, File path) throws Exception {
     		FileOutputStream fout = new FileOutputStream(path);
     		HttpClient client = new DefaultHttpClient();
@@ -206,19 +278,6 @@ public class StartupActivity extends Activity {
     		}
     		return true;
     	}
-    	
-    	private boolean installApplication(File path) {
-    		try {
-				Intent promptInstall = new Intent(Intent.ACTION_VIEW)
-			    .setDataAndType(Uri.fromFile(path), "application/vnd.android.package-archive");
-				startActivity(promptInstall);
-    		} catch (ActivityNotFoundException ex) {
-    			return false;
-    		}
-    		//ref http://stackoverflow.com/questions/6362479/install-apk-programmatically-on-android
-    		//for knowing when the application is finished installing
-			return true;
-    	}
 
 		@Override
 		protected Boolean doInBackground(Void... params) {
@@ -230,9 +289,9 @@ public class StartupActivity extends Activity {
 
 			this.publishProgress(State.INSTALLING_UPDATE1);
 			installApplication(mobilePath);
-			this.publishProgress(State.INSTALLING_UPDATE2);
-			installApplication(betaPath);
-			this.publishProgress(State.DONE_UPDATING);
+			//this.publishProgress(State.INSTALLING_UPDATE2);
+			//installApplication(betaPath);
+			//this.publishProgress(State.DONE_UPDATING);
 			
 			return true;
 		}
@@ -255,6 +314,8 @@ public class StartupActivity extends Activity {
     
     private class CheckVersion extends AsyncTask<Void, Void, BuildInfo> {
     	
+    	private boolean checkFailed = false;
+    	
     	@Override
     	protected void onPreExecute() {
     	}
@@ -268,6 +329,7 @@ public class StartupActivity extends Activity {
 				builds = service.getLatestBuilds();
 			} catch (Exception e) {
 				e.printStackTrace();
+				checkFailed = true;
 				return null;
 			}
 			
@@ -275,15 +337,7 @@ public class StartupActivity extends Activity {
 				return null;
 			}
 			
-	    	PackageInfo packageInfo;
-	    	try {
-	    		packageInfo = getPackageManager().getPackageInfo("edu.rosehulman.android.directory", 0); 
-			} catch (NameNotFoundException e) {
-				e.printStackTrace();
-				return null;
-			}
-	    	
-			int buildNumber = packageInfo.versionCode;
+			int buildNumber = Env.getBuildNumber(StartupActivity.this, Env.RHIT_MOBILE);
 			if (buildNumber < builds.rolling.buildNumber) {
 				return builds.rolling;
 			}
@@ -301,9 +355,10 @@ public class StartupActivity extends Activity {
     			latestBuild = result;
     			
     			currentState = State.UPDATES_AVAILABLE;
+    		} else if (checkFailed) {
+    			currentState = State.UPDATE_CHECK_FAILED;
     		} else {
     			currentState = State.NO_UPDATES;
-    			Toast.makeText(StartupActivity.this, "No updates", Toast.LENGTH_SHORT).show();
     		}
     		updateProgress();
     	}

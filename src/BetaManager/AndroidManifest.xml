@@ -32,7 +32,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".StartupActivity"
-                  android:label="RHIT Mobile Beta Updater">
+                  android:label="RHIT Mobile Beta Updater"
+                  android:configChanges="orientation">
             <intent-filter>
                 <action android:name="edu.rosehulman.android.directory.beta.SHOW_STARTUP" />
                 <category android:name="android.intent.category.DEFAULT" />
