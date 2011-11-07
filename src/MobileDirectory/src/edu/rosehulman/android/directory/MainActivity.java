@@ -516,6 +516,12 @@ public class MainActivity extends MapActivity {
 	    	updateOverlays();
 		}
 		
+		private void setSelectedId(long id) {
+			if (!MainActivity.this.buildingLayer.setSelectedBuilding(id)) {
+				MainActivity.this.poiLayer.setFocus(id);
+			}
+		}
+		
 		@Override
 		protected void onPostExecute(Void res) {
 			//add the overlay to the map;
@@ -524,10 +530,10 @@ public class MainActivity extends MapActivity {
 			Intent intent = getIntent();
 			
 	    	if (savedInstanceState != null) {
-	    		MainActivity.this.buildingLayer.setSelectedBuilding(savedInstanceState.getLong(BUILDING_SELECTED_ID));
+	    		setSelectedId(savedInstanceState.getLong(BUILDING_SELECTED_ID));
 	    	} else if (intent.hasExtra(EXTRA_BUILDING_ID)) {
 	    		long id = intent.getLongExtra(EXTRA_BUILDING_ID, -1);
-	    		MainActivity.this.buildingLayer.setSelectedBuilding(id);
+	    		setSelectedId(id);
 	    	}
 			
 	        MainActivity.this.setProgressBarIndeterminateVisibility(false);
