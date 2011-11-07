@@ -81,6 +81,12 @@ public class BetaManagerManager extends ContextWrapper {
      * @return True if enabled; false otherwise
      */
     public boolean isBetaEnabled() {
+    	try {
+			if (getPackageManager().getPackageInfo(getPackageName(), 0).versionCode == 0) {
+				return false;
+			}
+		} catch (NameNotFoundException e) { }
+    	
     	return getBooleanParameter(PREF_BETA_ENABLED, true);    	
     }
     
