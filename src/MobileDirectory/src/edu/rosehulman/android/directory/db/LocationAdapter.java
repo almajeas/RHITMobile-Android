@@ -30,7 +30,6 @@ public class LocationAdapter extends TableAdapter {
 	
 	/**
 	 * Creates a new LocationAdapter with its connection to the database closed
-	 * @param db 
 	 */
 	public LocationAdapter() {
 	}
