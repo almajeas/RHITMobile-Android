@@ -61,11 +61,6 @@
     </target>
 -->
 
-    <target name="doc">
-        <exec executable="doxygen" failonerror="true">
-        </exec>
-    </target>
-
 
     <!-- Import the actual build file.
 
