@@ -123,40 +123,66 @@ public class C {
 
 
 	
-	/*!
-	 * \package edu.rosehulman.android.directory.model
+	/*! \package edu.rosehulman.android.directory.model
 	 * 
-	 * TODO Documentation for model
+	 * The model classes do little other than hold data and provide simple
+	 * operations on the data, but they are used in many of the application's
+	 * components.  The structure of these data models is based on the structure
+	 * of the data returned by the \ref service "server" API calls.
+	 *
+	 * \ref Location and \ref MapAreaData are the primary classes describing a
+	 * location on the map and are used by any feature dealing with specific
+	 * locations.  
 	 */
 	
-	/*!
-	 * \package edu.rosehulman.android.directory.db
+	/*! \package edu.rosehulman.android.directory.db
 	 * 
-	 * TODO Documentation for db
+	 * All data retrieved by the \ref service "server" is stored in a SQLite
+	 * database on the phone itself.  This package provides a layer of
+	 * abstraction from actually interfacing with the database by providing a
+	 * set of adapter classes (\ref LocationAdapter, for example) that perform
+	 * operations with the database in terms of \ref model objects instead of
+	 * forcing all other layers use SQL directly.
 	 */
 	
-	/*!
-	 * \package edu.rosehulman.android.directory
+	/*! \package edu.rosehulman.android.directory
 	 * 
-	 * TODO Documentation for main package
+	 * Certain classes do not fit well in any other package and are therefore
+	 * left at the main package level.  Examples include:
+	 *
+	 *  - \ref MyApplication "MyApplication": maintains global application state
+	 *
+	 *  - \ref C "C": contains global constants that can be used throughout the
+	 *  application
+	 *
+	 * This package also includes all of the Activities (such as \ref
+	 * LocationActivity)
 	 */
 	
-	/*!
-	 * \package edu.rosehulman.android.directory.maps
+	/*! \package edu.rosehulman.android.directory.maps
 	 * 
-	 * TODO Documentation for maps
+	 * This application makes numerous modifications and extensions to the
+	 * provided MapView class, all of which are categorized in this layer.
+	 * Various overlays are drawn on the map (ex \ref BuildingOverlayLayer), and
+	 * there are numerous supporting classes required to simplify interaction
+	 * with the map.
 	 */
 	
-	/*!
-	 * \package edu.rosehulman.android.directory.service
+	/*! \package edu.rosehulman.android.directory.service
 	 * 
-	 * TODO Documentation for service
+	 * RHIT Mobile has to deal with a large amount of data, none of which
+	 * originates from the device itself.  Instead of storing static copies of
+	 * data and doing had processing (like directions) on the device itself, we
+	 * have a server component to house that data and perform complex
+	 * computations.  With that additional component comes the need to be able
+	 * to communicate with the server.  This package provides that
+	 * functionality.
 	 */
 	
-	/*!
-	 * \package edu.rosehulman.android.directory.util
+	/*! \package edu.rosehulman.android.directory.util
 	 * 
-	 * TODO Documentation for util
+	 * This layer contains various utility functionality that is not associated
+	 * with any other package and should not be associated with the UI classes.
 	 */
 	
 	
