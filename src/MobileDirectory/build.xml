@@ -61,16 +61,9 @@
     </target>
 -->
 
-    <target name="javadoc">
-        <javadoc 
-            destdir="docs"
-            doctitle="MobileDirectory API Reference"
-	    access="private"
-            use="true"
-	    classpath="${sdk.dir}/platforms/android-7/android.jar;${sdk.dir}/add-ons/addon_google_apis_google_inc_7/libs/maps.jar"
-            sourcepath="gen;src"
-	    stylesheetfile="${sdk.dir}/docs/assets/android-developer-docs.css"
-        />
+    <target name="doc">
+        <exec executable="doxygen" failonerror="true">
+        </exec>
     </target>
 
 
