@@ -46,7 +46,7 @@ import edu.rosehulman.android.directory.service.MobileDirectoryService;
 /**
  * Main entry point into MobileDirectory
  */
-public class MainActivity extends MapActivity {
+public class CampusMapActivity extends MapActivity {
 	
     private static final String BUILDING_SELECTED_ID = "BuildingSelectedId";
 
@@ -56,7 +56,7 @@ public class MainActivity extends MapActivity {
 	private static final int REQUEST_STARTUP_CODE = 4;
 
 	public static Intent createIntent(Context context, long buildingId) {
-		Intent intent = new Intent(context, MainActivity.class);
+		Intent intent = new Intent(context, CampusMapActivity.class);
 		intent.putExtra(EXTRA_IS_INTERNAL, true);
 		intent.putExtra(EXTRA_BUILDING_ID, buildingId);
 		return intent;
@@ -329,7 +329,7 @@ public class MainActivity extends MapActivity {
 		
 		@Override
 		protected void onPostExecute(Void res) {
-	    	AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
+	    	AlertDialog dialog = new AlertDialog.Builder(CampusMapActivity.this)
 	    		.setTitle("Top Locations")
 	    		.setItems(names, new OnClickListener() {
 					@Override
@@ -501,13 +501,13 @@ public class MainActivity extends MapActivity {
 		
 		@Override
 		protected void onPreExecute() {
-			MainActivity.this.setProgressBarIndeterminateVisibility(true);
+			CampusMapActivity.this.setProgressBarIndeterminateVisibility(true);
 		}
 		
 		private void updateOverlays() {
-			MainActivity.this.poiLayer = poiLayer;
-			MainActivity.this.buildingLayer = buildingLayer;
-			MainActivity.this.textLayer = textLayer;
+			CampusMapActivity.this.poiLayer = poiLayer;
+			CampusMapActivity.this.buildingLayer = buildingLayer;
+			CampusMapActivity.this.textLayer = textLayer;
 			rebuildOverlays();
 		}
 		
@@ -517,8 +517,8 @@ public class MainActivity extends MapActivity {
 		}
 		
 		private void setSelectedId(long id) {
-			if (!MainActivity.this.buildingLayer.setSelectedBuilding(id)) {
-				MainActivity.this.poiLayer.setFocus(id);
+			if (!CampusMapActivity.this.buildingLayer.setSelectedBuilding(id)) {
+				CampusMapActivity.this.poiLayer.setFocus(id);
 			}
 		}
 		
@@ -536,12 +536,12 @@ public class MainActivity extends MapActivity {
 	    		setSelectedId(id);
 	    	}
 			
-	        MainActivity.this.setProgressBarIndeterminateVisibility(false);
+	        CampusMapActivity.this.setProgressBarIndeterminateVisibility(false);
 		}
 		
 		@Override
 		protected void onCancelled() {
-			MainActivity.this.setProgressBarIndeterminateVisibility(false);
+			CampusMapActivity.this.setProgressBarIndeterminateVisibility(false);
 		}
 		
 	}

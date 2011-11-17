@@ -142,7 +142,7 @@ public class LocationActivity extends Activity {
     }
     
     private void btnShowOnMap_clicked() {
-    	Intent intent = MainActivity.createIntent(this, location.id);
+    	Intent intent = CampusMapActivity.createIntent(this, location.id);
     	startActivity(intent);
     }
     

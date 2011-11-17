@@ -32,13 +32,13 @@ public class C {
 	 *  APIs that include a MapView with various extension points.  Many of our
 	 *  project's modifications to the MapView class can be found in the classes
 	 *  contained within \ref edu.rosehulman.android.directory.maps.  The campus
-	 *  map itself is controlled by \ref MainActivity, which uses the extension
+	 *  map itself is controlled by \ref CampusMapActivity, which uses the extension
 	 *  point defined in the \ref maps package.
 	 *
 	 *  - Details for any location on campus.  \ref LocationActivity provides
 	 *  additional details and functionality related to a specific location on
 	 *  campus.  This activity will be accessible from various locations,
-	 *  including the map on the \ref MainActivity.  From the location activity,
+	 *  including the map on the \ref CampusMapActivity.  From the location activity,
 	 *  users can view it on the map, see which locations are within that
 	 *  location, get directions to that location, any navigate to any useful
 	 *  links associated with that location.
