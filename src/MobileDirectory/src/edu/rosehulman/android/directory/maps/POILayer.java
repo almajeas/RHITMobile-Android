@@ -65,7 +65,7 @@ public class POILayer extends BalloonItemizedOverlay<OverlayItem> implements Man
 	 * @param id The ID of the POI to focus
 	 * @return True if the POI was found; false otherwise
 	 */
-	public boolean setFocus(long id) {
+	public boolean focus(long id) {
 		for (int i = 0; i < poi.size(); i++) {
 			PointOfInterest poi = this.poi.get(i);
 			if (poi.location.id == id) {

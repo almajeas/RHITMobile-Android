@@ -1,6 +1,5 @@
 package edu.rosehulman.android.directory;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
@@ -32,11 +31,9 @@ import com.google.android.maps.Overlay;
 import edu.rosehulman.android.directory.db.DbIterator;
 import edu.rosehulman.android.directory.db.LocationAdapter;
 import edu.rosehulman.android.directory.db.VersionsAdapter;
-import edu.rosehulman.android.directory.maps.BoundingMapArea;
 import edu.rosehulman.android.directory.maps.BuildingOverlayLayer;
 import edu.rosehulman.android.directory.maps.OverlayManager;
 import edu.rosehulman.android.directory.maps.POILayer;
-import edu.rosehulman.android.directory.maps.TextOverlay;
 import edu.rosehulman.android.directory.maps.TextOverlayLayer;
 import edu.rosehulman.android.directory.model.Location;
 import edu.rosehulman.android.directory.model.LocationCollection;
@@ -238,8 +235,8 @@ public class CampusMapActivity extends MapActivity {
     
     private void selectLocation(long id, boolean animate) {
 		//FIXME use a more generic method of selecting a building
-    	buildingLayer.setSelectedBuilding(id, animate);
-    	poiLayer.setFocus(id);
+    	buildingLayer.focus(id, animate);
+    	poiLayer.focus(id);
     }
     
     @Override
@@ -296,7 +293,7 @@ public class CampusMapActivity extends MapActivity {
     	public boolean onTap(GeoPoint p, MapView mapView) {
     		//tap not handled by any other overlay
     		if (buildingLayer != null) {
-    			buildingLayer.setSelectedBuilding(-1, false);
+    			buildingLayer.focus(-1, false);
     		}
     		
     		if (poiLayer != null) {
@@ -387,47 +384,9 @@ public class CampusMapActivity extends MapActivity {
 	    }
 
 		private void generateText() {
-			//get our db
-	        LocationAdapter buildingAdapter = new LocationAdapter();
+			TextOverlayLayer.initializeCache();
+			
 	        textLayer = new TextOverlayLayer();
-	        buildingAdapter.open();
-	        
-	        //build out text overlays
-	        Cursor buildingOverlays = buildingAdapter.getBuildingOverlayCursor(false);
-	        int iId = buildingOverlays.getColumnIndex("_Id");
-	        int iName = buildingOverlays.getColumnIndex("Name");
-	        int iLat = buildingOverlays.getColumnIndex("CenterLat");
-	        int iLon = buildingOverlays.getColumnIndex("CenterLon");
-	        int iMinZoomLevel = buildingOverlays.getColumnIndex("MinZoomLevel");
-	        while (buildingOverlays.moveToNext()) {
-	        	String name = buildingOverlays.getString(iName);
-	        	int minZoomLevel = buildingOverlays.getInt(iMinZoomLevel);
-	        	GeoPoint pt = new GeoPoint(buildingOverlays.getInt(iLat), buildingOverlays.getInt(iLon));
-	        	textLayer.addOverlay(new TextOverlay(pt, name, minZoomLevel));
-	        } while (buildingOverlays.moveToNext());
-	        buildingOverlays.close();
-	        
-	        //add our building obstacles to the text layer
-	        buildingOverlays = buildingAdapter.getBuildingOverlayCursor(true);
-	        iId = buildingOverlays.getColumnIndex("_Id");
-	        while (buildingOverlays.moveToNext()) {
-	        	int buildingId = buildingOverlays.getInt(iId);
-	        	Cursor buildingPoints = buildingAdapter.getBuildingCornersCursor(buildingId);
-	            iLat = buildingPoints.getColumnIndex("Lat");
-	            iLon = buildingPoints.getColumnIndex("Lon");
-	        	List<GeoPoint> pts = new ArrayList<GeoPoint>(buildingPoints.getCount());
-	        	while (buildingPoints.moveToNext()) {
-	        		int lat = buildingPoints.getInt(iLat);
-	        		int lon = buildingPoints.getInt(iLon);
-	        		pts.add(new GeoPoint(lat, lon));
-	        	}
-	        	buildingPoints.close();
-	        	BoundingMapArea boundingMapArea = new BoundingMapArea(pts);
-	        	textLayer.addObstacle(boundingMapArea);
-	        }
-	        buildingOverlays.close();
-	        
-	        buildingAdapter.close();
 		}
 		
 		private void buildLayers() {
@@ -509,8 +468,8 @@ public class CampusMapActivity extends MapActivity {
 		}
 		
 		private void setSelectedId(long id) {
-			if (!CampusMapActivity.this.buildingLayer.setSelectedBuilding(id, false)) {
-				CampusMapActivity.this.poiLayer.setFocus(id);
+			if (!CampusMapActivity.this.buildingLayer.focus(id, false)) {
+				CampusMapActivity.this.poiLayer.focus(id);
 			}
 		}
 		

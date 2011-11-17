@@ -33,20 +33,7 @@ public class BuildingOverlayLayer extends Overlay implements ManageableOverlay {
 	private BalloonOverlayView balloon;
 	
 	private OverlayManagerControl manager;
-	
-	/**
-	 * Create a new BuildingOverlayLayer
-	 * 
-	 * @param mapView The MapView that will contain this overlay
-	 */
-	public BuildingOverlayLayer(MapView mapView) {
-		this.mapView = mapView;
-		
-		if (overlays == null) {
-			throw new RuntimeException("Attempted to use overlay layer without an initialized cache");
-		}
-	}
-	
+
 	/**
 	 * Initialize data that needs to be loaded by the database.
 	 * 
@@ -75,6 +62,19 @@ public class BuildingOverlayLayer extends Overlay implements ManageableOverlay {
 	    	}
 	    	
 	    	locationAdapter.close();
+		}
+	}
+	
+	/**
+	 * Create a new BuildingOverlayLayer
+	 * 
+	 * @param mapView The MapView that will contain this overlay
+	 */
+	public BuildingOverlayLayer(MapView mapView) {
+		this.mapView = mapView;
+		
+		if (overlays == null) {
+			throw new RuntimeException("Attempted to use overlay layer without an initialized cache");
 		}
 	}
 	
@@ -131,7 +131,7 @@ public class BuildingOverlayLayer extends Overlay implements ManageableOverlay {
 	 * 
 	 * @return True if the building was found and selected
 	 */
-	public boolean setSelectedBuilding(long id, boolean animate) {
+	public boolean focus(long id, boolean animate) {
 		if (id < 0) {
 			setSelected(null);
 			return true;
