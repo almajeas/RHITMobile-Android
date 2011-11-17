@@ -32,14 +32,15 @@ public class ViewController {
 	 * @param pt The location on the screen center should be located
 	 * @param spanLat How much latitude should be visible on the screen
 	 * @param spanLon How much longitude should be visible on the screen
+	 * @param animate True if the point should be animated to
 	 */
-	public void animateTo(GeoPoint center, Point pt, int spanLat, int spanLon) {
+	public void animateTo(GeoPoint center, Point pt, int spanLat, int spanLon, boolean animate) {
 		final int level = mapView.getZoomLevel();
 		controller.zoomToSpan(spanLat, spanLon);
 		final int newLevel = mapView.getZoomLevel();
 		controller.setZoom(level);
 		
-		animateTo(center, pt, newLevel);
+		animateTo(center, pt, newLevel, animate);
 	}
 	
 	/**
@@ -48,13 +49,17 @@ public class ViewController {
 	 * @param center The GeoPoint that we want to 'center'
 	 * @param pt The location on the screen center should be located
 	 * @param zoomLevel The zoom level to approach
+	 * @param animate True if the point should be animated to
 	 */
-	public void animateTo(GeoPoint center, Point pt, final int zoomLevel) {
+	public void animateTo(GeoPoint center, Point pt, final int zoomLevel, boolean animate) {
+		
+		if (!animate) {
+			controller.setZoom(zoomLevel);
+		}
+		
 		Projection projection = mapView.getProjection();
 		int centerX = mapView.getWidth() / 2;
 		int centerY = mapView.getHeight() / 2;
-
-		//@assert projection.toPixels(center, null).equals(pt);
 		
 		GeoPoint currentCenter = projection.fromPixels(centerX, centerY);
 		GeoPoint destCenter = projection.fromPixels(pt.x, pt.y);
@@ -66,16 +71,22 @@ public class ViewController {
 		final int currentZoomLevel = mapView.getZoomLevel();
 		final Point p = pt;
 		
-		controller.animateTo(destPoint, new Runnable() {
-			@Override
-			public void run() {
-				if (currentZoomLevel < zoomLevel - 1) {
-					controller.zoomInFixing(p.x, p.y);
-				} else if (currentZoomLevel > zoomLevel) {
-					controller.zoomOutFixing(p.x, p.y);
+		if (animate) {
+			controller.animateTo(destPoint, new Runnable() {
+				@Override
+				public void run() {
+					if (currentZoomLevel < zoomLevel - 1) {
+						controller.zoomInFixing(p.x, p.y);
+					} else if (currentZoomLevel > zoomLevel) {
+						controller.zoomOutFixing(p.x, p.y);
+					}
 				}
-			}
-		});
+			});	
+		} else {
+			controller.setCenter(destPoint);
+		}
+		
+		
 	}
 	
 	/**

@@ -1,7 +1,7 @@
 package edu.rosehulman.android.directory.maps;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -16,6 +16,8 @@ import com.readystatesoftware.mapviewballoons.BalloonOverlayView;
 import com.readystatesoftware.mapviewballoons.BalloonOverlayView.OnTapListener;
 
 import edu.rosehulman.android.directory.LocationActivity;
+import edu.rosehulman.android.directory.db.DbIterator;
+import edu.rosehulman.android.directory.db.LocationAdapter;
 import edu.rosehulman.android.directory.model.Location;
 import edu.rosehulman.android.directory.util.BoundingBox;
 
@@ -24,7 +26,7 @@ import edu.rosehulman.android.directory.util.BoundingBox;
  */
 public class BuildingOverlayLayer extends Overlay implements ManageableOverlay {
 	
-	private List<BuildingOverlay> overlays;
+	private static Map<Long, BuildingOverlay> overlays;
 	private Point pt;
 	private BuildingOverlay selected;
 	private MapView mapView;
@@ -38,18 +40,42 @@ public class BuildingOverlayLayer extends Overlay implements ManageableOverlay {
 	 * @param mapView The MapView that will contain this overlay
 	 */
 	public BuildingOverlayLayer(MapView mapView) {
-		overlays = new ArrayList<BuildingOverlay>();
 		this.mapView = mapView;
+		
+		if (overlays == null) {
+			throw new RuntimeException("Attempted to use overlay layer without an initialized cache");
+		}
 	}
 	
 	/**
-	 * Add a new location to the overlay
+	 * Initialize data that needs to be loaded by the database.
 	 * 
-	 * @param area The Location to add
+	 * This method must be called before attempting to create an instance
+	 * of \ref BuildingOverlayLayer
 	 */
-	public void addMapArea(Location area) {
-		BuildingOverlay overlay = new BuildingOverlay(area);
-		overlays.add(overlay);
+	public static void initializeCache() {
+		if (overlays != null)
+			return;
+		
+		synchronized (BuildingOverlayLayer.class) {
+			if (overlays != null)
+				return;
+
+			overlays = new HashMap<Long, BuildingOverlay>();
+			
+	    	LocationAdapter locationAdapter = new LocationAdapter();
+	    	locationAdapter.open();
+	    	
+	    	DbIterator<Location> iterator = locationAdapter.getBuildingIterator();
+	    	while (iterator.hasNext()) {
+	    		Location location = iterator.getNext();
+	    		locationAdapter.loadMapArea(location, true);
+	    		BuildingOverlay overlay = new BuildingOverlay(location);
+	    		overlays.put(location.id, overlay);
+	    	}
+	    	
+	    	locationAdapter.close();
+		}
 	}
 	
 	@Override
@@ -57,11 +83,11 @@ public class BuildingOverlayLayer extends Overlay implements ManageableOverlay {
 		pt = mapView.getProjection().toPixels(p, pt);
 		
 		Point snapPoint = new Point();
-		for (BuildingOverlay building : overlays) {
+		for (BuildingOverlay building : overlays.values()) {
 			if (building.onSnapToItem(pt.x, pt.y, snapPoint, mapView)) {
 				GeoPoint dest = mapView.getProjection().fromPixels(snapPoint.x, snapPoint.y);
 				setSelected(building);
-				moveToSelected(dest);
+				moveToSelected(dest, true);
 				return true;
 			}
 		}
@@ -101,23 +127,24 @@ public class BuildingOverlayLayer extends Overlay implements ManageableOverlay {
 	 * Also animates to the selected building
 	 * 
 	 * @param id The ID of the building to select, or -1 to clear the selection
-	 * @return True if the ID was found; false otherwise
+	 * @param animate True if the building should be animated to
+	 * 
+	 * @return True if the building was found and selected
 	 */
-	public boolean setSelectedBuilding(long id) {
+	public boolean setSelectedBuilding(long id, boolean animate) {
 		if (id < 0) {
 			setSelected(null);
 			return true;
 		}
 		
-		for (BuildingOverlay building : overlays) {
-			if (building.getID() == id) {
-				setSelected(building);
-				moveToSelected(building.getLocation().center.asGeoPoint());
-				return true;
-			}
+		BuildingOverlay building = overlays.get(id);
+		if (building == null) {
+			return false;
 		}
 		
-		return false;
+		setSelected(building);
+		moveToSelected(building.getLocation().center.asGeoPoint(), animate);
+		return true;
 	}
 	
 	private void setSelected(BuildingOverlay overlay) {
@@ -158,13 +185,13 @@ public class BuildingOverlayLayer extends Overlay implements ManageableOverlay {
 		
 	}
 	
-	private void moveToSelected(GeoPoint dest) {
+	private void moveToSelected(GeoPoint dest, boolean animate) {
 		BoundingBox bounds = selected.getBounds();
 		int spanLat = bounds.right - bounds.left;
 		int spanLon = bounds.top - bounds.bottom;
 		ViewController controller = new ViewController(mapView);
 		Point center = new Point(mapView.getWidth() / 2, mapView.getHeight() / 4 * 3);
-		controller.animateTo(dest, center, spanLat, spanLon);
+		controller.animateTo(dest, center, spanLat, spanLon, animate);
 		mapView.invalidate();
 	}
 

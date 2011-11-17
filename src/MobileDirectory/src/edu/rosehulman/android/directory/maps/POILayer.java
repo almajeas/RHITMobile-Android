@@ -111,7 +111,7 @@ public class POILayer extends BalloonItemizedOverlay<OverlayItem> implements Man
 		MapView mapView = getMapView();
 		ViewController controller = new ViewController(mapView);
 		Point pt = new Point(mapView.getWidth() / 2, mapView.getHeight() / 4 * 3);
-		controller.animateTo(center, pt, MIN_ZOOM_LEVEL + 1);
+		controller.animateTo(center, pt, MIN_ZOOM_LEVEL + 1, true);
 	}
 	
 	@Override

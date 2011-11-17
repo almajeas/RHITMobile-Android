@@ -236,6 +236,12 @@ public class CampusMapActivity extends MapActivity {
     	task.execute();
     }
     
+    private void selectLocation(long id, boolean animate) {
+		//FIXME use a more generic method of selecting a building
+    	buildingLayer.setSelectedBuilding(id, animate);
+    	poiLayer.setFocus(id);
+    }
+    
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         //handle item selection
@@ -290,7 +296,7 @@ public class CampusMapActivity extends MapActivity {
     	public boolean onTap(GeoPoint p, MapView mapView) {
     		//tap not handled by any other overlay
     		if (buildingLayer != null) {
-    			buildingLayer.setSelectedBuilding(-1);
+    			buildingLayer.setSelectedBuilding(-1, false);
     		}
     		
     		if (poiLayer != null) {
@@ -334,10 +340,7 @@ public class CampusMapActivity extends MapActivity {
 	    		.setItems(names, new OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						if (!buildingLayer.setSelectedBuilding(ids[which])) {
-							poiLayer.setFocus(ids[which]);	
-						}
-						
+						selectLocation(ids[which], true);
 					}
 				})
 				.create();
@@ -359,20 +362,9 @@ public class CampusMapActivity extends MapActivity {
 		}
 		
 	    private void generateBuildings() {
+	    	BuildingOverlayLayer.initializeCache();
+	    	
 	    	BuildingOverlayLayer buildings = new BuildingOverlayLayer(mapView);
-	    	
-	    	LocationAdapter buildingAdapter = new LocationAdapter();
-	    	buildingAdapter.open();
-	    	
-	    	DbIterator<Location> iterator = buildingAdapter.getBuildingIterator();
-	    	while (iterator.hasNext()) {
-	    		Location area = iterator.getNext();
-	    		buildingAdapter.loadMapArea(area, true);
-	    		buildings.addMapArea(area);
-	    	}
-	    	
-	    	buildingAdapter.close();
-
 	    	this.buildingLayer = buildings;
 	    }
 	    
@@ -517,7 +509,7 @@ public class CampusMapActivity extends MapActivity {
 		}
 		
 		private void setSelectedId(long id) {
-			if (!CampusMapActivity.this.buildingLayer.setSelectedBuilding(id)) {
+			if (!CampusMapActivity.this.buildingLayer.setSelectedBuilding(id, false)) {
 				CampusMapActivity.this.poiLayer.setFocus(id);
 			}
 		}
