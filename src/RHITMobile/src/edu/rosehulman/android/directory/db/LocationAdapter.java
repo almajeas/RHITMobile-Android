@@ -23,6 +23,7 @@ public class LocationAdapter extends TableAdapter {
 	public static final String KEY_CENTER_LAT = "CenterLat";
 	public static final String KEY_CENTER_LON = "CenterLon";
 	public static final String KEY_TYPE = "Type";
+	public static final String KEY_CHILDREN_LOADED = "ChildrenLoaded";
 	
 	private MapAreaDataAdapter areasAdapter;
 	private AlternateNamesAdapter namesAdapter;
@@ -200,12 +201,18 @@ public class LocationAdapter extends TableAdapter {
 		//add each building to the database
 		for (Location location : locations) {
 			addLocation(location);
+			setChildrenLoaded(location.id, false);
 		}
 		
 		db.setTransactionSuccessful();
 		db.endTransaction();
 	}
 	
+	/**
+	 * Adds a location to the database
+	 * 
+	 * @param location The location to add
+	 */
 	public void addLocation(Location location) {
 		ContentValues values = new ContentValues();
 		values.put(KEY_ID, location.id);
@@ -236,6 +243,41 @@ public class LocationAdapter extends TableAdapter {
 		for (Hyperlink link : location.links){
 			linksAdapter.addHyperlink(location.id, link);
 		}
+	}
+	
+	/**
+	 * Marks the given location's children as loaded or not
+	 * 
+	 * @param id The id of the location to update
+	 * @param loaded The value to use
+	 */
+	public void setChildrenLoaded(long id, boolean loaded) {
+		ContentValues values = new ContentValues();
+		values.put(KEY_CHILDREN_LOADED, loaded);
+		
+		String where = KEY_ID + "=?";
+		String[] args = new String[] {String.valueOf(id)};
+		
+		db.update(TABLE_NAME, values, where, args);
+	}
+	
+	/**
+	 * Gets the IDs of locations that have not yet loaded their children
+	 * 
+	 * @return an array of IDs to load
+	 */
+	public long[] getUnloadedParents() {
+		String[] projection = new String[] {KEY_ID, KEY_NAME};
+		String where = KEY_CHILDREN_LOADED + "=0";
+		Cursor cursor = db.query(TABLE_NAME, projection, where, null, null, null, null);
+		
+		long[] res = new long[cursor.getCount()];
+		for (int i = 0; cursor.moveToNext(); i++) {
+			res[i] = cursor.getLong(0);
+		}
+		
+		cursor.close();
+		return res;
 	}
 	
 	private long getNullableId(Cursor cursor, int columnIndex) {

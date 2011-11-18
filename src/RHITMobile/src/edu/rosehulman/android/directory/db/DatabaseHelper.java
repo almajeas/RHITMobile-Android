@@ -43,7 +43,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		return instance;
 	}
 
-	private static final int DATABASE_VERSION = 12;
+	private static final int DATABASE_VERSION = 15;
 
 	private static final String TABLE_LOCATIONS = "Locations";
 	private static final String CREATE_TABLE_LOCATIONS =
@@ -56,6 +56,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 				", CenterLat INTEGER NOT NULL" + 
 				", CenterLon INTEGER NOT NULL" +
 				", Type INTEGER NOT NULL" +
+				", ChildrenLoaded INTEGER" +
 				");";
 	
 	private static final String TABLE_MAP_AREA_DATA = "MapAreaData";

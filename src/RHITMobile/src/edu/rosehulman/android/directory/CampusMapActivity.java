@@ -147,11 +147,9 @@ public class CampusMapActivity extends MapActivity {
     protected void onStart() {
     	super.onStart();
     	
-    	if (textLayer == null) {
-    		LoadOverlays loadOverlays = new LoadOverlays(savedInstanceState == null);
-            taskManager.addTask(loadOverlays);
-            loadOverlays.execute();
-    	}
+		LoadLocations loadLocations = new LoadLocations();
+        taskManager.addTask(loadLocations);
+        loadLocations.execute();
     }
     
     @Override
@@ -359,19 +357,17 @@ public class CampusMapActivity extends MapActivity {
     	
     }
     
-	private class LoadOverlays extends AsyncTask<Void, Void, Void> {
-		
-		private boolean refreshData;
+    private static boolean topLocationsRefreshed = false;
+    private static boolean innerLocationsRefreshed = false;
+	private class LoadLocations extends AsyncTask<Void, Void, Void> {
 		
 	    private POILayer poiLayer;
 	    private BuildingOverlayLayer buildingLayer;
 	    private TextOverlayLayer textLayer;
 	    
 	    private String newVersion;
-	    private long[] ids;
 
-		public LoadOverlays(boolean refreshData) {
-			this.refreshData = refreshData;
+		public LoadLocations() {
 		}
 		
 	    private void generateBuildings() {
@@ -419,7 +415,7 @@ public class CampusMapActivity extends MapActivity {
 				return null;
 			}
 			
-			if (!refreshData) {
+			if (topLocationsRefreshed) {
 				//skip update
 				buildLayers();
 				return null;
@@ -453,10 +449,6 @@ public class CampusMapActivity extends MapActivity {
 			}
 			
 			//remember our top level ids
-			ids = new long[collection.mapAreas.length];
-			for (int i = 0; i < ids.length; i++) {
-				ids[i] = collection.mapAreas[i].id;
-			}
 			newVersion = collection.version;
 
 			//replace the building data with the new data
@@ -499,6 +491,8 @@ public class CampusMapActivity extends MapActivity {
 			//add the overlay to the map;
 			updateOverlays();
 			
+			topLocationsRefreshed = true;
+			
 			Intent intent = getIntent();
 			
 	    	if (savedInstanceState != null) {
@@ -507,14 +501,14 @@ public class CampusMapActivity extends MapActivity {
 	    		long id = intent.getLongExtra(EXTRA_BUILDING_ID, -1);
 	    		focusLocation(id, false);
 	    	}
-			
-	    	if (newVersion == null) {
-	    		setProgressBarIndeterminateVisibility(false);
-	    		setProgressBarVisibility(false);
-	    	} else {
-	    		LoadInnerLocations task = new LoadInnerLocations(newVersion, ids);
+
+			setProgressBarIndeterminateVisibility(false);
+			if (!innerLocationsRefreshed) {
+	    		LoadInnerLocations task = new LoadInnerLocations(newVersion);
 	    		taskManager.addTask(task);
 	    		task.execute();
+	    	} else {
+	    		setProgressBarVisibility(false);
 	    	}
 		}
 		
@@ -534,16 +528,7 @@ public class CampusMapActivity extends MapActivity {
 		private List<Long> ids;
 		private String newVersion;
 		
-		public LoadInnerLocations(String version, long[] ids) {
-			this.ids = new ArrayList<Long>();
-			topIds = new HashSet<Long>();
-			for (long id : ids) {
-				this.ids.add(id);
-				topIds.add(id);
-			}
-			totalItems = ids.length;
-			setProgressBarIndeterminateVisibility(false);
-			setProgress(0);
+		public LoadInnerLocations(String version) {
 			newVersion = version;
 		}
 		
@@ -570,6 +555,11 @@ public class CampusMapActivity extends MapActivity {
 				return ids.remove(ids.size() - 1);
 			}
 		}
+		
+		@Override
+		protected void onPreExecute() {
+			setProgress(0);
+		}
 
 		@Override
 		protected Void doInBackground(Void... params) {
@@ -577,6 +567,22 @@ public class CampusMapActivity extends MapActivity {
 			MobileDirectoryService service = new MobileDirectoryService();
 	        LocationAdapter buildingAdapter = new LocationAdapter();
 	        buildingAdapter.open();
+	        
+	        //Get the ids to load
+	        this.ids = new ArrayList<Long>();
+			topIds = new HashSet<Long>();
+	        long[] ids = buildingAdapter.getUnloadedParents();
+	        for (long id : ids) {
+	        	this.ids.add(id);
+	        	this.topIds.add(id);
+	        }
+			totalItems = ids.length;
+			publishProgress(0);
+			
+			if (ids.length == 0) {
+				return null;
+			}
+	        
 	        int processed = 0;
 			
 	        try {
@@ -590,8 +596,8 @@ public class CampusMapActivity extends MapActivity {
 			        	collection = service.getLocationData(id, null);
 					} catch (Exception e) {
 						Log.e(C.TAG, "Failed to download locations within a parent", e);
-						synchronized(ids) {
-							ids.add(0, id);
+						synchronized(this.ids) {
+							this.ids.add(0, id);
 							totalItems++;
 						}
 						continue;
@@ -604,6 +610,9 @@ public class CampusMapActivity extends MapActivity {
 			        	
 			        	buildingAdapter.addLocation(location);
 			        }
+			        newVersion = collection.version;
+			        buildingAdapter.setChildrenLoaded(id, true);
+			        
 					buildingAdapter.commitTransaction();
 		        	buildingAdapter.finishTransaction();
 			        
@@ -626,13 +635,18 @@ public class CampusMapActivity extends MapActivity {
 		
 		@Override
 		protected void onProgressUpdate(Integer... values) {
-			int progress = values[0] * 10000 / totalItems;
-			setProgress(progress);
+			if (totalItems == 0) {
+				setProgress(0);
+			} else {
+				int progress = values[0] * 10000 / totalItems;
+				setProgress(progress);
+			}
 		}
 		
 		@Override
 		protected void onPostExecute(Void res) {
 			setProgressBarVisibility(false);
+			innerLocationsRefreshed = true;
 		}
 		
 		@Override
