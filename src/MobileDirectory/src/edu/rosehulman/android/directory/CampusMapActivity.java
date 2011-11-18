@@ -584,6 +584,7 @@ public class CampusMapActivity extends MapActivity {
 						Log.e(C.TAG, "Failed to download locations within a parent", e);
 						synchronized(ids) {
 							ids.add(0, id);
+							totalItems++;
 						}
 						continue;
 					}
