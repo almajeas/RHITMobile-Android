@@ -63,6 +63,18 @@ public abstract class TableAdapter {
 		deref(db);
 		db = null;
 	}
+	
+	public void startTransaction() {
+		db.beginTransaction();
+	}
+	
+	public void commitTransaction() {
+		db.setTransactionSuccessful();
+	}
+	
+	public void finishTransaction() {
+		db.endTransaction();
+	}
 
 	/**
 	 * Convert the result of a single cell into a String

@@ -569,6 +569,7 @@ public class CampusMapActivity extends MapActivity {
 			MobileDirectoryService service = new MobileDirectoryService();
 	        LocationAdapter buildingAdapter = new LocationAdapter();
 	        buildingAdapter.open();
+	        buildingAdapter.startTransaction();
 	        int processed = 0;
 			
 	        try {
@@ -587,7 +588,6 @@ public class CampusMapActivity extends MapActivity {
 						}
 						continue;
 					}
-			        Log.d(C.TAG, "Adding sublocation set: " + processed);
 			        
 			        for (Location location : collection.mapAreas) {
 			        	if (topIds.contains(location.id))
@@ -598,9 +598,12 @@ public class CampusMapActivity extends MapActivity {
 			        
 			        processed++;
 			        publishProgress(processed);
-		        } 
+		        }
+				
+				buildingAdapter.commitTransaction();
 				
 	        } finally {
+	        	buildingAdapter.finishTransaction();
 		        buildingAdapter.close();
 	        }
 			
