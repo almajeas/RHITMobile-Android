@@ -1,5 +1,6 @@
 package edu.rosehulman.android.directory;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
@@ -81,6 +82,7 @@ public class CampusMapActivity extends MapActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+		requestWindowFeature(Window.FEATURE_PROGRESS);
         setContentView(R.layout.main);
         
         taskManager = new TaskManager();
@@ -353,6 +355,9 @@ public class CampusMapActivity extends MapActivity {
 	    private POILayer poiLayer;
 	    private BuildingOverlayLayer buildingLayer;
 	    private TextOverlayLayer textLayer;
+	    
+	    private String newVersion;
+	    private long[] ids;
 
 		public LoadOverlays(boolean refreshData) {
 			this.refreshData = refreshData;
@@ -416,7 +421,7 @@ public class CampusMapActivity extends MapActivity {
 			
 	        LocationCollection collection = null;
 	        try {
-	        	collection = service.getAllLocationData(version);
+	        	collection = service.getTopLocationData(version);
 			} catch (Exception e) {
 				Log.e(C.TAG, "Failed to download new map areas", e);
 				//just use our old data, it is likely up to date
@@ -432,11 +437,18 @@ public class CampusMapActivity extends MapActivity {
 				buildLayers();
 				return null;
 			}
+			
+			//remember our top level ids
+			ids = new long[collection.mapAreas.length];
+			for (int i = 0; i < ids.length; i++) {
+				ids[i] = collection.mapAreas[i].id;
+			}
+			newVersion = collection.version;
 
 			//replace the building data with the new data
 	        LocationAdapter buildingAdapter = new LocationAdapter();
 	        buildingAdapter.open();
-	        buildingAdapter.replaceBuildings(collection.mapAreas);
+	        buildingAdapter.replaceLocations(collection.mapAreas);
 	        buildingAdapter.close();
 	        
 	        versionsAdapter.open();
@@ -453,6 +465,7 @@ public class CampusMapActivity extends MapActivity {
 		@Override
 		protected void onPreExecute() {
 			CampusMapActivity.this.setProgressBarIndeterminateVisibility(true);
+			CampusMapActivity.this.setProgressBarVisibility(true);
 		}
 		
 		private void updateOverlays() {
@@ -487,12 +500,122 @@ public class CampusMapActivity extends MapActivity {
 	    		setSelectedId(id);
 	    	}
 			
-	        CampusMapActivity.this.setProgressBarIndeterminateVisibility(false);
+	    	if (newVersion == null) {
+	    		setProgressBarIndeterminateVisibility(false);
+	    		setProgressBarVisibility(false);
+	    	} else {
+	    		LoadInnerLocations task = new LoadInnerLocations(newVersion, ids);
+	    		taskManager.addTask(task);
+	    		task.execute();
+	    	}
 		}
 		
 		@Override
 		protected void onCancelled() {
-			CampusMapActivity.this.setProgressBarIndeterminateVisibility(false);
+    		setProgressBarIndeterminateVisibility(false);
+    		setProgressBarVisibility(false);
+		}
+		
+	}
+	
+	private class LoadInnerLocations extends AsyncTask<Void, Integer, Void> {
+		
+		private int totalItems;
+		private List<Long> ids;
+		private String newVersion;
+		
+		public LoadInnerLocations(String version, long[] ids) {
+			this.ids = new ArrayList<Long>();
+			for (long id : ids) {
+				this.ids.add(id);
+			}
+			totalItems = ids.length;
+			setProgressBarIndeterminateVisibility(false);
+			setProgress(0);
+			newVersion = version;
+		}
+		
+		public void requestLocation(long id) {
+			synchronized (ids) {
+				if (ids.remove(id)) {
+					ids.add(id);
+				}
+			}
+		}
+		
+		public boolean hasLocation(long id) {
+			synchronized (ids) {
+				return !ids.contains(id);
+			}
+		}
+		
+		private long getNextId() {
+			synchronized(ids) {
+				if (ids.isEmpty())
+					return -1;
+				return ids.remove(ids.size() - 1);
+			}
+		}
+
+		@Override
+		protected Void doInBackground(Void... params) {
+	        
+			MobileDirectoryService service = new MobileDirectoryService();
+	        LocationAdapter buildingAdapter = new LocationAdapter();
+	        buildingAdapter.open();
+	        int processed = 0;
+			
+	        try {
+				for (long id = getNextId(); id >= 0; id = getNextId()) {
+					if (isCancelled()) {
+						return null;
+					}
+					
+					LocationCollection collection = null;
+			        try {
+			        	collection = service.getLocationData(id, null);
+					} catch (Exception e) {
+						Log.e(C.TAG, "Failed to download locations within a parent", e);
+						synchronized(ids) {
+							ids.add(0, id);
+						}
+						continue;
+					}
+			        Log.d(C.TAG, "Adding sublocation set: " + processed);
+			        
+			        buildingAdapter.addLocations(collection.mapAreas);
+			        
+			        processed++;
+			        publishProgress(processed);
+		        } 
+				
+	        } finally {
+		        buildingAdapter.close();
+	        }
+			
+			//mark our data set as up to date
+			VersionsAdapter versionsAdapter = new VersionsAdapter();
+	        versionsAdapter.open();
+	        versionsAdapter.setVersion(VersionType.MAP_AREAS, newVersion);
+	        versionsAdapter.close();
+			
+			return null;
+		}
+		
+		@Override
+		protected void onProgressUpdate(Integer... values) {
+			int progress = values[0] * 10000 / totalItems;
+			setProgress(progress);
+		}
+		
+		@Override
+		protected void onPostExecute(Void res) {
+			setProgressBarVisibility(false);
+		}
+		
+		@Override
+		protected void onCancelled() {
+			setProgressBarVisibility(false);
 		}
 		
 	}

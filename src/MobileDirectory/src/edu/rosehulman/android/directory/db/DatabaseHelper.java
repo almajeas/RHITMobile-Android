@@ -43,7 +43,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		return instance;
 	}
 
-	private static final int DATABASE_VERSION = 10;
+	private static final int DATABASE_VERSION = 12;
 
 	private static final String TABLE_LOCATIONS = "Locations";
 	private static final String CREATE_TABLE_LOCATIONS =

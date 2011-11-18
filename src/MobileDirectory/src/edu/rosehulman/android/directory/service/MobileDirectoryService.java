@@ -27,39 +27,24 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 		MobileDirectoryService.factory = factory;
 	}
 	
-	/*private static void verifyThread() {
-		StackTraceElement stack[] = Thread.currentThread().getStackTrace();
-		for (StackTraceElement frame : stack) {
-			//TODO determine proper method name/condition
-			//TODO use frame.isNative() (true)
-			if ("dalvik.system.NativeStart.main".equals(frame.getMethodName())) {
-				throw new RuntimeException("Web access on UI thread");
-			}
-		}
-	}*/
-	
-	/*	 NativeStart.main(String[]) line: not available [native method]
-	 */
-	
 	@Override
 	public LocationCollection getAllLocationData(String currentVersion) throws Exception {
-		JsonClient client = factory.makeJsonClient(HOST, PORT, "locations/data/all");
-		if (currentVersion != null) {
-			client.addParameter("version", currentVersion);
-		}
-		
-		JSONObject root = client.execute();
-		if (root == null) {
-			return null;
-		}
-		
-		return LocationCollection.deserialize(root);
+		return getLocationCollection("locations/data/all", currentVersion);
 	}
 	
 	@Override
-	@Deprecated
-	public LocationCollection getMapAreas(String currentVersion) throws Exception {
-		JsonClient client = factory.makeJsonClient(HOST, PORT, "mapareas");
+	public LocationCollection getTopLocationData(String currentVersion) throws Exception {
+		return getLocationCollection("locations/data/top", currentVersion);
+	}
+	
+	@Override
+	public LocationCollection getLocationData(long parent, String currentVersion) throws Exception {
+		String url = String.format("locations/data/within/%d", parent);
+		return getLocationCollection(url, currentVersion);
+	}
+
+	private LocationCollection getLocationCollection(String url, String currentVersion) throws Exception {
+		JsonClient client = factory.makeJsonClient(HOST, PORT, url);
 		if (currentVersion != null) {
 			client.addParameter("version", currentVersion);
 		}
@@ -71,5 +56,4 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 		
 		return LocationCollection.deserialize(root);
 	}
-
 }

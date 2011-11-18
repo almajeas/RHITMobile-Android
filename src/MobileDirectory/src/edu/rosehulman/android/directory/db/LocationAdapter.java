@@ -186,9 +186,9 @@ public class LocationAdapter extends TableAdapter {
 	/**
 	 * Remove all Locations from the database and replace them with the supplied data
 	 * 
-	 * @param newData the locations to add to the database
+	 * @param locations the locations to add to the database
 	 */
-	public void replaceBuildings(Location[] newData) {
+	public void replaceLocations(Location[] locations) {
 		db.beginTransaction();
 		
 		//delete all records
@@ -198,7 +198,14 @@ public class LocationAdapter extends TableAdapter {
 		areasAdapter.clear();
 		
 		//add each building to the database
-		for (Location location : newData) {
+		addLocations(locations);
+		
+		db.setTransactionSuccessful();
+		db.endTransaction();
+	}
+	
+	public void addLocations(Location[] locations) {
+		for (Location location : locations) {
 			
 			ContentValues values = new ContentValues();
 			values.put(KEY_ID, location.id);
@@ -230,9 +237,6 @@ public class LocationAdapter extends TableAdapter {
 				linksAdapter.addHyperlink(location.id, link);
 			}
 		}
-		
-		db.setTransactionSuccessful();
-		db.endTransaction();
 	}
 	
 	private long getNullableId(Cursor cursor, int columnIndex) {
