@@ -576,7 +576,6 @@ public class CampusMapActivity extends MapActivity {
 					if (isCancelled()) {
 						return null;
 					}
-					long start = System.currentTimeMillis();
 					
 					LocationCollection collection = null;
 			        try {
@@ -588,9 +587,6 @@ public class CampusMapActivity extends MapActivity {
 						}
 						continue;
 					}
-			        Log.d(C.TAG, "Adding sublocation set: " + processed);
-			        
-			        long response = System.currentTimeMillis();
 
 			        buildingAdapter.startTransaction();
 			        for (Location location : collection.mapAreas) {
@@ -601,11 +597,6 @@ public class CampusMapActivity extends MapActivity {
 			        }
 					buildingAdapter.commitTransaction();
 		        	buildingAdapter.finishTransaction();
-			        
-			        long dbwork = System.currentTimeMillis();
-			        
-			        Log.d(C.TAG, "Server request time: " + (response - start)/1000.0);
-			        Log.d(C.TAG, "Database time: " + (dbwork - response)/1000.0);
 			        
 			        processed++;
 			        publishProgress(processed);
