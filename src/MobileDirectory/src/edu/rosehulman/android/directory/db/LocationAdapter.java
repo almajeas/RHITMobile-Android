@@ -198,44 +198,43 @@ public class LocationAdapter extends TableAdapter {
 		areasAdapter.clear();
 		
 		//add each building to the database
-		addLocations(locations);
+		for (Location location : locations) {
+			addLocation(location);
+		}
 		
 		db.setTransactionSuccessful();
 		db.endTransaction();
 	}
 	
-	public void addLocations(Location[] locations) {
-		for (Location location : locations) {
-			
-			ContentValues values = new ContentValues();
-			values.put(KEY_ID, location.id);
-			
-			//add the corresponding map area first
-			if (location.mapData != null) {
-				long mapAreaId = areasAdapter.add(location.mapData);
-				values.put(KEY_MAP_AREA_ID, mapAreaId);
-			}
-			
-			if (location.parentId >= 0)
-				values.put(KEY_PARENT_ID, location.parentId);
-			values.put(KEY_NAME, location.name);
-			if (location.description != null)
-				values.put(KEY_DESCRIPTION, location.description);
-			values.put(KEY_CENTER_LAT, location.center.lat);
-			values.put(KEY_CENTER_LON, location.center.lon);
-			values.put(KEY_TYPE, location.type.ordinal());
-			
-			db.insert(TABLE_NAME, null, values);
+	public void addLocation(Location location) {
+		ContentValues values = new ContentValues();
+		values.put(KEY_ID, location.id);
+		
+		//add the corresponding map area first
+		if (location.mapData != null) {
+			long mapAreaId = areasAdapter.add(location.mapData);
+			values.put(KEY_MAP_AREA_ID, mapAreaId);
+		}
+		
+		if (location.parentId >= 0)
+			values.put(KEY_PARENT_ID, location.parentId);
+		values.put(KEY_NAME, location.name);
+		if (location.description != null)
+			values.put(KEY_DESCRIPTION, location.description);
+		values.put(KEY_CENTER_LAT, location.center.lat);
+		values.put(KEY_CENTER_LON, location.center.lon);
+		values.put(KEY_TYPE, location.type.ordinal());
+		
+		db.insert(TABLE_NAME, null, values);
 
-			//add any alternate names
-			for (String name : location.altNames){
-				namesAdapter.addName(location.id, name);
-			}
-			
-			//add any hyperlinks
-			for (Hyperlink link : location.links){
-				linksAdapter.addHyperlink(location.id, link);
-			}
+		//add any alternate names
+		for (String name : location.altNames){
+			namesAdapter.addName(location.id, name);
+		}
+		
+		//add any hyperlinks
+		for (Hyperlink link : location.links){
+			linksAdapter.addHyperlink(location.id, link);
 		}
 	}
 	

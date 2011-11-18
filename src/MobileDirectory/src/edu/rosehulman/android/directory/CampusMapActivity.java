@@ -1,7 +1,9 @@
 package edu.rosehulman.android.directory;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -520,14 +522,18 @@ public class CampusMapActivity extends MapActivity {
 	
 	private class LoadInnerLocations extends AsyncTask<Void, Integer, Void> {
 		
+		private Set<Long> topIds;
+		
 		private int totalItems;
 		private List<Long> ids;
 		private String newVersion;
 		
 		public LoadInnerLocations(String version, long[] ids) {
 			this.ids = new ArrayList<Long>();
+			topIds = new HashSet<Long>();
 			for (long id : ids) {
 				this.ids.add(id);
+				topIds.add(id);
 			}
 			totalItems = ids.length;
 			setProgressBarIndeterminateVisibility(false);
@@ -583,7 +589,12 @@ public class CampusMapActivity extends MapActivity {
 					}
 			        Log.d(C.TAG, "Adding sublocation set: " + processed);
 			        
-			        buildingAdapter.addLocations(collection.mapAreas);
+			        for (Location location : collection.mapAreas) {
+			        	if (topIds.contains(location.id))
+			        		continue;
+			        	
+			        	buildingAdapter.addLocation(location);
+			        }
 			        
 			        processed++;
 			        publishProgress(processed);
