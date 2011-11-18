@@ -2,7 +2,6 @@ package edu.rosehulman.android.directory;
 
 import android.app.Application;
 import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import edu.rosehulman.android.directory.db.DatabaseHelper;
 import edu.rosehulman.android.directory.service.MobileDirectoryService;
