@@ -39,6 +39,7 @@ public class POILayer extends BalloonItemizedOverlay<OverlayItem> implements Man
 	
 	private Map<Long, PointOfInterest> poiMap;
 	private List<PointOfInterest> pois;
+	private boolean animate = true;
 
 	/**
 	 * Create a new POILayer
@@ -71,15 +72,31 @@ public class POILayer extends BalloonItemizedOverlay<OverlayItem> implements Man
 	 * @param id The ID of the POI to focus
 	 * @return True if the POI was found; false otherwise
 	 */
-	public boolean focus(long id) {
+	public boolean focus(long id, boolean animate) {
 		PointOfInterest poi = poiMap.get(id);
 		if (poi == null) {
 			this.setFocus(null);
 			return false;
 		}
-		
+		this.animate = animate;
+		this.setLastFocusedIndex(pois.indexOf(poi));
 		this.onTap(pois.indexOf(poi));
+		this.animate = true;
+		
 		return true;
+	}
+	
+	/**
+	 * Determines the id of the focused poi
+	 * 
+	 * @return the id of the focused poi, or -1 if none
+	 */
+	public long getFocusId() {
+		int index = getLastFocusedIndex();
+		if (index == -1)
+			return -1;
+		
+		return pois.get(index).location.id;
 	}
 
 	@Override
@@ -116,7 +133,7 @@ public class POILayer extends BalloonItemizedOverlay<OverlayItem> implements Man
 		MapView mapView = getMapView();
 		ViewController controller = new ViewController(mapView);
 		Point pt = new Point(mapView.getWidth() / 2, mapView.getHeight() / 4 * 3);
-		controller.animateTo(center, pt, MIN_ZOOM_LEVEL + 1, true);
+		controller.animateTo(center, pt, MIN_ZOOM_LEVEL + 1, animate);
 	}
 	
 	@Override

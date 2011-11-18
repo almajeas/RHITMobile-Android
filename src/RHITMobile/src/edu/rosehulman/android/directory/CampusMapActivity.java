@@ -48,7 +48,7 @@ import edu.rosehulman.android.directory.service.MobileDirectoryService;
  */
 public class CampusMapActivity extends MapActivity {
 	
-    private static final String BUILDING_SELECTED_ID = "BuildingSelectedId";
+    private static final String SELECTED_ID = "SelectedId";
 
     public static final String EXTRA_IS_INTERNAL = "IS_INTERNAL";
 	public static final String EXTRA_BUILDING_ID = "BUILDING_ID";
@@ -159,7 +159,7 @@ public class CampusMapActivity extends MapActivity {
     	super.onSaveInstanceState(bundle);
     	//TODO save our state
     	if (buildingLayer != null) {
-    		bundle.putLong(BUILDING_SELECTED_ID, buildingLayer.getSelectedBuilding());
+    		bundle.putLong(SELECTED_ID, getFocusedLocation());
     	}
     }
     
@@ -237,10 +237,19 @@ public class CampusMapActivity extends MapActivity {
     	task.execute();
     }
     
-    private void selectLocation(long id, boolean animate) {
-		//FIXME use a more generic method of selecting a building
-    	buildingLayer.focus(id, animate);
-    	poiLayer.focus(id);
+    private void focusLocation(long id, boolean animate) {
+    	if (!buildingLayer.focus(id, animate)) {
+    		poiLayer.focus(id, animate);
+    	}
+    }
+    
+    private long getFocusedLocation() {
+    	long id = buildingLayer.getSelectedBuilding();
+    	
+    	if (id >= 0)
+    		return id;
+    	
+    	return poiLayer.getFocusId();
     }
     
     @Override
@@ -290,12 +299,6 @@ public class CampusMapActivity extends MapActivity {
     	
     	mapView.invalidate();
     }
-    
-	private void focusItem(long id, boolean animate) {
-		if (!buildingLayer.focus(id, animate)) {
-			poiLayer.focus(id);
-		}
-	}
     
     private class EventOverlay extends Overlay {
     	
@@ -347,7 +350,7 @@ public class CampusMapActivity extends MapActivity {
 	    		.setItems(names, new OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						selectLocation(ids[which], true);
+						focusLocation(ids[which], true);
 					}
 				})
 				.create();
@@ -499,10 +502,10 @@ public class CampusMapActivity extends MapActivity {
 			Intent intent = getIntent();
 			
 	    	if (savedInstanceState != null) {
-	    		focusItem(savedInstanceState.getLong(BUILDING_SELECTED_ID), false);
+	    		focusLocation(savedInstanceState.getLong(SELECTED_ID), false);
 	    	} else if (intent.hasExtra(EXTRA_BUILDING_ID)) {
 	    		long id = intent.getLongExtra(EXTRA_BUILDING_ID, -1);
-	    		focusItem(id, false);
+	    		focusLocation(id, false);
 	    	}
 			
 	    	if (newVersion == null) {
