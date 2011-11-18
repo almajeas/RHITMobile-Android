@@ -412,6 +412,9 @@ public class CampusMapActivity extends MapActivity {
 		
 		@Override
 		protected Void doInBackground(Void... args) {
+			if (isCancelled()) {
+				return null;
+			}
 			
 			if (!refreshData) {
 				//skip update
