@@ -1,7 +1,9 @@
 package edu.rosehulman.android.directory.maps;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -35,7 +37,8 @@ public class POILayer extends BalloonItemizedOverlay<OverlayItem> implements Man
 		}
 	}
 	
-	private List<PointOfInterest> poi;
+	private Map<Long, PointOfInterest> poiMap;
+	private List<PointOfInterest> pois;
 
 	/**
 	 * Create a new POILayer
@@ -45,7 +48,8 @@ public class POILayer extends BalloonItemizedOverlay<OverlayItem> implements Man
 	 */
 	public POILayer(Drawable defaultMarker, MapView mapView) {
 		super(boundCenter(defaultMarker), mapView);
-		poi = new ArrayList<PointOfInterest>();
+		poiMap = new HashMap<Long, PointOfInterest>();
+		pois = new ArrayList<PointOfInterest>();
 	}
 	
 	/**
@@ -55,7 +59,9 @@ public class POILayer extends BalloonItemizedOverlay<OverlayItem> implements Man
 	 */
 	public void add(Location location) {
 		OverlayItem overlay = new OverlayItem(location.center.asGeoPoint(), location.name, location.description);
-		poi.add(new PointOfInterest(location, overlay));
+		PointOfInterest poi = new PointOfInterest(location, overlay);
+		poiMap.put(location.id, poi);
+		pois.add(poi);
 		populate();
 	}
 	
@@ -66,30 +72,29 @@ public class POILayer extends BalloonItemizedOverlay<OverlayItem> implements Man
 	 * @return True if the POI was found; false otherwise
 	 */
 	public boolean focus(long id) {
-		for (int i = 0; i < poi.size(); i++) {
-			PointOfInterest poi = this.poi.get(i);
-			if (poi.location.id == id) {
-				this.onTap(i);
-				return true;
-			}
+		PointOfInterest poi = poiMap.get(id);
+		if (poi == null) {
+			this.setFocus(null);
+			return false;
 		}
 		
-		return false;
+		this.onTap(pois.indexOf(poi));
+		return true;
 	}
 
 	@Override
 	protected OverlayItem createItem(int i) {
-		return poi.get(i).poi;
+		return pois.get(i).poi;
 	}
 
 	@Override
 	public int size() {
-		return poi.size();
+		return pois.size();
 	}
 	
 	@Override
 	protected boolean onBalloonTap(int index, OverlayItem item) {
-		final Location loc = poi.get(index).location;
+		final Location loc = pois.get(index).location;
 		
 		new PopulateLocation(new Runnable() {
 			

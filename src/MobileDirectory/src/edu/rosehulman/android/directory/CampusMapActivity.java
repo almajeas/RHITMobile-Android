@@ -291,6 +291,12 @@ public class CampusMapActivity extends MapActivity {
     	mapView.invalidate();
     }
     
+	private void focusItem(long id, boolean animate) {
+		if (!buildingLayer.focus(id, animate)) {
+			poiLayer.focus(id);
+		}
+	}
+    
     private class EventOverlay extends Overlay {
     	
     	@Override
@@ -482,12 +488,6 @@ public class CampusMapActivity extends MapActivity {
 	    	updateOverlays();
 		}
 		
-		private void setSelectedId(long id) {
-			if (!CampusMapActivity.this.buildingLayer.focus(id, false)) {
-				CampusMapActivity.this.poiLayer.focus(id);
-			}
-		}
-		
 		@Override
 		protected void onPostExecute(Void res) {
 			//add the overlay to the map;
@@ -496,10 +496,10 @@ public class CampusMapActivity extends MapActivity {
 			Intent intent = getIntent();
 			
 	    	if (savedInstanceState != null) {
-	    		setSelectedId(savedInstanceState.getLong(BUILDING_SELECTED_ID));
+	    		focusItem(savedInstanceState.getLong(BUILDING_SELECTED_ID), false);
 	    	} else if (intent.hasExtra(EXTRA_BUILDING_ID)) {
 	    		long id = intent.getLongExtra(EXTRA_BUILDING_ID, -1);
-	    		setSelectedId(id);
+	    		focusItem(id, false);
 	    	}
 			
 	    	if (newVersion == null) {
@@ -541,6 +541,8 @@ public class CampusMapActivity extends MapActivity {
 			newVersion = version;
 		}
 		
+		//TODO use these methods to prioritize which locations we load
+		//TODO do not tie this asynctask to this activity (or restart it later if needed)
 		public void requestLocation(long id) {
 			synchronized (ids) {
 				if (ids.remove(id)) {
