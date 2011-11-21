@@ -379,7 +379,7 @@ public class CampusMapActivity extends MapActivity {
 	    
 	    private void generatePOI() {
 	    	Drawable marker = getResources().getDrawable(R.drawable.map_marker);
-	    	POILayer poi = new POILayer(marker, mapView);
+	    	POILayer poi = new POILayer(marker, mapView, taskManager);
 
 	    	LocationAdapter buildingAdapter = new LocationAdapter();
 	    	buildingAdapter.open();

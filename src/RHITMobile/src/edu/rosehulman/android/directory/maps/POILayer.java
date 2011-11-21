@@ -9,6 +9,9 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapView;
@@ -16,6 +19,8 @@ import com.google.android.maps.OverlayItem;
 import com.readystatesoftware.mapviewballoons.BalloonItemizedOverlay;
 
 import edu.rosehulman.android.directory.LocationActivity;
+import edu.rosehulman.android.directory.TaskManager;
+import edu.rosehulman.android.directory.db.LocationAdapter;
 import edu.rosehulman.android.directory.model.Location;
 
 /**
@@ -37,6 +42,8 @@ public class POILayer extends BalloonItemizedOverlay<OverlayItem> implements Man
 		}
 	}
 	
+	private static Drawable transparent;
+	private TaskManager taskManager;
 	private Map<Long, PointOfInterest> poiMap;
 	private List<PointOfInterest> pois;
 	private boolean animate = true;
@@ -47,10 +54,15 @@ public class POILayer extends BalloonItemizedOverlay<OverlayItem> implements Man
 	 * @param defaultMarker A Drawable to use to render each point of interest
 	 * @param mapView The MapView that this overlay will be rendered on
 	 */
-	public POILayer(Drawable defaultMarker, MapView mapView) {
+	public POILayer(Drawable defaultMarker, MapView mapView, TaskManager taskManager) {
 		super(boundCenter(defaultMarker), mapView);
+		this.taskManager = taskManager;
 		poiMap = new HashMap<Long, PointOfInterest>();
 		pois = new ArrayList<PointOfInterest>();
+		
+		if (transparent == null) {
+			transparent = getMapView().getResources().getDrawable(android.R.color.transparent);
+		}
 	}
 	
 	/**
@@ -70,11 +82,16 @@ public class POILayer extends BalloonItemizedOverlay<OverlayItem> implements Man
 	 * Focus a particular POI
 	 * 
 	 * @param id The ID of the POI to focus
-	 * @return True if the POI was found; false otherwise
+	 * @return True if the POI was found immediately; false otherwise
 	 */
 	public boolean focus(long id, boolean animate) {
 		PointOfInterest poi = poiMap.get(id);
 		if (poi == null) {
+			ShowLocation task = new ShowLocation(animate);
+			taskManager.addTask(task);
+			task.execute(id);
+			
+			//hide what is visible for now
 			this.setFocus(null);
 			return false;
 		}
@@ -145,6 +162,46 @@ public class POILayer extends BalloonItemizedOverlay<OverlayItem> implements Man
 	}
 
 	@Override
+	public boolean onTouchEvent(MotionEvent event, MapView mapView) {
+		if (mapView.getZoomLevel() < MIN_ZOOM_LEVEL)
+			return false;
+		
+		return super.onTouchEvent(event, mapView);
+	}
+
+	@Override
+	public boolean onTrackballEvent(MotionEvent event, MapView mapView) {
+		if (mapView.getZoomLevel() < MIN_ZOOM_LEVEL)
+			return false;
+		
+		return super.onTrackballEvent(event, mapView);
+	}
+	
+	@Override
+	public boolean onTap(GeoPoint p, MapView mapView) {
+		if (mapView.getZoomLevel() < MIN_ZOOM_LEVEL)
+			return false;
+		
+		return super.onTap(p, mapView);
+	}
+
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event, MapView mapView) {
+		if (mapView.getZoomLevel() < MIN_ZOOM_LEVEL)
+			return false;
+
+		return super.onKeyDown(keyCode, event, mapView);
+	}
+	
+	@Override
+	public boolean onKeyUp(int keyCode, KeyEvent event, MapView mapView) {
+		if (mapView.getZoomLevel() < MIN_ZOOM_LEVEL)
+			return false;
+		
+		return super.onKeyUp(keyCode, event, mapView);
+	}
+	
+	@Override
 	public void clearSelection() {
 		this.setFocus(null);
 	}
@@ -152,6 +209,45 @@ public class POILayer extends BalloonItemizedOverlay<OverlayItem> implements Man
 	@Override
 	public void setManager(OverlayManagerControl manager) {
 		this.manager = manager;
+	}
+	
+	private class ShowLocation extends AsyncTask<Long, Void, Location> {
+		
+		private boolean animate;
+		
+		public ShowLocation(boolean animate) {
+			this.animate = animate;
+		}
+
+		@Override
+		protected Location doInBackground(Long... ids) {
+			LocationAdapter locationAdapter = new LocationAdapter();
+			locationAdapter.open();
+			
+			Location loc = locationAdapter.getLocation(ids[0]);
+			
+			locationAdapter.close();
+			
+			return loc;
+		}
+		
+		@Override
+		protected void onPostExecute(Location loc) {
+			//add our overlay
+			OverlayItem overlay = new OverlayItem(loc.center.asGeoPoint(), loc.name, loc.description);
+			overlay.setMarker(transparent);
+			PointOfInterest poi = new PointOfInterest(loc, overlay);
+			poiMap.put(loc.id, poi);
+			pois.add(poi);
+			populate();
+			
+			//and select it
+			POILayer.this.animate = animate;
+			setLastFocusedIndex(pois.indexOf(poi));
+			onTap(pois.indexOf(poi));
+			POILayer.this.animate = true;
+		}
+		
 	}
 
 }
