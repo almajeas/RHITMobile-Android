@@ -1,7 +1,10 @@
 package edu.rosehulman.android.directory.maps;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+
+import com.google.android.maps.Overlay;
 
 /**
  * Manage common attributes and functionality between different overlays
@@ -35,6 +38,23 @@ public class OverlayManager {
 	public void addOverlay(ManageableOverlay overlay) {
 		this.overlays.add(overlay);
 		overlay.setManager(new OverlayController(overlay));
+	}
+	
+	/**
+	 * Prune any overlays that are managed but not in the provided list
+	 * 
+	 * @param overlays The list of current overlays
+	 */
+	public void prune(List<Overlay> overlays) {
+		List<ManageableOverlay> old = new LinkedList<ManageableOverlay>();
+		for (ManageableOverlay overlay : this.overlays) {
+			if (!overlays.contains(overlay)) {
+				overlay.clearSelection();
+				old.add(overlay);
+			}
+		}
+		
+		this.overlays.removeAll(old);		
 	}
 	
 	private void markSelected(ManageableOverlay selected) {

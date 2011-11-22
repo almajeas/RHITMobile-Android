@@ -302,6 +302,9 @@ public class CampusMapActivity extends MapActivity {
     		overlayManager.addOverlay(poiLayer);
     	}
     	
+    	//Remove any old overlays
+    	overlayManager.prune(overlays);
+    	
     	mapView.invalidate();
     }
     
