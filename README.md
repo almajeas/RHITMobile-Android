@@ -8,8 +8,8 @@ Android projects require the [Android SDK](http://developer.android.com/sdk/inde
 
 The source for the android project is split across multiple repositories.  In order to build the project, we need to first retrieve the code from these `submodules`.  From the root directory of the repository, run the following commands to initialize the required submodules:
 
-  $ git submodule init
-  $ git submodule update
+    $ git submodule init
+    $ git submodule update
 
 ## Building the Project
 
@@ -37,24 +37,24 @@ Building from the command requires the Android SDK to be installed, as described
 
 From each project's directory, run the following command to autogenerate a `local.properties` file:
 
-  $ android update project --path .
+    $ android update project --path .
 
 To automatically sign the project, add the following entries to the `local.properties` file for both the `BetaManager` and `RHITMobile` projects:
 
-  key.store=path/to/mobile\_directory.keystore
-  key.alias=mykey
-  key.store.password=password
-  key.alias.password=password
+    key.store=path/to/mobile\_directory.keystore
+    key.alias=mykey
+    key.store.password=password
+    key.alias.password=password
 
 where `password` is set to the password of the private keystore and the proper path to the keystore is used.
 
 To build the RHITMobile project, run the following command from within that project's directory:
 
-  $ ant release
+    $ ant release
 
 To immediately install the built application to a device, the following command can be used instead:
 
-  $ ant release install
+    $ ant release install
 
 The same commands can be used to build and install the `BetaManager` project.
 
