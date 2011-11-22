@@ -192,5 +192,5 @@ public class C {
 	 * Log.d(C.TAG, &quot;Debug Message&quot;);
 	 * </pre>
 	 */
-	public static String TAG = "MobileDirectory";
+	public static String TAG = "RHITMobile";
 }
