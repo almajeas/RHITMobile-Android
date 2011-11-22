@@ -10,8 +10,6 @@ import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -269,19 +267,19 @@ public class StartupActivity extends Activity {
     	}
     }
     
-    private BroadcastReceiver packageReceiver = new BroadcastReceiver() {
-		@Override
-		public void onReceive(Context context, Intent intent) {			
-			switch (currentState) {
-			case INSTALLING_UPDATE1:
-				updateProgress(State.INSTALLING_UPDATE2);
-				installApplication(betaPath);
-				break;
-			default:
-				break;
-			}
-		}
-	};
+//    private BroadcastReceiver packageReceiver = new BroadcastReceiver() {
+//		@Override
+//		public void onReceive(Context context, Intent intent) {			
+//			switch (currentState) {
+//			case INSTALLING_UPDATE1:
+//				updateProgress(State.INSTALLING_UPDATE2);
+//				installApplication(betaPath);
+//				break;
+//			default:
+//				break;
+//			}
+//		}
+//	};
 	
 	private boolean installApplication(File path) {
 		try {
