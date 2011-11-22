@@ -2,6 +2,7 @@ package edu.rosehulman.android.directory;
 
 import android.app.Application;
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import edu.rosehulman.android.directory.db.DatabaseHelper;
 import edu.rosehulman.android.directory.service.MobileDirectoryService;
@@ -30,6 +31,8 @@ public class MyApplication extends Application {
 	
 	private static MyApplication instance;
 	
+	private static final boolean PURGE_DB = false;
+	
 	/**
 	 * Get the globally accessible application instance
 	 * 
@@ -37,6 +40,12 @@ public class MyApplication extends Application {
 	 */
 	public static MyApplication getInstance() {
 		return instance;
+	}
+	
+	private void purgeDb() {
+		SQLiteDatabase db = dbHelper.getWritableDatabase();
+		dbHelper.onUpgrade(db, 0, 0);
+		db.close();
 	}
 	
 	@Override
@@ -59,9 +68,10 @@ public class MyApplication extends Application {
 		instance = this;
 		
 		//start with a fresh database every run
-		//SQLiteDatabase db = dbHelper.getWritableDatabase();
-		//dbHelper.onUpgrade(db, 0, 0);
-		//db.close();
+		if (PURGE_DB) {
+			purgeDb();
+		}
+		
 	}
 
 }

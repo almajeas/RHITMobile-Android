@@ -643,7 +643,7 @@ public class CampusMapActivity extends MapActivity {
 			totalItems = ids.length;
 			publishProgress(0);
 			
-			if (ids.length == 0) {
+			if (this.ids.size() == 0) {
 				return null;
 			}
 	        
