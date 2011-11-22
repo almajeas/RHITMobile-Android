@@ -29,6 +29,7 @@ public interface IMobileDirectoryService {
 	/**
 	 * Retrieve location data within the given location id
 	 * 
+	 * @param parent The id of the parent location
 	 * @param currentVersion The current version data, or null if not known
 	 * @return A collection of locations
 	 * @throws Exception On error
