@@ -35,8 +35,10 @@ import edu.rosehulman.android.directory.db.DbIterator;
 import edu.rosehulman.android.directory.db.LocationAdapter;
 import edu.rosehulman.android.directory.db.VersionsAdapter;
 import edu.rosehulman.android.directory.maps.BuildingOverlayLayer;
+import edu.rosehulman.android.directory.maps.BuildingOverlayLayer.OnBuildingSelectedListener;
 import edu.rosehulman.android.directory.maps.OverlayManager;
 import edu.rosehulman.android.directory.maps.POILayer;
+import edu.rosehulman.android.directory.maps.PopulateLocation;
 import edu.rosehulman.android.directory.maps.TextOverlayLayer;
 import edu.rosehulman.android.directory.model.Location;
 import edu.rosehulman.android.directory.model.LocationCollection;
@@ -77,6 +79,7 @@ public class CampusMapActivity extends MapActivity {
     private MyLocationOverlay myLocation;
     
     private TaskManager taskManager;
+    private LoadInnerLocations taskLoadInnerLocations;
     
     private Bundle savedInstanceState;
     
@@ -236,7 +239,11 @@ public class CampusMapActivity extends MapActivity {
     }
     
     private void focusLocation(long id, boolean animate) {
-    	if (!buildingLayer.focus(id, animate)) {
+    	if (buildingLayer.focus(id, animate)) {
+    		if (taskLoadInnerLocations != null) {
+    			taskLoadInnerLocations.requestLocation(id);
+    		}
+    	} else {
     		poiLayer.focus(id, animate);
     	}
     }
@@ -297,6 +304,47 @@ public class CampusMapActivity extends MapActivity {
     	
     	mapView.invalidate();
     }
+    
+    private OnBuildingSelectedListener buildingSelectedListener = new OnBuildingSelectedListener() {
+
+		@Override
+		public void onSelect(Location location) {
+			long id = location.id;
+			if (taskLoadInnerLocations != null) {
+    			//request this location to be loaded ASAP
+    			taskLoadInnerLocations.requestLocation(id);
+    		}	
+		}
+		
+		@Override
+		public void onTap(final Location location) {
+			
+			Runnable listener = new Runnable() {
+
+				@Override
+				public void run() {
+					//populate the location
+					PopulateLocation task = new PopulateLocation(new Runnable() {
+						
+						@Override
+						public void run() {
+							//run the activity
+							Context context = mapView.getContext();
+							context.startActivity(LocationActivity.createIntent(context, location));
+						}
+					});
+					taskManager.addTask(task);
+					task.execute(location);
+				}
+				
+			};
+			
+			if (taskLoadInnerLocations == null || !taskLoadInnerLocations.setLocationListener(location.id, listener)) {
+				//if the load inner task is not running or it does not have our id, run the load event now
+				listener.run();
+			}
+		}
+    };
     
     private class EventOverlay extends Overlay {
     	
@@ -373,7 +421,7 @@ public class CampusMapActivity extends MapActivity {
 	    private void generateBuildings() {
 	    	BuildingOverlayLayer.initializeCache();
 	    	
-	    	BuildingOverlayLayer buildings = new BuildingOverlayLayer(mapView);
+	    	BuildingOverlayLayer buildings = new BuildingOverlayLayer(mapView, buildingSelectedListener);
 	    	this.buildingLayer = buildings;
 	    }
 	    
@@ -504,9 +552,9 @@ public class CampusMapActivity extends MapActivity {
 
 			setProgressBarIndeterminateVisibility(false);
 			if (!innerLocationsRefreshed) {
-	    		LoadInnerLocations task = new LoadInnerLocations(newVersion);
-	    		taskManager.addTask(task);
-	    		task.execute();
+	    		taskLoadInnerLocations = new LoadInnerLocations(newVersion);
+	    		taskManager.addTask(taskLoadInnerLocations);
+	    		taskLoadInnerLocations.execute();
 	    	} else {
 	    		setProgressBarVisibility(false);
 	    	}
@@ -528,12 +576,17 @@ public class CampusMapActivity extends MapActivity {
 		private List<Long> ids;
 		private String newVersion;
 		
+		private long waitId;
+		private Runnable listener;
+		
 		public LoadInnerLocations(String version) {
 			newVersion = version;
+	        ids = new ArrayList<Long>();
+	        
+			if (taskLoadInnerLocations != null)
+				throw new RuntimeException("Running two LoadInnerLocations");
 		}
 		
-		//TODO use these methods to prioritize which locations we load
-		//TODO do not tie this asynctask to this activity (or restart it later if needed)
 		public void requestLocation(long id) {
 			synchronized (ids) {
 				if (ids.remove(id)) {
@@ -542,9 +595,15 @@ public class CampusMapActivity extends MapActivity {
 			}
 		}
 		
-		public boolean hasLocation(long id) {
+		public boolean setLocationListener(long id, Runnable listener) {
 			synchronized (ids) {
-				return !ids.contains(id);
+				if (ids.contains(id)) {
+					this.waitId = id;
+					this.listener = listener;
+					return true;
+				} else {
+					return false;
+				}
 			}
 		}
 		
@@ -569,11 +628,13 @@ public class CampusMapActivity extends MapActivity {
 	        buildingAdapter.open();
 	        
 	        //Get the ids to load
-	        this.ids = new ArrayList<Long>();
 			topIds = new HashSet<Long>();
-	        long[] ids = buildingAdapter.getUnloadedParents();
+	        long[] ids = buildingAdapter.getUnloadedTopLocations();
 	        for (long id : ids) {
 	        	this.ids.add(id);
+	        }
+	        ids = buildingAdapter.getAllTopLocations();
+	        for (long id : ids) {
 	        	this.topIds.add(id);
 	        }
 			totalItems = ids.length;
@@ -602,6 +663,9 @@ public class CampusMapActivity extends MapActivity {
 						}
 						continue;
 					}
+					if (isCancelled()) {
+						return null;
+					}
 
 			        buildingAdapter.startTransaction();
 			        for (Location location : collection.mapAreas) {
@@ -615,6 +679,15 @@ public class CampusMapActivity extends MapActivity {
 			        
 					buildingAdapter.commitTransaction();
 		        	buildingAdapter.finishTransaction();
+		        	
+		        	synchronized (ids) {
+			        	if (id == waitId) {
+			        		if (listener != null) {
+			        			runOnUiThread(listener);
+			        		}
+				        	waitId = -1;
+			        	}
+		        	}
 			        
 			        processed++;
 			        publishProgress(processed);
@@ -647,11 +720,13 @@ public class CampusMapActivity extends MapActivity {
 		protected void onPostExecute(Void res) {
 			setProgressBarVisibility(false);
 			innerLocationsRefreshed = true;
+			taskLoadInnerLocations = null;
 		}
 		
 		@Override
 		protected void onCancelled() {
 			setProgressBarVisibility(false);
+			taskLoadInnerLocations = null;
 		}
 		
 	}

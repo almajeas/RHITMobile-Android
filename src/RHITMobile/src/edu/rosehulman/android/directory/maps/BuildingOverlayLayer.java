@@ -3,7 +3,6 @@ package edu.rosehulman.android.directory.maps;
 import java.util.HashMap;
 import java.util.Map;
 
-import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Point;
 import android.view.View;
@@ -15,7 +14,6 @@ import com.google.android.maps.Overlay;
 import com.readystatesoftware.mapviewballoons.BalloonOverlayView;
 import com.readystatesoftware.mapviewballoons.BalloonOverlayView.OnTapListener;
 
-import edu.rosehulman.android.directory.LocationActivity;
 import edu.rosehulman.android.directory.db.DbIterator;
 import edu.rosehulman.android.directory.db.LocationAdapter;
 import edu.rosehulman.android.directory.model.Location;
@@ -26,6 +24,27 @@ import edu.rosehulman.android.directory.util.BoundingBox;
  */
 public class BuildingOverlayLayer extends Overlay implements ManageableOverlay {
 	
+	/**
+	 * Useful event hooks for the \ref BuildingOverlayLayer
+	 */
+	public interface OnBuildingSelectedListener {
+		/**
+		 * Called when the location is selected. The overlay will
+		 * respond by animating to the location and displaying a balloon
+		 * with the title and description
+		 * 
+		 * @param location The location that was selected
+		 */
+		public void onSelect(Location location);
+		
+		/**
+		 * Called when a balloon associated with a location is tapped.
+		 * 
+		 * @param location The location that was tapped
+		 */
+		public void onTap(Location location);
+	}
+	
 	private static Map<Long, BuildingOverlay> overlays;
 	private Point pt;
 	private BuildingOverlay selected;
@@ -33,6 +52,8 @@ public class BuildingOverlayLayer extends Overlay implements ManageableOverlay {
 	private BalloonOverlayView balloon;
 	
 	private OverlayManagerControl manager;
+	
+	private OnBuildingSelectedListener listener;
 
 	/**
 	 * Initialize data that needs to be loaded by the database.
@@ -69,9 +90,11 @@ public class BuildingOverlayLayer extends Overlay implements ManageableOverlay {
 	 * Create a new BuildingOverlayLayer
 	 * 
 	 * @param mapView The MapView that will contain this overlay
+	 * @param listener The listener to handle events related to this overlay layer
 	 */
-	public BuildingOverlayLayer(MapView mapView) {
+	public BuildingOverlayLayer(MapView mapView, OnBuildingSelectedListener listener) {
 		this.mapView = mapView;
+		this.listener = listener;
 		
 		if (overlays == null) {
 			throw new RuntimeException("Attempted to use overlay layer without an initialized cache");
@@ -88,6 +111,9 @@ public class BuildingOverlayLayer extends Overlay implements ManageableOverlay {
 				GeoPoint dest = mapView.getProjection().fromPixels(snapPoint.x, snapPoint.y);
 				setSelected(building);
 				moveToSelected(dest, true);
+				if (listener != null) {
+					listener.onSelect(building.getLocation());
+				}
 				return true;
 			}
 		}
@@ -205,21 +231,17 @@ public class BuildingOverlayLayer extends Overlay implements ManageableOverlay {
 		this.manager = manager;
 	}
 	
+	
 	private OnTapListener balloonTapListener = new OnTapListener() {
 		
 		@Override
 		public boolean onTap(View v) {
 			
-			final Location loc = selected.getLocation();
+			Location loc = selected.getLocation();
 			
-			new PopulateLocation(new Runnable() {
-				
-				@Override
-				public void run() {
-					Context context = mapView.getContext();
-					context.startActivity(LocationActivity.createIntent(context, loc));
-				}
-			}).execute(loc);
+			if (listener != null) {
+				listener.onTap(loc);
+			}
 			
 			return true;
 		}

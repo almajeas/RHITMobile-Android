@@ -266,9 +266,25 @@ public class LocationAdapter extends TableAdapter {
 	 * 
 	 * @return an array of IDs to load
 	 */
-	public long[] getUnloadedParents() {
-		String[] projection = new String[] {KEY_ID, KEY_NAME};
+	public long[] getUnloadedTopLocations() {
 		String where = KEY_CHILDREN_LOADED + "=0";
+		
+		return getTopLocations(where);
+	}
+	
+	/**
+	 * Gets the IDs of locations that are considered top level
+	 * 
+	 * @return an array of IDs
+	 */
+	public long[] getAllTopLocations() {
+		String where = KEY_CHILDREN_LOADED + " IS NOT NULL";
+		
+		return getTopLocations(where);
+	}
+	
+	private long[] getTopLocations(String where) {
+		String[] projection = new String[] {KEY_ID, KEY_NAME};
 		Cursor cursor = db.query(TABLE_NAME, projection, where, null, null, null, null);
 		
 		long[] res = new long[cursor.getCount()];

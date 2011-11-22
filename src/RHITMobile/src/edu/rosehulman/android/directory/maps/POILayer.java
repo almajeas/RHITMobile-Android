@@ -53,6 +53,7 @@ public class POILayer extends BalloonItemizedOverlay<OverlayItem> implements Man
 	 * 
 	 * @param defaultMarker A Drawable to use to render each point of interest
 	 * @param mapView The MapView that this overlay will be rendered on
+	 * @param taskManager The task manager that can be used to abort tasks if the activity is paused
 	 */
 	public POILayer(Drawable defaultMarker, MapView mapView, TaskManager taskManager) {
 		super(boundCenter(defaultMarker), mapView);
@@ -82,6 +83,8 @@ public class POILayer extends BalloonItemizedOverlay<OverlayItem> implements Man
 	 * Focus a particular POI
 	 * 
 	 * @param id The ID of the POI to focus
+	 * @param animate Whether the focus operation should animate or not
+	 * 
 	 * @return True if the POI was found immediately; false otherwise
 	 */
 	public boolean focus(long id, boolean animate) {
