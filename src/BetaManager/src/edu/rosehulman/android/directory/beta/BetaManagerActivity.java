@@ -1,12 +1,15 @@
 package edu.rosehulman.android.directory.beta;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -46,10 +49,6 @@ public class BetaManagerActivity extends Activity {
 		});
         
         txtFeedback = (EditText)findViewById(R.id.txtFeedback);
-		
- 		//mark that we are not registered
-	    //TODO tell the server also?
-	    //BetaPrefs.setRegistered(BetaManagerActivity.this, false);
     }
     
 
@@ -73,9 +72,32 @@ public class BetaManagerActivity extends Activity {
         case R.id.preferences:
             startActivity(new Intent(this, BetaPreferencesActivity.class));
         	return true;
+        case R.id.unregister:
+        	menu_unregister();
+        	return true;
         default:
             return super.onOptionsItemSelected(item);
         }
+    }
+    
+    private void menu_unregister() {
+    	AlertDialog.Builder builder = new AlertDialog.Builder(this);
+    	builder
+    		.setMessage("You probably don't want to do this.  Are you sure you want to unregister?")
+    		.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int which) {
+			 		//mark that we are not registered
+					
+				    BetaPrefs.setRegistered(BetaManagerActivity.this, false);
+			    	finish();
+				}
+			})
+			.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int which) {
+					//do nothing
+				}
+			})
+			.show();
     }
     
     private void btnBack_onClick() {
@@ -85,6 +107,7 @@ public class BetaManagerActivity extends Activity {
     private void btnFeedback_onClick() {
     	String feedback = txtFeedback.getText().toString();
     	
+    	//TODO prompt to run unit tests
     	new SubmitFeedback().execute(feedback);
     }
     
@@ -129,6 +152,7 @@ public class BetaManagerActivity extends Activity {
 			try {
 				return service.postFeedback(authToken, feedback);
 			} catch (Exception e) {
+				Log.e(C.TAG, "Failed to post feedback", e);
 				return false;
 			}
 		}
@@ -137,10 +161,16 @@ public class BetaManagerActivity extends Activity {
     	protected void onPostExecute(Boolean success) {
 			status.dismiss();
 			
-			if (!success) {
-				String message = "An error occurred while submitting feedback";
-				Toast.makeText(BetaManagerActivity.this, message, Toast.LENGTH_SHORT);
+			String message;
+			if (success) {
+				message = "Thanks";
+			} else {
+				message = "An error occurred while submitting feedback";
 			}
+			
+			Toast.makeText(BetaManagerActivity.this, message, Toast.LENGTH_SHORT).show();
+			
+			finish();
     		
     	}
     	
