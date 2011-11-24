@@ -7,6 +7,7 @@ import java.util.Set;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
@@ -102,7 +103,12 @@ public class CampusMapActivity extends MapActivity {
         if (savedInstanceState == null) {
         	
         	Intent intent = getIntent();
-		    if (!intent.getBooleanExtra(EXTRA_IS_INTERNAL, false) && betaManager.hasBetaManager() && betaManager.isBetaEnabled()) {
+        	
+        	if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+    			String query = intent.getStringExtra(SearchManager.QUERY);
+    			Log.d(C.TAG, query);
+    			//TODO run the search
+    		} else if (!intent.getBooleanExtra(EXTRA_IS_INTERNAL, false) && betaManager.hasBetaManager() && betaManager.isBetaEnabled()) {
 		       	if (betaManager.isBetaRegistered()) {
 		       		Intent betaIntent = betaManager.getBetaIntent(BetaManagerManager.ACTION_SHOW_STARTUP); 
 		       		startActivityForResult(betaIntent, REQUEST_STARTUP_CODE);	
