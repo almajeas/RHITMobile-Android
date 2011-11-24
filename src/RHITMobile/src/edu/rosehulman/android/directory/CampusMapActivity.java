@@ -38,7 +38,7 @@ import edu.rosehulman.android.directory.db.LocationAdapter;
 import edu.rosehulman.android.directory.db.VersionsAdapter;
 import edu.rosehulman.android.directory.maps.BuildingOverlayLayer;
 import edu.rosehulman.android.directory.maps.BuildingOverlayLayer.OnBuildingSelectedListener;
-import edu.rosehulman.android.directory.maps.LocationSearchOverlay;
+import edu.rosehulman.android.directory.maps.LocationSearchLayer;
 import edu.rosehulman.android.directory.maps.OverlayManager;
 import edu.rosehulman.android.directory.maps.POILayer;
 import edu.rosehulman.android.directory.maps.PopulateLocation;
@@ -78,7 +78,7 @@ public class CampusMapActivity extends MapActivity {
     private LocationListener locationListener;
 
     private OverlayManager overlayManager;
-    private LocationSearchOverlay searchOverlay;
+    private LocationSearchLayer searchOverlay;
     private POILayer poiLayer;
     private BuildingOverlayLayer buildingLayer;
     private TextOverlayLayer textLayer;
@@ -755,7 +755,7 @@ public class CampusMapActivity extends MapActivity {
 		
 	}
 	
-	private class SearchLocations extends AsyncTask<String, Void, LocationSearchOverlay> {
+	private class SearchLocations extends AsyncTask<String, Void, LocationSearchLayer> {
 		
 		ProgressDialog dialog;
 
@@ -770,7 +770,7 @@ public class CampusMapActivity extends MapActivity {
 		}
 		
 		@Override
-		protected LocationSearchOverlay doInBackground(String... params) {
+		protected LocationSearchLayer doInBackground(String... params) {
 			String query = params[0];
 			MobileDirectoryService service = new MobileDirectoryService();
 			
@@ -792,7 +792,7 @@ public class CampusMapActivity extends MapActivity {
 			}
 			
 	    	Drawable marker = getResources().getDrawable(R.drawable.map_search_marker);
-			LocationSearchOverlay overlay = new LocationSearchOverlay(marker, mapView);
+			LocationSearchLayer overlay = new LocationSearchLayer(marker, mapView);
 			LocationAdapter locationAdapter = new LocationAdapter();
 			locationAdapter.open();
 			for (int i = 0; i < names.locations.length; i++) {
@@ -811,7 +811,7 @@ public class CampusMapActivity extends MapActivity {
 		}
 
 		@Override
-		protected void onPostExecute(LocationSearchOverlay res) {
+		protected void onPostExecute(LocationSearchLayer res) {
 			dialog.dismiss();
 			CampusMapActivity.this.searchOverlay = res;
 			rebuildOverlays();

@@ -17,7 +17,10 @@ import edu.rosehulman.android.directory.C;
 import edu.rosehulman.android.directory.LocationActivity;
 import edu.rosehulman.android.directory.model.Location;
 
-public class LocationSearchOverlay extends BalloonItemizedOverlay<OverlayItem> implements ManageableOverlay{
+/**
+ * Overlay containing search results
+ */
+public class LocationSearchLayer extends BalloonItemizedOverlay<OverlayItem> implements ManageableOverlay{
 
 	private static final int MIN_ZOOM_LEVEL = 19;
 	
@@ -35,11 +38,22 @@ public class LocationSearchOverlay extends BalloonItemizedOverlay<OverlayItem> i
 		}
 	}
 	
-	public LocationSearchOverlay(Drawable defaultMarker, MapView mapView) {
+	/**
+	 * Creates a new search layer
+	 * 
+	 * @param defaultMarker The marker to use for a search result
+	 * @param mapView The associated MapView
+	 */
+	public LocationSearchLayer(Drawable defaultMarker, MapView mapView) {
 		super(boundCenterBottom(defaultMarker), mapView);
 		items = new ArrayList<SearchItem>();
 	}
 	
+	/**
+	 * Add a new location to the layer
+	 * 
+	 * @param location The location to add
+	 */
 	public void add(Location location) {
 		OverlayItem overlay = new OverlayItem(location.center.asGeoPoint(), location.name, location.description);
 		items.add(new SearchItem(location, overlay));
