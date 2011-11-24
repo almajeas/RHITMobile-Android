@@ -270,6 +270,9 @@ public class CampusMapActivity extends MapActivity {
         case R.id.top_level:
         	showTopLocations();
         	return true;
+        case R.id.search:
+        	onSearchRequested();
+        	return true;
         default:
             return super.onOptionsItemSelected(item);
         }
