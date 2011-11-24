@@ -41,7 +41,7 @@ public interface IMobileDirectoryService {
 	 * Retrieve ids of locations that match the given query
 	 * 
 	 * @param query The search query
-	 * @return A collection of \ref LocationName objects
+	 * @return A collection of LocationName objects
 	 * @throws Exception On error
 	 */
 	public LocationNamesCollection searchLocations(String query) throws Exception;
