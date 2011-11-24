@@ -1,5 +1,6 @@
 package edu.rosehulman.android.directory.db;
 
+import android.app.SearchManager;
 import android.content.ContentValues;
 import android.database.Cursor;
 import edu.rosehulman.android.directory.model.Hyperlink;
@@ -281,6 +282,29 @@ public class LocationAdapter extends TableAdapter {
 		String where = KEY_CHILDREN_LOADED + " IS NOT NULL";
 		
 		return getTopLocations(where);
+	}
+	
+
+	/**
+	 * Provide suggestions for a search query
+	 * 
+	 * @param path The path that the user has entered so far
+	 * @return A Cursor that contains suggestions to display
+	 */
+	public Cursor searchSuggestions(String path) {
+		if (path.length() == 0) {
+			return null;
+		}
+		
+		String query = "SELECT " + columns(
+				columnAlias(KEY_ID, "_id"),
+				columnAlias(KEY_NAME, SearchManager.SUGGEST_COLUMN_TEXT_1),
+				columnAlias(KEY_DESCRIPTION, SearchManager.SUGGEST_COLUMN_TEXT_2)
+				) + 
+				"FROM " + TABLE_NAME + " " +
+				"WHERE Name LIKE ?";
+		String[] args = new String[] {"%" + path + "%"};
+		return db.rawQuery(query, args);
 	}
 	
 	private long[] getTopLocations(String where) {

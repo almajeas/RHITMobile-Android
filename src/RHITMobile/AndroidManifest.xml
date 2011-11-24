@@ -39,6 +39,10 @@
         </activity>
 
         <uses-library android:name="com.google.android.maps" />
+        
+        <provider
+            android:name=".providers.LocationSearchSuggestions" 
+            android:authorities="edu.rosehulman.android.directory.providers.LocationSearchSuggestions"/>
     </application>
 
 </manifest>

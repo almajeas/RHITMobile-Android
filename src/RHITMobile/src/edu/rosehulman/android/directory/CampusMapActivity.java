@@ -115,6 +115,7 @@ public class CampusMapActivity extends MapActivity {
     			SearchLocations task = new SearchLocations();
     			taskManager.addTask(task);
     			task.execute(searchQuery);
+    			setTitle("Search: " + searchQuery);
     		} else if (!intent.getBooleanExtra(EXTRA_IS_INTERNAL, false) && betaManager.hasBetaManager() && betaManager.isBetaEnabled()) {
 		       	if (betaManager.isBetaRegistered()) {
 		       		Intent betaIntent = betaManager.getBetaIntent(BetaManagerManager.ACTION_SHOW_STARTUP); 

@@ -131,6 +131,19 @@ public abstract class TableAdapter {
 	protected String column(String table, String column) {
 		return table + "." + column;
 	}
+	
+	/**
+	 * Format a table/column pair
+	 * 
+	 * @param column
+	 *            The column to use
+	 * @param alias
+	 *            The alias of the column
+	 * @return table.column AS alias
+	 */
+	protected String columnAlias(String column, String alias) {
+		return column + " AS " + alias;
+	}
 
 	//protected String tables(String... args) {
 	//	//TODO implement
