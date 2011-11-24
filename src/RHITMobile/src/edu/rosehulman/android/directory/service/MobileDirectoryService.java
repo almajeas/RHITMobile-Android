@@ -3,6 +3,7 @@ package edu.rosehulman.android.directory.service;
 import org.json.JSONObject;
 
 import edu.rosehulman.android.directory.model.LocationCollection;
+import edu.rosehulman.android.directory.model.LocationNamesCollection;
 
 /**
  * Wraps logic of communicating with the mobile directory web service into
@@ -55,5 +56,18 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 		}
 		
 		return LocationCollection.deserialize(root);
+	}
+	
+	@Override
+	public LocationNamesCollection searchLocations(String query) throws Exception {
+		JsonClient client = factory.makeJsonClient(HOST, PORT, "locations/names");
+		client.addParameter("s", query);
+		
+		JSONObject root = client.execute();
+		if (root == null) {
+			return null;
+		}
+		
+		return LocationNamesCollection.deserialize(root);
 	}
 }

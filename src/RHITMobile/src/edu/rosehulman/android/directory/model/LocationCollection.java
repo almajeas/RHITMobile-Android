@@ -4,12 +4,15 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+/**
+ * Represents a versioned collection of Location objects
+ */
 public class LocationCollection {
 	
 	/** Collection of Location objects */
 	public Location mapAreas[];
 	
-	/** Version associated with the given collection of MapArea objects */
+	/** Version associated with the given collection of Location objects */
 	public String version;
 	
 	private static Location[] deserializeMapAreas(JSONArray array) throws JSONException {
