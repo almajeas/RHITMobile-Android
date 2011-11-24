@@ -31,6 +31,15 @@ public class OverlayManager {
 	}
 	
 	/**
+	 * Deselects every overlay
+	 */
+	public void clearSelection() {
+		for (ManageableOverlay overlay : overlays) {
+			overlay.clearSelection();
+		}
+	}
+	
+	/**
 	 * Adds an overlay to the manager
 	 * 
 	 * @param overlay The overlay to manage

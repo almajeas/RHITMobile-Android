@@ -7,6 +7,7 @@ import java.util.Set;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -37,12 +38,14 @@ import edu.rosehulman.android.directory.db.LocationAdapter;
 import edu.rosehulman.android.directory.db.VersionsAdapter;
 import edu.rosehulman.android.directory.maps.BuildingOverlayLayer;
 import edu.rosehulman.android.directory.maps.BuildingOverlayLayer.OnBuildingSelectedListener;
+import edu.rosehulman.android.directory.maps.LocationSearchOverlay;
 import edu.rosehulman.android.directory.maps.OverlayManager;
 import edu.rosehulman.android.directory.maps.POILayer;
 import edu.rosehulman.android.directory.maps.PopulateLocation;
 import edu.rosehulman.android.directory.maps.TextOverlayLayer;
 import edu.rosehulman.android.directory.model.Location;
 import edu.rosehulman.android.directory.model.LocationCollection;
+import edu.rosehulman.android.directory.model.LocationNamesCollection;
 import edu.rosehulman.android.directory.model.VersionType;
 import edu.rosehulman.android.directory.service.MobileDirectoryService;
 
@@ -69,10 +72,13 @@ public class CampusMapActivity extends MapActivity {
 
     private MapView mapView;
     
+    private String searchQuery;
+    
     private LocationManager locationManager;
     private LocationListener locationListener;
 
     private OverlayManager overlayManager;
+    private LocationSearchOverlay searchOverlay;
     private POILayer poiLayer;
     private BuildingOverlayLayer buildingLayer;
     private TextOverlayLayer textLayer;
@@ -105,9 +111,10 @@ public class CampusMapActivity extends MapActivity {
         	Intent intent = getIntent();
         	
         	if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-    			String query = intent.getStringExtra(SearchManager.QUERY);
-    			Log.d(C.TAG, query);
-    			//TODO run the search
+    			searchQuery = intent.getStringExtra(SearchManager.QUERY);
+    			SearchLocations task = new SearchLocations();
+    			taskManager.addTask(task);
+    			task.execute(searchQuery);
     		} else if (!intent.getBooleanExtra(EXTRA_IS_INTERNAL, false) && betaManager.hasBetaManager() && betaManager.isBetaEnabled()) {
 		       	if (betaManager.isBetaRegistered()) {
 		       		Intent betaIntent = betaManager.getBetaIntent(BetaManagerManager.ACTION_SHOW_STARTUP); 
@@ -311,6 +318,11 @@ public class CampusMapActivity extends MapActivity {
     		overlayManager.addOverlay(poiLayer);
     	}
     	
+    	if (searchOverlay != null) {
+    		overlays.add(searchOverlay);
+    		overlayManager.addOverlay(searchOverlay);
+    	}
+    	
     	//Remove any old overlays
     	overlayManager.prune(overlays);
     	
@@ -363,13 +375,7 @@ public class CampusMapActivity extends MapActivity {
     	@Override
     	public boolean onTap(GeoPoint p, MapView mapView) {
     		//tap not handled by any other overlay
-    		if (buildingLayer != null) {
-    			buildingLayer.focus(-1, false);
-    		}
-    		
-    		if (poiLayer != null) {
-    			poiLayer.setFocus(null);
-    		}
+    		overlayManager.clearSelection();
     		
     		return true;
     	}
@@ -464,6 +470,12 @@ public class CampusMapActivity extends MapActivity {
 		private void buildLayers() {
 			generateText();
 			publishProgress();
+			
+			//don't generate buildings or POI if we are searching
+			if (searchQuery != null) {
+				return;
+			}
+			
 			generateBuildings();
 			publishProgress();
 			generatePOI();	
@@ -743,4 +755,72 @@ public class CampusMapActivity extends MapActivity {
 		
 	}
 	
+	private class SearchLocations extends AsyncTask<String, Void, LocationSearchOverlay> {
+		
+		ProgressDialog dialog;
+
+		@Override
+		protected void onPreExecute() {
+			dialog = new ProgressDialog(CampusMapActivity.this);
+			dialog.setTitle(null);
+			dialog.setMessage("Searching...");
+			dialog.setIndeterminate(true);
+			dialog.setCancelable(false);
+			dialog.show();
+		}
+		
+		@Override
+		protected LocationSearchOverlay doInBackground(String... params) {
+			String query = params[0];
+			MobileDirectoryService service = new MobileDirectoryService();
+			
+			LocationNamesCollection names;
+			try {
+				names = service.searchLocations(query);
+			} catch (Exception e) {
+				e.printStackTrace();
+				return null;
+			}
+			
+			VersionsAdapter versions = new VersionsAdapter();
+			versions.open();
+			String version = versions.getVersion(VersionType.MAP_AREAS);
+			versions.close();
+			if (version == null || !version.equals(names.version)) {
+				Log.e(C.TAG, "Search: data version has changed! Aborting");
+				return null;
+			}
+			
+	    	Drawable marker = getResources().getDrawable(R.drawable.map_search_marker);
+			LocationSearchOverlay overlay = new LocationSearchOverlay(marker, mapView);
+			LocationAdapter locationAdapter = new LocationAdapter();
+			locationAdapter.open();
+			for (int i = 0; i < names.locations.length; i++) {
+				Location loc = locationAdapter.getLocation(names.locations[i].id);
+				
+				if (loc == null) {
+					//Just ignore locations we do not yet have
+					continue;
+				}
+				
+				overlay.add(loc);
+			}
+			locationAdapter.close();
+			
+			return overlay;
+		}
+
+		@Override
+		protected void onPostExecute(LocationSearchOverlay res) {
+			dialog.dismiss();
+			CampusMapActivity.this.searchOverlay = res;
+			rebuildOverlays();
+		}
+		
+		@Override
+		protected void onCancelled() {
+			dialog.dismiss();
+		}
+		
+	}
 }
