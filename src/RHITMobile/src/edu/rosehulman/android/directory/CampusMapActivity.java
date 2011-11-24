@@ -119,7 +119,6 @@ public class CampusMapActivity extends MapActivity {
     			setTitle("Search: " + searchQuery);
     			
         	} else if (Intent.ACTION_VIEW.equals(intent.getAction())) {
-			    // Handle a suggestions click (because the suggestions all use ACTION_VIEW)
 			    Uri data = intent.getData();
 			    
 			    long id = Long.parseLong(data.getPath());
