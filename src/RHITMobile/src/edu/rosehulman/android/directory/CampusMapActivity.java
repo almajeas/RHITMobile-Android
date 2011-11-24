@@ -365,13 +365,11 @@ public class CampusMapActivity extends MapActivity {
 
 				@Override
 				public void run() {
-					Log.d(C.TAG, "Running listener");
 					//populate the location
 					PopulateLocation task = new PopulateLocation(new Runnable() {
 						
 						@Override
 						public void run() {
-							Log.d(C.TAG, "Launching Activity");
 							//run the activity
 							Context context = mapView.getContext();
 							context.startActivity(LocationActivity.createIntent(context, location));
@@ -384,11 +382,6 @@ public class CampusMapActivity extends MapActivity {
 			};
 			
 			if (taskLoadInnerLocations == null || !taskLoadInnerLocations.setLocationListener(location.id, listener)) {
-				if (taskLoadInnerLocations == null) {
-					Log.d(C.TAG, "(taskLoadInnerLocations == null)");
-				} else {
-					Log.d(C.TAG, "Did not set Location Listener");
-				}
 				//if the load inner task is not running or it does not have our id, run the load event now
 				listener.run();
 			}
@@ -647,7 +640,6 @@ public class CampusMapActivity extends MapActivity {
 		
 		public boolean setLocationListener(long id, Runnable listener) {
 			synchronized (ids) {
-				Log.d(C.TAG, "Set listener: " + id);
 				if (id == currentId || ids.contains(id)) {
 					this.waitId = id;
 					this.listener = listener;
