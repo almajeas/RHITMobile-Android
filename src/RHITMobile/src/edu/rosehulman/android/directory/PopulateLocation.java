@@ -1,9 +1,12 @@
-package edu.rosehulman.android.directory.maps;
+package edu.rosehulman.android.directory;
 
 import android.os.AsyncTask;
 import edu.rosehulman.android.directory.db.LocationAdapter;
 import edu.rosehulman.android.directory.model.Location;
 
+/**
+ * Load additional information for a given location
+ */
 public class PopulateLocation extends AsyncTask<Location, Void, Location> {
 	
 	private Runnable task;

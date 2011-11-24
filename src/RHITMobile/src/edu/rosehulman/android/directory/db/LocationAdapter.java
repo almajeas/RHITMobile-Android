@@ -298,6 +298,7 @@ public class LocationAdapter extends TableAdapter {
 		
 		String query = "SELECT " + columns(
 				columnAlias(KEY_ID, "_id"),
+				columnAlias(KEY_ID, SearchManager.SUGGEST_COLUMN_INTENT_DATA),
 				columnAlias(KEY_NAME, SearchManager.SUGGEST_COLUMN_TEXT_1),
 				columnAlias(KEY_DESCRIPTION, SearchManager.SUGGEST_COLUMN_TEXT_2)
 				) + 

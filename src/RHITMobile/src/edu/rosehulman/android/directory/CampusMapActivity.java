@@ -18,6 +18,7 @@ import android.graphics.drawable.Drawable;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationProvider;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -33,6 +34,7 @@ import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.Overlay;
 
+import edu.rosehulman.android.directory.LoadLocation.OnLocationLoadedListener;
 import edu.rosehulman.android.directory.db.DbIterator;
 import edu.rosehulman.android.directory.db.LocationAdapter;
 import edu.rosehulman.android.directory.db.VersionsAdapter;
@@ -41,7 +43,6 @@ import edu.rosehulman.android.directory.maps.BuildingOverlayLayer.OnBuildingSele
 import edu.rosehulman.android.directory.maps.LocationSearchLayer;
 import edu.rosehulman.android.directory.maps.OverlayManager;
 import edu.rosehulman.android.directory.maps.POILayer;
-import edu.rosehulman.android.directory.maps.PopulateLocation;
 import edu.rosehulman.android.directory.maps.TextOverlayLayer;
 import edu.rosehulman.android.directory.model.Location;
 import edu.rosehulman.android.directory.model.LocationCollection;
@@ -116,6 +117,23 @@ public class CampusMapActivity extends MapActivity {
     			taskManager.addTask(task);
     			task.execute(searchQuery);
     			setTitle("Search: " + searchQuery);
+    			
+        	} else if (Intent.ACTION_VIEW.equals(intent.getAction())) {
+			    // Handle a suggestions click (because the suggestions all use ACTION_VIEW)
+			    Uri data = intent.getData();
+			    
+			    long id = Long.parseLong(data.getPath());
+			    LoadLocation task = new LoadLocation(new OnLocationLoadedListener() {
+					@Override
+					public void onLocationLoaded(Location location) {
+						finish();
+						Intent newIntent = LocationActivity.createIntent(CampusMapActivity.this, location);
+						startActivity(newIntent);
+					}
+				});
+			    taskManager.addTask(task);
+			    task.execute(id);
+			    
     		} else if (!intent.getBooleanExtra(EXTRA_IS_INTERNAL, false) && betaManager.hasBetaManager() && betaManager.isBetaEnabled()) {
 		       	if (betaManager.isBetaRegistered()) {
 		       		Intent betaIntent = betaManager.getBetaIntent(BetaManagerManager.ACTION_SHOW_STARTUP); 

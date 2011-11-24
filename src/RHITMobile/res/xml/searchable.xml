@@ -5,5 +5,5 @@
     android:voiceSearchMode="showVoiceSearchButton|launchRecognizer"
     android:searchSuggestAuthority="edu.rosehulman.android.directory.providers.LocationSearchSuggestions"
     android:searchSuggestIntentAction="android.intent.action.VIEW"
-    android:searchSuggestSelection="Name LIKE ?">
+    android:searchSuggestSelection="Name LIKE ?" >
 </searchable>
