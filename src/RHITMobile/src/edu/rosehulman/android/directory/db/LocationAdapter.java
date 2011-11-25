@@ -303,7 +303,8 @@ public class LocationAdapter extends TableAdapter {
 				columnAlias(KEY_DESCRIPTION, SearchManager.SUGGEST_COLUMN_TEXT_2)
 				) + 
 				"FROM " + TABLE_NAME + " " +
-				"WHERE Name LIKE ?";
+				"WHERE Name LIKE ? LIMIT 10";
+		
 		String[] args = new String[] {"%" + path + "%"};
 		return db.rawQuery(query, args);
 	}
