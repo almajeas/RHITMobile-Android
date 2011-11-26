@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import edu.rosehulman.android.directory.db.DatabaseHelper;
 import edu.rosehulman.android.directory.service.MobileDirectoryService;
 import edu.rosehulman.android.directory.service.MockClientFactory;
+import edu.rosehulman.android.directory.service.MockJsonClient;
 import edu.rosehulman.android.directory.service.WebClientFactory;
 
 /**
@@ -59,6 +60,7 @@ public class MyApplication extends Application {
 		dbHelper = DatabaseHelper.createInstance(context, isMocking);
 		if (isMocking) {
 			MobileDirectoryService.setClientFactory(new MockClientFactory());
+			MockJsonClient.setContext(context);
 		} else {
 			MobileDirectoryService.setClientFactory(new WebClientFactory());
 		}
