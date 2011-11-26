@@ -133,6 +133,8 @@ public class CustomInstrumentationTestRunner extends InstrumentationTestRunner {
 		
 		super.onCreate(arguments);
 		
+    	BetaPrefs.setUseMocks(this.getContext(), true);
+		
 		testSuites = new LinkedList<TestRunnerTestSuite>();
 	}
 	

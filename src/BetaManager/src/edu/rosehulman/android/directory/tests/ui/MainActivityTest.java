@@ -40,5 +40,10 @@ public class MainActivityTest extends
 		assertFalse(m_mapView.isStreetView());
 		assertTrue(m_mapView.getOverlays().size() > 0);
 	}
+	
+	@UiThreadTest
+	public void testSearch() {
+		
+	}
 
 }
