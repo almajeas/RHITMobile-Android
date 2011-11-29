@@ -41,9 +41,4 @@ public class MainActivityTest extends
 		assertTrue(m_mapView.getOverlays().size() > 0);
 	}
 	
-	@UiThreadTest
-	public void testSearch() {
-		
-	}
-
 }
