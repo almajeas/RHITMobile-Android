@@ -18,7 +18,6 @@ import android.graphics.drawable.Drawable;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationProvider;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -34,7 +33,6 @@ import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.Overlay;
 
-import edu.rosehulman.android.directory.LoadLocation.OnLocationLoadedListener;
 import edu.rosehulman.android.directory.db.DbIterator;
 import edu.rosehulman.android.directory.db.LocationAdapter;
 import edu.rosehulman.android.directory.db.VersionsAdapter;
@@ -66,6 +64,14 @@ public class CampusMapActivity extends MapActivity {
 		Intent intent = new Intent(context, CampusMapActivity.class);
 		intent.putExtra(EXTRA_IS_INTERNAL, true);
 		intent.putExtra(EXTRA_BUILDING_ID, buildingId);
+		return intent;
+	}
+	
+	public static Intent createIntent(Context context, String query) {
+		Intent intent = new Intent(context, CampusMapActivity.class);
+		intent.setAction(Intent.ACTION_SEARCH);
+		intent.putExtra(EXTRA_IS_INTERNAL, true);
+		intent.putExtra(SearchManager.QUERY, query);
 		return intent;
 	}
 	
@@ -118,21 +124,6 @@ public class CampusMapActivity extends MapActivity {
     			task.execute(searchQuery);
     			setTitle("Search: " + searchQuery);
     			
-        	} else if (Intent.ACTION_VIEW.equals(intent.getAction())) {
-			    Uri data = intent.getData();
-			    
-			    long id = Long.parseLong(data.getPath());
-			    LoadLocation task = new LoadLocation(new OnLocationLoadedListener() {
-					@Override
-					public void onLocationLoaded(Location location) {
-						finish();
-						Intent newIntent = LocationActivity.createIntent(CampusMapActivity.this, location);
-						startActivity(newIntent);
-					}
-				});
-			    taskManager.addTask(task);
-			    task.execute(id);
-			    
     		} else if (!intent.getBooleanExtra(EXTRA_IS_INTERNAL, false) && betaManager.hasBetaManager() && betaManager.isBetaEnabled()) {
 		       	if (betaManager.isBetaRegistered()) {
 		       		Intent betaIntent = betaManager.getBetaIntent(BetaManagerManager.ACTION_SHOW_STARTUP); 
