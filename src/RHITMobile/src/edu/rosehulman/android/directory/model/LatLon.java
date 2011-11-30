@@ -44,7 +44,7 @@ public class LatLon {
 	 * @throws JSONException
 	 */
 	public static LatLon deserialize(JSONObject root) throws JSONException {
-		return new LatLon(root.getDouble("Lat"), root.getDouble("Long"));
+		return new LatLon(root.getDouble("Lat"), root.getDouble("Lon"));
 	}
 	
 	/**
