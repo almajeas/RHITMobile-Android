@@ -17,14 +17,38 @@ import android.widget.TextView;
 
 public class StartupActivity extends Activity {
 	
+	private BetaManagerManager betaManager;
+	
 	private ArrayAdapter<Task> taskAdapter;
 	
 	private GridView tasksView;
+	
+	private static final int REQUEST_STARTUP_CODE = 4;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.startup);
+		
+        betaManager = new BetaManagerManager(this);
+        
+        if (betaManager.hasBetaManager()) {
+        	//Add the beta channel
+        	Task[] tasks = new Task[this.tasks.length+1];
+        	for (int i = 0; i < this.tasks.length; i++) {
+				tasks[i] = this.tasks[i];
+			}
+        	tasks[this.tasks.length] = new Task(
+        			"Beta",
+        			android.R.drawable.ic_menu_manage,
+        			new OnClickListener() {
+						@Override
+						public void onClick(View v) {
+							taskBeta_clicked();
+						}
+					});
+        	this.tasks = tasks;
+        }
 		
 		taskAdapter = new ArrayAdapter<Task>(
 				this, 
@@ -56,8 +80,34 @@ public class StartupActivity extends Activity {
 			}
 		});
 		
-		
+		if (savedInstanceState == null) {
+			if (betaManager.hasBetaManager() && betaManager.isBetaEnabled()) {
+				if (betaManager.isBetaRegistered()) {
+					Intent betaIntent = betaManager.getBetaIntent(BetaManagerManager.ACTION_SHOW_STARTUP);
+					startActivityForResult(betaIntent, REQUEST_STARTUP_CODE);
+				} else {
+					betaManager.launchBetaActivity(BetaManagerManager.ACTION_SHOW_REGISTER);
+				}
+			}
+		}
 	}
+	
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    	if (requestCode != REQUEST_STARTUP_CODE)
+    		return;
+    	
+    	switch (resultCode) {
+    		case Activity.RESULT_CANCELED:
+    			//The user declined an update, exit
+    			finish();
+    			break;
+    		case Activity.RESULT_OK:
+    			//We were up to date, continue on happily
+    			break;	
+    	}
+    }
 	
 	private void taskMap_clicked() {
 		Intent intent = CampusMapActivity.createIntent(this);
@@ -70,6 +120,10 @@ public class StartupActivity extends Activity {
 	
 	private void taskServices_clicked() {
 		
+	}
+	
+	private void taskBeta_clicked() {
+		betaManager.launchBetaActivity(BetaManagerManager.ACTION_SHOW_BETA_MANAGER);
 	}
 	
 	private class Task {

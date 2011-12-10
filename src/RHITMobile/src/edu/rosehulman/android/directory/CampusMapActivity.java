@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
@@ -55,15 +54,10 @@ public class CampusMapActivity extends MapActivity {
 	
     private static final String SELECTED_ID = "SelectedId";
 
-    public static final String EXTRA_IS_INTERNAL = "IS_INTERNAL";
 	public static final String EXTRA_BUILDING_ID = "BUILDING_ID";
 
-	private static final int REQUEST_STARTUP_CODE = 4;
-	
 	public static Intent createIntent(Context context) {
-		Intent intent = new Intent(context, CampusMapActivity.class);
-		intent.putExtra(EXTRA_IS_INTERNAL, true);
-		return intent;
+		return new Intent(context, CampusMapActivity.class);
 	}
 
 	public static Intent createIntent(Context context, long buildingId) {
@@ -78,8 +72,6 @@ public class CampusMapActivity extends MapActivity {
 		intent.putExtra(SearchManager.QUERY, query);
 		return intent;
 	}
-	
-	private BetaManagerManager betaManager;
 
     private MapView mapView;
     
@@ -109,7 +101,6 @@ public class CampusMapActivity extends MapActivity {
         setContentView(R.layout.campus_map);
         
         taskManager = new TaskManager();
-        betaManager = new BetaManagerManager(this);
         
         mapView = (MapView)findViewById(R.id.mapview);
         
@@ -128,14 +119,7 @@ public class CampusMapActivity extends MapActivity {
     			task.execute(searchQuery);
     			setTitle("Search: " + searchQuery);
     			
-    		} else if (!intent.getBooleanExtra(EXTRA_IS_INTERNAL, false) && betaManager.hasBetaManager() && betaManager.isBetaEnabled()) {
-		       	if (betaManager.isBetaRegistered()) {
-		       		Intent betaIntent = betaManager.getBetaIntent(BetaManagerManager.ACTION_SHOW_STARTUP); 
-		       		startActivityForResult(betaIntent, REQUEST_STARTUP_CODE);	
-		       	} else {
-		       		betaManager.launchBetaActivity(BetaManagerManager.ACTION_SHOW_REGISTER);
-		       	}
-	        }
+    		}
 
 	        mapView.setSatellite(true);
 	        
@@ -154,22 +138,6 @@ public class CampusMapActivity extends MapActivity {
         mapView.setBuiltInZoomControls(true);
         
         rebuildOverlays();
-    }
-    
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-    	if (requestCode != REQUEST_STARTUP_CODE)
-    		return;
-    	
-    	switch (resultCode) {
-    		case Activity.RESULT_CANCELED:
-    			//The user declined an update, exit
-    			finish();
-    			break;
-    		case Activity.RESULT_OK:
-    			//We were up to date, continue on happily
-    			break;	
-    	}
     }
     
     @Override
@@ -253,7 +221,6 @@ public class CampusMapActivity extends MapActivity {
     
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-    	menu.setGroupVisible(R.id.beta_channel, betaManager.hasBetaManager());
     	menu.setGroupEnabled(R.id.location_items, myLocation.getMyLocation() != null);
         return true;
     }
@@ -287,9 +254,6 @@ public class CampusMapActivity extends MapActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         //handle item selection
         switch (item.getItemId()) {
-        case R.id.beta_manager:
-            betaManager.launchBetaActivity(BetaManagerManager.ACTION_SHOW_BETA_MANAGER);
-            return true;
         case R.id.location:
         	mapView.getController().animateTo(myLocation.getMyLocation());
         	return true;

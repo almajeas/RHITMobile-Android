@@ -1,10 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-	<group android:id="@+id/beta_channel">
-	    <item android:id="@+id/beta_manager"
-	          android:icon="@android:drawable/ic_menu_manage"
-	          android:title="Beta Manager" />
-    </group>
     <group android:id="@+id/location_items">
 	    <item android:id="@+id/location"
 	          android:icon="@android:drawable/ic_menu_mylocation"
