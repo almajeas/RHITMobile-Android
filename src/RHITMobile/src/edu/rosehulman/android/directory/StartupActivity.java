@@ -115,7 +115,8 @@ public class StartupActivity extends Activity {
 	}
 	
 	private void taskDirectory_clicked() {
-		
+		Intent intent = PersonActivity.createIntent(this);
+		startActivity(intent);
 	}
 	
 	private void taskServices_clicked() {
