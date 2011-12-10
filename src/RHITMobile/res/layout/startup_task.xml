@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+    
+    <ImageView
+        android:id="@+id/task_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:padding="4.0dip"
+        android:scaleType="center" />
+    
+	<TextView
+        android:id="@+id/task_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/task_image"
+        android:gravity="center"
+        android:paddingTop="5.0dip"
+        android:textColor="#ff323232"
+        android:textSize="18.0sp" />
+    
+</RelativeLayout>

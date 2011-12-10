@@ -59,18 +59,22 @@ public class CampusMapActivity extends MapActivity {
 	public static final String EXTRA_BUILDING_ID = "BUILDING_ID";
 
 	private static final int REQUEST_STARTUP_CODE = 4;
-
-	public static Intent createIntent(Context context, long buildingId) {
+	
+	public static Intent createIntent(Context context) {
 		Intent intent = new Intent(context, CampusMapActivity.class);
 		intent.putExtra(EXTRA_IS_INTERNAL, true);
+		return intent;
+	}
+
+	public static Intent createIntent(Context context, long buildingId) {
+		Intent intent = createIntent(context);
 		intent.putExtra(EXTRA_BUILDING_ID, buildingId);
 		return intent;
 	}
 	
 	public static Intent createIntent(Context context, String query) {
-		Intent intent = new Intent(context, CampusMapActivity.class);
+		Intent intent = createIntent(context);
 		intent.setAction(Intent.ACTION_SEARCH);
-		intent.putExtra(EXTRA_IS_INTERNAL, true);
 		intent.putExtra(SearchManager.QUERY, query);
 		return intent;
 	}
@@ -102,7 +106,7 @@ public class CampusMapActivity extends MapActivity {
         super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		requestWindowFeature(Window.FEATURE_PROGRESS);
-        setContentView(R.layout.main);
+        setContentView(R.layout.campus_map);
         
         taskManager = new TaskManager();
         betaManager = new BetaManagerManager(this);
