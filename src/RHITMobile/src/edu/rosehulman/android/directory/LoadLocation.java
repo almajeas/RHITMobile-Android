@@ -5,7 +5,7 @@ import edu.rosehulman.android.directory.db.LocationAdapter;
 import edu.rosehulman.android.directory.model.Location;
 
 /**
- * Load a \ref .model.Location
+ * Load a \ref model.Location
  */
 public class LoadLocation extends AsyncTask<Long, Void, Location> {
 	
