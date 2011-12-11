@@ -20,9 +20,11 @@ public class PersonSearchActivity extends ListActivity {
 	private ArrayAdapter<PersonInfo> dataSet;
 	
 	private PersonInfo[] defaultPeople = new PersonInfo[] {
-		new PersonInfo(1, "Kevin Wells", "SE/CS Student"),
-		new PersonInfo(2, "Eric Hayes", "Assistant Dean of Student Affairs"),
-		new PersonInfo(3, "Matt Branam", "President")
+		new PersonInfo(1, "Scott Glowski", "CS/SE/MA Student"),
+		new PersonInfo(2, "Jimmy Theis", "SE Student"),
+		new PersonInfo(3, "Kevin Wells", "SE/CS Student"),
+		new PersonInfo(4, "Bryan Watts", "CS/SE Student"),
+		new PersonInfo(5, "Eric Hayes", "Assistant Dean of Student Affairs")
 	};
 	
 	public class PersonInfo {
