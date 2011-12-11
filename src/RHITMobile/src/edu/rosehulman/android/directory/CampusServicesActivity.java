@@ -3,12 +3,14 @@ package edu.rosehulman.android.directory;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListView;
+import android.widget.ExpandableListView.OnChildClickListener;
 import android.widget.TextView;
 
 public class CampusServicesActivity extends Activity {
@@ -20,10 +22,9 @@ public class CampusServicesActivity extends Activity {
 	private ExpandableListView tree;
 	
 	private Group[] groups = new Group[] {
-			new Group("Health Services", new Child[] {
-					new Child("Hours and Staff", "http://www.rose-hulman.edu/HealthServices/staff.htm"),
-					new Child("Services Offered", "http://www.rose-hulman.edu/HealthServices/services.htm"),
-					new Child("Forms", "http://www.rose-hulman.edu/HealthServices/forms.htm")
+			new Group("Career Services", new Child[] {
+					new Child("Contacts", "http://www.rose-hulman.edu/careerservices/contacts.htm"),
+					new Child("eRecruiting", "http://rhit.experience.com/er/security/login.jsp")
 			}),
 			new Group("Dining Services", new Child[] {
 					new Child("Cafeteria Hours", "http://www.campusdish.com/en-US/CSMW/RoseHulman/Locations/HulmanUnionCafeteria.htm"),
@@ -33,7 +34,12 @@ public class CampusServicesActivity extends Activity {
 					new Child("C3", "http://www.campusdish.com/en-US/CSMW/RoseHulman/Locations/C3ConvenienceStore.htm"),
 					new Child("Java City", "http://www.campusdish.com/en-US/CSMW/RoseHulman/Locations/JavaCity.htm"),
 					new Child("Logan's", "http://www.campusdish.com/en-US/CSMW/RoseHulman/Locations/Logans.htm")
-			})			
+			}),
+			new Group("Health Services", new Child[] {
+					new Child("Hours and Staff", "http://www.rose-hulman.edu/HealthServices/staff.htm"),
+					new Child("Services Offered", "http://www.rose-hulman.edu/HealthServices/services.htm"),
+					new Child("Forms", "http://www.rose-hulman.edu/HealthServices/forms.htm")
+			})
 	};
 	
 	@Override
@@ -43,6 +49,21 @@ public class CampusServicesActivity extends Activity {
 		
 		tree = (ExpandableListView)findViewById(R.id.tree);
 		tree.setAdapter(new TreeAdapter(groups));
+		
+		tree.setOnChildClickListener(new OnChildClickListener() {
+			@Override
+			public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+				tree_childClicked(groups[groupPosition].children[childPosition]);
+				return true;
+			}
+		});
+	}
+	
+	private void tree_childClicked(Child child) {
+		String earl = child.url;
+		Intent intent = new Intent(Intent.ACTION_VIEW);
+		intent.setData(Uri.parse(earl));
+		startActivity(intent);
 	}
 	
 	private class Group {
