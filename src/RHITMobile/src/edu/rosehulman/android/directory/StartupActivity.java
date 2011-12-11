@@ -168,6 +168,15 @@ public class StartupActivity extends Activity {
 				public void onClick(View v) {
 					taskServices_clicked();
 				}
+			}),
+			new Task("My Schedule",
+					android.R.drawable.ic_menu_my_calendar,
+					new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					Intent intent = PersonScheduleActivity.createIntent(StartupActivity.this, "Kevin");
+					startActivity(intent);
+				}
 			})
 		};
 	
