@@ -119,7 +119,8 @@ public class StartupActivity extends Activity {
 	}
 	
 	private void taskServices_clicked() {
-		
+		Intent intent = CampusServicesActivity.createIntent(this);
+		startActivity(intent);
 	}
 	
 	private void taskBeta_clicked() {
