@@ -25,6 +25,10 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            
+            <meta-data
+            	android:name="android.app.default_searchable"
+                android:value=".PersonSearchActivity" />
         </activity>
         
         <activity
@@ -71,7 +75,26 @@
 
             <meta-data
                 android:name="android.app.searchable"
-                android:resource="@xml/searchable" />
+                android:resource="@xml/searchable_location" />
+        </activity>
+        
+        <activity
+            android:label="@string/app_name"
+            android:name=".PersonSearchActivity"
+            android:launchMode="singleTop"
+            android:configChanges="keyboardHidden|orientation"
+            android:theme="@android:style/Theme.Light" >
+            
+            <intent-filter >
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+            <intent-filter >
+                <action android:name="android.intent.action.VIEW" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable_person" />
         </activity>
 
         <uses-library android:name="com.google.android.maps" />
@@ -79,6 +102,10 @@
         <provider
             android:name=".providers.LocationSearchSuggestions" 
             android:authorities="edu.rosehulman.android.directory.providers.LocationSearchSuggestions"/>
+        
+        <provider
+            android:name=".providers.PeopleSearchSuggestions" 
+            android:authorities="edu.rosehulman.android.directory.providers.PeopleSearchSuggestions"/>
     </application>
 
 </manifest>
