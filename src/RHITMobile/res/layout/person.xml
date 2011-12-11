@@ -10,7 +10,7 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:padding="5dp"
-        android:background="@drawable/title_bar_medium" >
+        android:background="@android:drawable/bottom_bar" >
 
 	    <ImageView
 	        android:id="@+id/image"

@@ -1,14 +1,25 @@
 package edu.rosehulman.android.directory;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 import android.app.Activity;
+import android.content.ContentProviderOperation;
 import android.content.Context;
 import android.content.Intent;
+import android.content.OperationApplicationException;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.RemoteException;
+import android.provider.ContactsContract;
+import android.provider.ContactsContract.CommonDataKinds.StructuredName;
+import android.provider.ContactsContract.Data;
+import android.provider.ContactsContract.RawContacts;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -58,6 +69,58 @@ public class PersonActivity extends Activity {
 		});
         
     }
+    
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.person, menu);
+        return true;
+    }
+    
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        return true;
+    }
+    
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        //handle item selection
+        switch (item.getItemId()) {
+        case R.id.add_contact:
+        	//TODO finish implementing createContact
+        	//createContact();
+        	return true;
+        default:
+            return super.onOptionsItemSelected(item);
+        }
+    }
+    
+	private void createContact() {
+		ArrayList<ContentProviderOperation> ops =
+				new ArrayList<ContentProviderOperation>();
+		int rawContactInsertIndex = ops.size();
+		ops.add(ContentProviderOperation.newInsert(RawContacts.CONTENT_URI)
+				.withValue(RawContacts.ACCOUNT_TYPE, "RHIT")
+				.withValue(RawContacts.ACCOUNT_NAME, "RHIT")
+				.build());
+
+		ops.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)
+				.withValueBackReference(Data.RAW_CONTACT_ID, rawContactInsertIndex)
+				.withValue(Data.MIMETYPE, StructuredName.CONTENT_ITEM_TYPE)
+				.withValue(StructuredName.DISPLAY_NAME, "Eric Hayes")
+				.build());
+
+		try {
+			getContentResolver().applyBatch(ContactsContract.AUTHORITY, ops);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+			return;
+		} catch (OperationApplicationException e) {
+			e.printStackTrace();
+			return;
+		}
+
+	}
     
     private void createListItems() {
     	List<ListItem> items = new LinkedList<ListItem>();
