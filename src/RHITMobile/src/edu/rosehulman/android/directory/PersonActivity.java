@@ -129,6 +129,7 @@ public class PersonActivity extends Activity {
     	items.add(new CallItem("1112223333,,1234"));
     	items.add(new LocationItem("F217"));
     	items.add(new LabelItem("Major", "SE/CS"));
+    	items.add(new LabelItem("Class", "Senior"));
     	items.add(new LabelItem("Campus Mailbox", "1965"));
     	
     	listItems = new ListItem[items.size()];
