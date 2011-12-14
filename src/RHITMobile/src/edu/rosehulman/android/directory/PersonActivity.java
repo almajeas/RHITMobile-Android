@@ -126,7 +126,7 @@ public class PersonActivity extends Activity {
     	List<ListItem> items = new LinkedList<ListItem>();
     	items.add(new ScheduleItem("Kevin Wells"));
     	items.add(new EmailItem("wellska1@rose-hulman.edu"));
-    	items.add(new CallItem("1112223333,,1234"));
+    	items.add(new CallItem("1112223333 x1234"));
     	items.add(new LocationItem("F217"));
     	items.add(new LabelItem("Major", "SE/CS"));
     	items.add(new LabelItem("Class", "Senior"));

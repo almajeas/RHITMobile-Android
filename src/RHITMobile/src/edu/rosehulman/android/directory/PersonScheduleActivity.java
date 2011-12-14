@@ -78,15 +78,26 @@ public class PersonScheduleActivity extends TabActivity {
 
 			hour.setText(String.valueOf(i));
 			time.setText(times[i]);
-			if ("wed".equals(tag)) {
-				if (i >= 7 && i <= 9) {
-					course.setText("CSSE498-01");
-					room.setText("O205");
+			if (i == 2)
+			{
+				if ("mon".equals(tag) || "tue".equals(tag) || "thu".equals(tag)) {
+					course.setText("ECE480-01");
+					room.setText("DL119");
 				}
-			} else {
-				if (i == 9) {
-					course.setText("CSSE474-02");
+			} else if (i == 5) {
+				if ("mon".equals(tag) || "tue".equals(tag) || "thu".equals(tag)) {
+					course.setText("IA241-02");
+					room.setText("A220");
+				}
+			} else if (i == 8) {
+				if ("mon".equals(tag) || "tue".equals(tag) || "thu".equals(tag) || "fri".equals(tag)) {
+					course.setText("CSSE474-01");
 					room.setText("G317");
+				}
+			} else if ("wed".equals(tag)) {
+				if (i >= 4 && i <= 6) {
+					course.setText("IA241-02");
+					room.setText("GM");
 				}
 			}
 			return (TableRow)v;

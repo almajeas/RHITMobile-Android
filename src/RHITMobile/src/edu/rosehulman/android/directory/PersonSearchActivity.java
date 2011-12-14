@@ -24,7 +24,7 @@ public class PersonSearchActivity extends ListActivity {
 		new PersonInfo(2, "Jimmy Theis", "SE Student"),
 		new PersonInfo(3, "Kevin Wells", "SE/CS Student"),
 		new PersonInfo(4, "Bryan Watts", "CS/SE Student"),
-		new PersonInfo(5, "Eric Hayes", "Assistant Dean of Student Affairs")
+		new PersonInfo(5, "Erik Hayes", "Assistant Dean of Student Affairs")
 	};
 	
 	public class PersonInfo {
