@@ -2,6 +2,7 @@ package edu.rosehulman.android.directory.service;
 
 import org.json.JSONObject;
 
+import edu.rosehulman.android.directory.model.DirectionsResponse;
 import edu.rosehulman.android.directory.model.LocationCollection;
 import edu.rosehulman.android.directory.model.LocationNamesCollection;
 
@@ -26,11 +27,6 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 	 */
 	public static void setClientFactory(ClientFactory factory) {
 		MobileDirectoryService.factory = factory;
-	}
-	
-	@Override
-	public LocationCollection getAllLocationData(String currentVersion) throws Exception {
-		return getLocationCollection("locations/data/all", currentVersion);
 	}
 	
 	@Override
@@ -69,5 +65,31 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 		}
 		
 		return LocationNamesCollection.deserialize(root);
+	}
+	
+	@Override
+	public DirectionsResponse getDirections(long from, long to) throws Exception {
+		String url = String.format("directions/fromloc/%ld/toloc/%ld", from, to);
+		JsonClient client = factory.makeJsonClient(HOST, PORT, url);
+		
+		JSONObject root = client.execute();
+		if (root == null) {
+			return null;
+		}
+		
+		return DirectionsResponse.deserialize(root);
+	}
+	
+	@Override
+	public DirectionsResponse getDirectionsStatus(int requestId) throws Exception {
+		String url = String.format("directions/status/%d", requestId);
+		JsonClient client = factory.makeJsonClient(HOST, PORT, url);
+		
+		JSONObject root = client.execute();
+		if (root == null) {
+			return null;
+		}
+		
+		return DirectionsResponse.deserialize(root);
 	}
 }
