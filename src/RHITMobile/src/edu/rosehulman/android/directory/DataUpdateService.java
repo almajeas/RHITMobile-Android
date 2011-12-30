@@ -1,0 +1,156 @@
+package edu.rosehulman.android.directory;
+
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.Service;
+import android.content.Context;
+import android.content.Intent;
+import android.os.AsyncTask;
+import android.os.Binder;
+import android.os.IBinder;
+import android.util.Log;
+
+public class DataUpdateService extends Service {
+	
+	public static Intent createIntent(Context context) {
+		return new Intent(context, DataUpdateService.class);
+	}
+	
+	private LocalBinder binder = new LocalBinder();
+
+	private NotificationManager notifyManager;
+	private UpdateDataTask updateTask;
+	
+	private static final int NOTIFICATION_ID = 4848;
+	
+	@Override
+	public void onCreate() {
+		notifyManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);	
+	}
+
+	@Override
+	public int onStartCommand(Intent intent, int flags, int startId) {
+		if (intent != null) {
+			//TODO handle method
+		}
+		return START_STICKY;
+	}
+
+	@Override
+	public void onDestroy() {
+		binder.abort();
+	}
+
+
+	@Override
+	public IBinder onBind(Intent intent) {
+		Log.d(C.TAG, "Service binding");
+		return binder;
+	}
+	
+	public class LocalBinder extends Binder implements IDataUpdateService {
+
+		@Override
+		public void startUpdate() {
+			synchronized (DataUpdateService.this) {
+				if (updateTask == null) {
+					updateTask = new UpdateDataTask();
+					updateTask.execute();
+				}	
+			}
+		}
+		
+		@Override
+		public void abort() {
+			synchronized (DataUpdateService.this) {
+				if (updateTask != null) {
+					updateTask.cancel(true);
+					updateTask = null;
+				}	
+			}
+		}
+		
+	}
+	
+	private enum UpdateStatus {
+		UPDATE_LOCATIONS,
+		UPDATE_SERVICES
+	}
+	
+	private class UpdateDataTask extends AsyncTask<Void, UpdateStatus, Void> {
+		
+		private PendingIntent startupIntent;
+		private Notification updateNotification;
+		
+		@Override
+		protected void onPreExecute() {
+			createNotification();
+			updateStatus(UpdateStatus.UPDATE_LOCATIONS);
+		}
+
+		@Override
+		protected Void doInBackground(Void... params) {
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e) { }
+			publishProgress(UpdateStatus.UPDATE_SERVICES);
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e) { }
+			return null;
+		}
+		
+		@Override
+		protected void onProgressUpdate(UpdateStatus... status) {
+			updateStatus(status[0]);
+		}
+		
+		@Override
+		protected void onPostExecute(Void result) {
+			cancelNotification();
+		}
+		
+		@Override
+		protected void onCancelled() {
+			cancelNotification();
+		}
+		
+		private void updateStatus(UpdateStatus status) {
+			switch (status) {
+			case UPDATE_LOCATIONS:
+				updateNotification("Updating locations...");
+				break;
+			case UPDATE_SERVICES:
+				updateNotification("Updating campus services...");
+				break;
+			}
+		}
+		
+		private void createNotification() {
+	        Intent appIntent = StartupActivity.createIntent(DataUpdateService.this);
+	        startupIntent = PendingIntent.getActivity(DataUpdateService.this, 0, appIntent, 0);
+	        appIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+	        appIntent.addFlags(Intent.FLAG_FROM_BACKGROUND);
+	 
+	        String message = "Updating remote data...";
+	 
+	        updateNotification = new Notification(R.drawable.icon, message, System.currentTimeMillis());
+	        updateNotification.when = System.currentTimeMillis();
+	        
+	    }
+		
+		private void updateNotification(String message) {
+	        String title = getResources().getString(R.string.app_name);
+	        updateNotification.setLatestEventInfo(DataUpdateService.this, title, message, startupIntent);
+	        notifyManager.notify(NOTIFICATION_ID, updateNotification);
+	        
+	        Log.d(C.TAG, "Posting update: " + message);
+		}
+		
+		private void cancelNotification() {
+			notifyManager.cancel(NOTIFICATION_ID);
+		}
+	}
+
+}

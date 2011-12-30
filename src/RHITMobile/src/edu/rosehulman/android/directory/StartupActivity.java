@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -14,8 +15,14 @@ import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
+import edu.rosehulman.android.directory.MyApplication.UpdateServiceListener;
 
 public class StartupActivity extends Activity {
+	
+	public static Intent createIntent(Context context) {
+		Intent intent = new Intent(context, StartupActivity.class);
+		return intent;
+	}
 	
 	private BetaManagerManager betaManager;
 	
@@ -24,6 +31,9 @@ public class StartupActivity extends Activity {
 	private GridView tasksView;
 	
 	private static final int REQUEST_STARTUP_CODE = 4;
+	
+	private boolean updateData = true;
+	private static IDataUpdateService updateService;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -82,6 +92,7 @@ public class StartupActivity extends Activity {
 		
 		if (savedInstanceState == null) {
 			if (betaManager.hasBetaManager() && betaManager.isBetaEnabled()) {
+				updateData = false;
 				if (betaManager.isBetaRegistered()) {
 					Intent betaIntent = betaManager.getBetaIntent(BetaManagerManager.ACTION_SHOW_STARTUP);
 					startActivityForResult(betaIntent, REQUEST_STARTUP_CODE);
@@ -90,6 +101,21 @@ public class StartupActivity extends Activity {
 				}
 			}
 		}
+		Log.d(C.TAG, "Requesting service");
+		MyApplication.getInstance().getDataUpdateService(new UpdateServiceListener() {
+			@Override
+			public void onServiceAcquired(IDataUpdateService service) {
+				updateService = (IDataUpdateService)service;
+				if (updateData) {
+					updateService.startUpdate();
+				}
+			}
+			
+			@Override
+			public void onServiceLost() {
+				updateService = null;
+			}
+		});
 	}
 	
 
@@ -105,6 +131,10 @@ public class StartupActivity extends Activity {
     			break;
     		case Activity.RESULT_OK:
     			//We were up to date, continue on happily
+    			updateData = true;
+    			if (updateService != null) {
+    				updateService.startUpdate();
+    			}
     			break;	
     	}
     }

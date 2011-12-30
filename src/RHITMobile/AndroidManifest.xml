@@ -111,6 +111,9 @@
         <provider
             android:name=".providers.PeopleSearchSuggestions" 
             android:authorities="edu.rosehulman.android.directory.providers.PeopleSearchSuggestions"/>
+        
+		<service android:enabled="true" android:name=".DataUpdateService" />        
+        
     </application>
 
 </manifest>
