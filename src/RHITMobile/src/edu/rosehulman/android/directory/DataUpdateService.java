@@ -78,23 +78,41 @@ public class DataUpdateService extends Service {
 		UPDATE_SERVICES
 	}
 	
-	private class UpdateDataTask extends AsyncTask<Void, UpdateStatus, Void> {
+	private class UpdateDataTask extends AsyncTask<Void, Void, Void> {
 		
 		private PendingIntent startupIntent;
 		private Notification updateNotification;
 		
+		private UpdateStatus step;
+		private int progress;
+		private int locationCount;
+		
 		@Override
 		protected void onPreExecute() {
 			createNotification();
-			updateStatus(UpdateStatus.UPDATE_LOCATIONS);
+		}
+		
+		private void sleep(int ms) {
+			try {
+				Thread.sleep(ms);
+			} catch (InterruptedException e) { }
 		}
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			try {
-				Thread.sleep(10000);
-			} catch (InterruptedException e) { }
-			publishProgress(UpdateStatus.UPDATE_SERVICES);
+			step = UpdateStatus.UPDATE_LOCATIONS;
+			progress = -1;
+			publishProgress();
+
+			locationCount = 100;
+			sleep(1000);
+			for (int i = 0; i < locationCount; i++) {
+				progress = i;
+				publishProgress();
+				sleep(50);
+			}
+			step = UpdateStatus.UPDATE_SERVICES;
+			publishProgress();
 			try {
 				Thread.sleep(10000);
 			} catch (InterruptedException e) { }
@@ -102,8 +120,8 @@ public class DataUpdateService extends Service {
 		}
 		
 		@Override
-		protected void onProgressUpdate(UpdateStatus... status) {
-			updateStatus(status[0]);
+		protected void onProgressUpdate(Void... args) {
+			updateStatus();
 		}
 		
 		@Override
@@ -116,10 +134,14 @@ public class DataUpdateService extends Service {
 			cancelNotification();
 		}
 		
-		private void updateStatus(UpdateStatus status) {
-			switch (status) {
+		private void updateStatus() {
+			switch (step) {
 			case UPDATE_LOCATIONS:
-				updateNotification("Updating locations...");
+				if (progress < 0) {
+					updateNotification("Updating locations...");
+				} else {
+					updateNotification(String.format("Updating locations (%d/%d)...", progress+1, locationCount));
+				}
 				break;
 			case UPDATE_SERVICES:
 				updateNotification("Updating campus services...");
@@ -144,8 +166,6 @@ public class DataUpdateService extends Service {
 	        String title = getResources().getString(R.string.app_name);
 	        updateNotification.setLatestEventInfo(DataUpdateService.this, title, message, startupIntent);
 	        notifyManager.notify(NOTIFICATION_ID, updateNotification);
-	        
-	        Log.d(C.TAG, "Posting update: " + message);
 		}
 		
 		private void cancelNotification() {
