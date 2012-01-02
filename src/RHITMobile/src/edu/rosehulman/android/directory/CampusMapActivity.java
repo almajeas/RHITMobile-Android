@@ -24,6 +24,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.Window;
+import android.widget.Toast;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
@@ -53,8 +54,11 @@ import edu.rosehulman.android.directory.service.MobileDirectoryService;
 public class CampusMapActivity extends MapActivity {
 	
     private static final String SELECTED_ID = "SelectedId";
+    
+    public static final String ACTION_DIRECTIONS = "edu.rosehulman.android.directory.intent.action.DIRECTIONS";
 
 	public static final String EXTRA_BUILDING_ID = "BUILDING_ID";
+	public static final String EXTRA_WAYPOINTS = "WAYPOINTS";
 
 	public static Intent createIntent(Context context) {
 		return new Intent(context, CampusMapActivity.class);
@@ -70,6 +74,13 @@ public class CampusMapActivity extends MapActivity {
 		Intent intent = createIntent(context);
 		intent.setAction(Intent.ACTION_SEARCH);
 		intent.putExtra(SearchManager.QUERY, query);
+		return intent;
+	}
+	
+	public static Intent createDirectionsIntent(Context context, long... ids) {
+		Intent intent = createIntent(context);
+		intent.setAction(ACTION_DIRECTIONS);
+		intent.putExtra(EXTRA_WAYPOINTS, ids);
 		return intent;
 	}
 
@@ -118,7 +129,15 @@ public class CampusMapActivity extends MapActivity {
     			taskManager.addTask(task);
     			task.execute(searchQuery);
     			setTitle("Search: " + searchQuery);
-    			
+    		
+        	} else if (ACTION_DIRECTIONS.equals(intent.getAction())) {
+        		StringBuilder ids = new StringBuilder();
+        		for (long id : intent.getLongArrayExtra(EXTRA_WAYPOINTS)) {
+        			ids.append(id);
+        			ids.append(' ');
+        		}
+        		
+    			Toast.makeText(this, "TODO: show directions for location ids: " + ids.toString(), Toast.LENGTH_LONG).show();
     		}
 
 	        mapView.setSatellite(true);

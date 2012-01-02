@@ -263,6 +263,31 @@ public class LocationAdapter extends TableAdapter {
 	}
 	
 	/**
+	 * Finds a building with the given name
+	 * 
+	 * @param name The name of the building
+	 * @return The id of the building, or -1 if 0 or multiple matches exist
+	 */
+	public long findBuilding(String name) {
+		String sql = "SELECT _Id FROM Locations WHERE UPPER(Name)=UPPER(?) " + 
+				"UNION " +
+				"SELECT LocationId AS _Id FROM AltNames WHERE UPPER(Name)=UPPER(?)";
+		
+		Cursor cursor = db.rawQuery(sql, new String[] {name, name});
+		
+		if (cursor.getCount() != 1) {
+			cursor.close();
+			return -1;
+		}
+		
+		cursor.moveToFirst();
+		long id = cursor.getLong(0); 
+		cursor.close();
+		
+		return id; 
+	}
+	
+	/**
 	 * Gets the IDs of locations that have not yet loaded their children
 	 * 
 	 * @return an array of IDs to load
