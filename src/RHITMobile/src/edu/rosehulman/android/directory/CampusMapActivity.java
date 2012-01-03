@@ -131,13 +131,17 @@ public class CampusMapActivity extends MapActivity {
     			setTitle("Search: " + searchQuery);
     		
         	} else if (ACTION_DIRECTIONS.equals(intent.getAction())) {
-        		StringBuilder ids = new StringBuilder();
-        		for (long id : intent.getLongArrayExtra(EXTRA_WAYPOINTS)) {
-        			ids.append(id);
-        			ids.append(' ');
+        		StringBuilder idMsg = new StringBuilder();
+        		long[] ids = intent.getLongArrayExtra(EXTRA_WAYPOINTS);
+        		for (long id : ids) {
+        			idMsg.append(id);
+        			idMsg.append(' ');
         		}
         		
-    			Toast.makeText(this, "TODO: show directions for location ids: " + ids.toString(), Toast.LENGTH_LONG).show();
+    			Toast.makeText(this, "TODO: show directions for location ids: " + idMsg.toString(), Toast.LENGTH_LONG).show();
+    			
+    			LoadDirections task = new LoadDirections(ids);
+    			task.execute();
     		}
 
 	        mapView.setSatellite(true);
@@ -760,7 +764,7 @@ public class CampusMapActivity extends MapActivity {
 	
 	private class SearchLocations extends AsyncTask<String, Void, LocationSearchLayer> {
 		
-		ProgressDialog dialog;
+		private ProgressDialog dialog;
 
 		@Override
 		protected void onPreExecute() {
@@ -826,4 +830,46 @@ public class CampusMapActivity extends MapActivity {
 		}
 		
 	}
+
+	private class LoadDirections extends AsyncTask<Void, Void, Void> {
+		
+		private long[] ids;
+		private ProgressDialog dialog;
+		
+		public LoadDirections(long[] ids) {
+			this.ids = ids;
+		}
+
+		@Override
+		protected void onPreExecute() {
+			dialog = new ProgressDialog(CampusMapActivity.this);
+			dialog.setTitle(null);
+			dialog.setMessage("Getting Directions...");
+			dialog.setIndeterminate(true);
+			dialog.setCancelable(false);
+			dialog.show();
+		}
+		
+		@Override
+		protected Void doInBackground(Void... params) {
+			try {
+				Thread.sleep(2000);
+			} catch (InterruptedException e) { }
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void res) {
+			dialog.dismiss();
+		
+		}
+		
+		@Override
+		protected void onCancelled() {
+			dialog.dismiss();
+		}
+		
+	}
+	
+	
 }
