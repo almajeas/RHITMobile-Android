@@ -150,7 +150,7 @@ public class CampusMapActivity extends MapActivity {
 	        MapController controller = mapView.getController();
 	        GeoPoint center = new GeoPoint(39483760, -87325929);
 	        controller.setCenter(center);
-	        controller.zoomToSpan(6241, 13894);
+	        controller.zoomToSpan(5000, 10000);
 	        
 	    } else {
 	    	this.savedInstanceState = savedInstanceState;
