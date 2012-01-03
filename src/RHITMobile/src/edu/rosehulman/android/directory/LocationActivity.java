@@ -13,6 +13,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -162,7 +163,7 @@ public class LocationActivity extends Activity {
     	final CharSequence[] locations = {"Inside", "Outside"};
 
     	new AlertDialog.Builder(this)
-    		.setTitle("Where are you")
+    		.setTitle("Where are you? ")
     		.setItems(locations, new DialogInterface.OnClickListener() {
 	    	    public void onClick(DialogInterface dialog, int item) {
 	    	    	switch (item) {
@@ -175,10 +176,12 @@ public class LocationActivity extends Activity {
 									Toast.makeText(LocationActivity.this, "Location not found. Try again.", Toast.LENGTH_SHORT).show();
 								}
 								
-								final EditText roomView = new EditText(LocationActivity.this);
+								LayoutInflater inflater = (LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE);
+								View root = inflater.inflate(R.layout.text_entry_dialog, null);
+								final EditText roomView = (EditText)root.findViewById(R.id.edit);
 			    	    		new AlertDialog.Builder(LocationActivity.this)
-			    	    			.setTitle("What room are you near")
-			    	    			.setView(roomView)
+			    	    			.setTitle("What room are you near?")
+			    	    			.setView(root)
 			    	    			.setPositiveButton("Get Directions", new DialogInterface.OnClickListener() {
 										@Override
 										public void onClick(DialogInterface dialog, int which) {
