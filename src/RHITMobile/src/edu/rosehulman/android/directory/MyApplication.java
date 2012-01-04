@@ -39,7 +39,7 @@ public class MyApplication extends Application {
 	
 	private static MyApplication instance;
 	
-	private static final boolean PURGE_DB = false;
+	private static final boolean PURGE_DB = true;
 	
 	/**
 	 * Get the globally accessible application instance

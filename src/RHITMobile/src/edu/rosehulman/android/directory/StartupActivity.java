@@ -117,6 +117,14 @@ public class StartupActivity extends Activity {
 		});
 	}
 	
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+
+		if (updateService != null) {
+			updateService.abort();
+		}
+	}
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

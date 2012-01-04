@@ -1,5 +1,8 @@
 package edu.rosehulman.android.directory;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -9,6 +12,13 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.IBinder;
+import android.util.Log;
+import edu.rosehulman.android.directory.db.LocationAdapter;
+import edu.rosehulman.android.directory.db.VersionsAdapter;
+import edu.rosehulman.android.directory.model.Location;
+import edu.rosehulman.android.directory.model.LocationCollection;
+import edu.rosehulman.android.directory.model.VersionType;
+import edu.rosehulman.android.directory.service.MobileDirectoryService;
 import edu.rosehulman.android.directory.util.TaskQueue;
 import edu.rosehulman.android.directory.util.TaskQueue.Task;
 
@@ -114,6 +124,9 @@ public class DataUpdateService extends Service {
 			
 			while (!queue.isEmpty()) {
 				queue.runTask();
+				
+				if (isCancelled())
+					return null;
 			}
 			
 			return null;
@@ -158,8 +171,7 @@ public class DataUpdateService extends Service {
 	        String message = "Updating remote data...";
 	 
 	        updateNotification = new Notification(R.drawable.icon, message, System.currentTimeMillis());
-	        updateNotification.when = System.currentTimeMillis();
-	        
+	        updateNotification.flags = Notification.FLAG_ONGOING_EVENT;
 	    }
 		
 		private void updateNotification(String message) {
@@ -190,11 +202,55 @@ public class DataUpdateService extends Service {
 				locationProgress = -1;
 				updateLocationProgress();
 				
-				sleep(1000);
+				//check for updated map areas
+				VersionsAdapter versionsAdapter = new VersionsAdapter();
+				versionsAdapter.open();
+		        
+				MobileDirectoryService service = new MobileDirectoryService();
+		    	String version = versionsAdapter.getVersion(VersionType.MAP_AREAS);
+		    	versionsAdapter.close();
 				
-				locationCount = 100;
+		        LocationCollection collection = null;
+		        try {
+		        	collection = service.getTopLocationData(version);
+				} catch (Exception e) {
+					Log.e(C.TAG, "Failed to download new locations", e);
+					//wait a bit and try again
+					queue.addTask(new TopLocationsTask());
+					sleep(5000);
+					return;
+				}
+				if (isCancelled()) {
+					return;
+				}
+				
+				if (collection == null) {
+					//data was up to date, make sure we have loaded all of our inner locations
+					LocationAdapter buildingAdapter = new LocationAdapter();
+			        buildingAdapter.open();
+					long[] ids = buildingAdapter.getUnloadedTopLocations();
+					locationCount = buildingAdapter.getAllTopLocations().length;
+					locationProgress = locationCount - ids.length;
+			        buildingAdapter.close();
+			        for (long id : ids) {
+			        	queue.addTask(new InnerLocationTask(id));
+			        }
+					return;
+				}
+				
+		        LocationAdapter buildingAdapter = new LocationAdapter();
+		        buildingAdapter.open();
+		        buildingAdapter.replaceLocations(collection.mapAreas);
+		        buildingAdapter.close();
+		        
+		        versionsAdapter.open();
+		        versionsAdapter.setVersion(VersionType.MAP_AREAS, collection.version);
+		        versionsAdapter.close();
+		        
+		        locationCount = collection.mapAreas.length;
+		        
 				for (int i = 0; i < locationCount; i++) {
-					queue.addTask(new InnerLocationTask(i));
+					queue.addTask(new InnerLocationTask(collection.mapAreas[i].id));
 				}
 			}
 			
@@ -217,7 +273,45 @@ public class DataUpdateService extends Service {
 				locationProgress++;
 				updateLocationProgress();
 				
-				sleep(50);
+				MobileDirectoryService service = new MobileDirectoryService();
+		        LocationAdapter buildingAdapter = new LocationAdapter();
+		        buildingAdapter.open();
+
+		        try {
+		        	Set<Long> topIds = new HashSet<Long>();
+			        long[] ids = buildingAdapter.getAllTopLocations();
+			        for (long id : ids) {
+			        	topIds.add(id);
+			        }
+		        	
+					LocationCollection collection = null;
+			        try {
+			        	collection = service.getLocationData(id, null);
+					} catch (Exception e) {
+						Log.e(C.TAG, "Failed to download locations within a parent", e);
+						locationProgress--;
+						queue.addTask(this);
+						return;
+					}
+					if (isCancelled()) {
+						return;
+					}
+	
+			        buildingAdapter.startTransaction();
+			        for (Location location : collection.mapAreas) {
+			        	if (topIds.contains(location.id))
+			        		continue;
+			        	
+			        	buildingAdapter.addLocation(location);
+			        }
+			        buildingAdapter.setChildrenLoaded(id, true);
+			        
+					buildingAdapter.commitTransaction();
+		        	buildingAdapter.finishTransaction();
+		        	
+		        } finally {
+		        	buildingAdapter.close();
+		        }
 			}
 			
 			@Override

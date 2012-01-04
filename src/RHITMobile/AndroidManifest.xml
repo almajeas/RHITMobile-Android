@@ -20,7 +20,10 @@
         <activity
             android:label="@string/app_name"
             android:name=".StartupActivity"
-            android:theme="@android:style/Theme.Light" >
+            android:theme="@android:style/Theme.Light"
+            android:launchMode="singleTop" 
+            android:allowTaskReparenting="true" >
+            
             <intent-filter >
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
