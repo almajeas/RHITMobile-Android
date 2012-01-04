@@ -1,0 +1,82 @@
+package edu.rosehulman.android.directory.util;
+
+import java.util.LinkedList;
+import java.util.List;
+
+/**
+ * Provides a queue of tasks that are executed in the order that they are added
+ */
+public class TaskQueue {
+	
+	/**
+	 * A runnable task that can be inserted into the task queue
+	 */
+	public interface Task {
+		
+		/**
+		 * Called when the task should perform its main operation.  The task is
+		 * free to perform operations on the TaskQueue, including adding new tasks
+		 * 
+		 * @param queue The TaskQueue the task is running from
+		 */
+		void run(TaskQueue queue);
+	}
+	
+	private List<Task> q;
+	
+	/**
+	 * Creates a new TaskQueue
+	 */
+	public TaskQueue() {
+		q = new LinkedList<Task>();
+	}
+	
+	/**
+	 * Adds a task to the queue to be executed
+	 * 
+	 * @param task The task to be executed
+	 */
+	public void addTask(Task task) {
+		synchronized (q) {
+			q.add(task);
+		}
+	}
+	
+	/**
+	 * Moves the given task to the start of the queue
+	 * 
+	 * @param task The task to run next
+	 */
+	public void prioritizeTask(Task task) {
+		synchronized (q) {
+			if (q.remove(task)) {
+				q.add(0, task);
+			}
+		}
+	}
+	
+	/**
+	 * Determines if there are any remaining tasks to run
+	 * 
+	 * @return True if the queue is empty
+	 */
+	public boolean isEmpty() {
+		synchronized (q) {
+			return q.isEmpty();
+		}
+	}
+	
+	/**
+	 * Runs the next task in the queue and removes it
+	 */
+	public void runTask() {
+		Task task;
+		
+		synchronized (q) {
+			task = q.remove(0);
+		}
+		
+		task.run(this);
+	}
+	
+}

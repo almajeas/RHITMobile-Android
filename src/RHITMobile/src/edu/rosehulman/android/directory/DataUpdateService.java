@@ -9,6 +9,8 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.IBinder;
+import edu.rosehulman.android.directory.util.TaskQueue;
+import edu.rosehulman.android.directory.util.TaskQueue.Task;
 
 public class DataUpdateService extends Service {
 	
@@ -69,6 +71,11 @@ public class DataUpdateService extends Service {
 			}
 		}
 		
+		@Override
+		public void requestTopLocations(AsyncRequest listener) {
+			//TODO implement
+		}
+		
 	}
 	
 	private enum UpdateStatus {
@@ -83,6 +90,8 @@ public class DataUpdateService extends Service {
 		
 		private UpdateStatus step;
 		private int progress;
+		
+		private int locationProgress;
 		private int locationCount;
 		
 		@Override
@@ -95,25 +104,18 @@ public class DataUpdateService extends Service {
 				Thread.sleep(ms);
 			} catch (InterruptedException e) { }
 		}
-
+		
 		@Override
 		protected Void doInBackground(Void... params) {
-			step = UpdateStatus.UPDATE_LOCATIONS;
-			progress = -1;
-			publishProgress();
-
-			locationCount = 100;
-			sleep(1000);
-			for (int i = 0; i < locationCount; i++) {
-				progress = i;
-				publishProgress();
-				sleep(50);
+			
+			TaskQueue queue = new TaskQueue();
+			queue.addTask(new TopLocationsTask());
+			queue.addTask(new CampusServicesTask());
+			
+			while (!queue.isEmpty()) {
+				queue.runTask();
 			}
-			step = UpdateStatus.UPDATE_SERVICES;
-			publishProgress();
-			try {
-				Thread.sleep(10000);
-			} catch (InterruptedException e) { }
+			
 			return null;
 		}
 		
@@ -169,6 +171,79 @@ public class DataUpdateService extends Service {
 		private void cancelNotification() {
 			notifyManager.cancel(NOTIFICATION_ID);
 		}
+		
+		private void updateLocationProgress() {
+			step = UpdateStatus.UPDATE_LOCATIONS;
+			progress = locationProgress;
+			publishProgress();
+		}
+		
+		private void updateServicesProgress() {
+			step = UpdateStatus.UPDATE_SERVICES;
+			publishProgress();
+		}
+		
+		class TopLocationsTask implements Task {
+			
+			@Override
+			public void run(TaskQueue queue) {
+				locationProgress = -1;
+				updateLocationProgress();
+				
+				sleep(1000);
+				
+				locationCount = 100;
+				for (int i = 0; i < locationCount; i++) {
+					queue.addTask(new InnerLocationTask(i));
+				}
+			}
+			
+			@Override
+			public boolean equals(Object o) {
+				return o instanceof TopLocationsTask;
+			}
+		}
+		
+		class InnerLocationTask implements Task {
+			
+			private long id;
+			
+			public InnerLocationTask(long id) {
+				this.id = id;
+			}
+
+			@Override
+			public void run(TaskQueue queue) {
+				locationProgress++;
+				updateLocationProgress();
+				
+				sleep(50);
+			}
+			
+			@Override
+			public boolean equals(Object o) {
+				if (!(o instanceof InnerLocationTask))
+					return false;
+				
+				return ((InnerLocationTask)o).id == id;
+			}
+		}
+		
+		class CampusServicesTask implements Task {
+
+			@Override
+			public void run(TaskQueue queue) {
+				updateServicesProgress();
+				sleep(5000);
+			}
+			
+			@Override
+			public boolean equals(Object o) {
+				return o instanceof CampusServicesTask;
+			}
+		}
+		
+		
 	}
 
 }
