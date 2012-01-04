@@ -388,7 +388,7 @@ public class DataUpdateService extends Service {
 			@Override
 			public void run(TaskQueue queue) {
 				updateServicesProgress();
-				sleep(5000);
+				sleep(1000);
 			}
 			
 			@Override
