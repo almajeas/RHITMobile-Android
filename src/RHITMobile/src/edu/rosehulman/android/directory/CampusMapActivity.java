@@ -183,30 +183,9 @@ public class CampusMapActivity extends MapActivity {
 					
 					@Override
 					public void onCompleted() {
-						if (dialog.isShowing()) {
-							dialog.cancel();
-						}
-						
-						generateText();
-						
-						//don't generate buildings or POI if we are searching
-						if (searchQuery != null) {
-							return;
-						}
-						
-						generateBuildings();
-						generatePOI();
-						rebuildOverlays();
-						
-						Intent intent = getIntent();
-						
-						//set a selected location
-				    	if (savedInstanceState != null) {
-				    		focusLocation(savedInstanceState.getLong(SELECTED_ID), false);
-				    	} else if (intent.hasExtra(EXTRA_BUILDING_ID)) {
-				    		long id = intent.getLongExtra(EXTRA_BUILDING_ID, -1);
-				    		focusLocation(id, false);
-				    	}
+						LoadOverlays task = new LoadOverlays(dialog);
+						taskManager.addTask(task);
+						task.execute();
 					}
 				});
 			}
@@ -460,8 +439,6 @@ public class CampusMapActivity extends MapActivity {
     
 
     private void generateBuildings() {
-    	BuildingOverlayLayer.initializeCache();
-    	
     	BuildingOverlayLayer buildings = new BuildingOverlayLayer(mapView, buildingSelectedListener);
     	buildingLayer = buildings;
     }
@@ -485,9 +462,68 @@ public class CampusMapActivity extends MapActivity {
     }
 
 	private void generateText() {
-		TextOverlayLayer.initializeCache();
-		
         textLayer = new TextOverlayLayer();
+	}
+	
+	private class LoadOverlays extends AsyncTask<Void, Void, Void> {
+		
+		private ProgressDialog dialog;
+		
+		public LoadOverlays(ProgressDialog dialog) {
+			this.dialog = dialog;
+		}
+
+		@Override
+		protected Void doInBackground(Void... params) {
+			
+			BuildingOverlayLayer.initializeCache();
+	    	
+			TextOverlayLayer.initializeCache();
+			
+			generatePOI();
+			
+			//don't generate buildings or POI if we are searching
+			if (searchQuery != null) {
+				return null;
+			}
+			
+	    	return null;
+		}
+		
+		@Override
+		protected void onCancelled() {
+			if (dialog.isShowing()) {
+				dialog.cancel();
+			}
+		}
+		
+		@Override
+		protected void onPostExecute(Void res) {
+			if (dialog.isShowing()) {
+				dialog.cancel();
+			}
+
+			generateText();
+			
+			//don't generate buildings or POI if we are searching
+			if (searchQuery != null) {
+				return;
+			}
+			
+			generateBuildings();
+			rebuildOverlays();
+			
+			Intent intent = getIntent();
+			
+			//set a selected location
+	    	if (savedInstanceState != null) {
+	    		focusLocation(savedInstanceState.getLong(SELECTED_ID), false);
+	    	} else if (intent.hasExtra(EXTRA_BUILDING_ID)) {
+	    		long id = intent.getLongExtra(EXTRA_BUILDING_ID, -1);
+	    		focusLocation(id, false);
+	    	}
+		}
+		
 	}
     
     private class TopLocations extends AsyncTask<Void, Void, Void> {
