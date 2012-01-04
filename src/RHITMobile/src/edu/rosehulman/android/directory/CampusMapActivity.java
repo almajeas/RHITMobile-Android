@@ -102,6 +102,8 @@ public class CampusMapActivity extends MapActivity {
     private TaskManager taskManager;
     private LoadInnerLocations taskLoadInnerLocations;
     
+    private ServiceManager<IDataUpdateService> updateService;
+    
     private Bundle savedInstanceState;
     
     @Override
@@ -161,6 +163,9 @@ public class CampusMapActivity extends MapActivity {
         mapView.setBuiltInZoomControls(true);
         
         rebuildOverlays();
+        
+		updateService = new ServiceManager<IDataUpdateService>(getApplicationContext(),
+				DataUpdateService.createIntent(getApplicationContext()));
     }
     
     @Override

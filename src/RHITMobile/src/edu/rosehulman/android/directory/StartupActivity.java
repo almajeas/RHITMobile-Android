@@ -14,7 +14,7 @@ import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
-import edu.rosehulman.android.directory.MyApplication.UpdateServiceListener;
+import edu.rosehulman.android.directory.ServiceManager.ServiceRunnable;
 
 public class StartupActivity extends Activity {
 	
@@ -30,9 +30,9 @@ public class StartupActivity extends Activity {
 	private GridView tasksView;
 	
 	private static final int REQUEST_STARTUP_CODE = 4;
-	
+
+	private ServiceManager<IDataUpdateService> updateService;
 	private boolean updateData = true;
-	private static IDataUpdateService updateService;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -101,29 +101,41 @@ public class StartupActivity extends Activity {
 			}
 		}
 		
-		MyApplication.getInstance().getDataUpdateService(new UpdateServiceListener() {
+		updateService = new ServiceManager<IDataUpdateService>(getApplicationContext(),
+				DataUpdateService.createIntent(getApplicationContext()));
+	}
+	
+	@Override
+	protected void onStart() {
+		super.onStart();
+
+		updateService.run(new ServiceRunnable<IDataUpdateService>() {
 			@Override
-			public void onServiceAcquired(IDataUpdateService service) {
-				updateService = (IDataUpdateService)service;
+			public void run(IDataUpdateService service) {
 				if (updateData) {
-					updateService.startUpdate();
+					service.startUpdate();
 				}
-			}
-			
-			@Override
-			public void onServiceLost() {
-				updateService = null;
 			}
 		});
 	}
 	
 	@Override
+	protected void onPause() {
+		super.onPause();
+		
+		updateService.cancel();
+	}
+
+	@Override
 	protected void onDestroy() {
 		super.onDestroy();
 
-		if (updateService != null) {
-			updateService.abort();
-		}
+		updateService.run(new ServiceRunnable<IDataUpdateService>() {
+			@Override
+			public void run(IDataUpdateService service) {
+				service.abort();
+			}
+		});
 	}
 
     @Override
@@ -138,10 +150,12 @@ public class StartupActivity extends Activity {
     			break;
     		case Activity.RESULT_OK:
     			//We were up to date, continue on happily
-    			updateData = true;
-    			if (updateService != null) {
-    				updateService.startUpdate();
-    			}
+    			updateService.run(new ServiceRunnable<IDataUpdateService>() {
+    				@Override
+    				public void run(IDataUpdateService service) {
+    					service.startUpdate();
+    				}
+    			});
     			break;	
     	}
     }
