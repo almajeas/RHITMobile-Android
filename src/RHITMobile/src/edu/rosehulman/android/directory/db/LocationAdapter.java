@@ -63,6 +63,9 @@ public class LocationAdapter extends TableAdapter {
 		String[] args = new String[] {String.valueOf(id)};
 		
 		Cursor cursor = db.query(TABLE_NAME, null, where, args, null, null, null);
+		if (cursor.getCount() == 0)
+			return null;
+		
 		cursor.moveToFirst();
 		return convertCursorRow(cursor);
 	}

@@ -181,7 +181,10 @@ public class LocationSearchActivity extends ListActivity {
 			
 			for (int i = 0; i < res.length; i++) {
 				res[i] = new LocationInfo(names.locations[i]);
-				res[i].description = locationAdapter.getLocation(res[i].id).description;
+				Location loc = locationAdapter.getLocation(res[i].id);
+				if (loc != null) {
+					res[i].description = loc.description;
+				}
 			}
 			
 			locationAdapter.close();
