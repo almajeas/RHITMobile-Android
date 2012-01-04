@@ -3,7 +3,7 @@ package edu.rosehulman.android.directory;
 public interface IDataUpdateService {
 	
 	public interface AsyncRequest {
-		public void onQueued();
+		public void onQueued(Runnable cancelCallback);
 		public void onCompleted();
 	}
 	
@@ -11,8 +11,5 @@ public interface IDataUpdateService {
 	void abort();
 	
 	void requestTopLocations(AsyncRequest listener);
-	
-	//boolean areLocationsUpdated();
-	//boolean requestLocation(long id, Runnable listener);
-
+	void requestInnerLocation(long id, AsyncRequest listener);
 }

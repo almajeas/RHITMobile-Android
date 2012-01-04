@@ -23,6 +23,7 @@ public class TaskQueue {
 	}
 	
 	private List<Task> q;
+	private Task currentTask;
 	
 	/**
 	 * Creates a new TaskQueue
@@ -46,12 +47,20 @@ public class TaskQueue {
 	 * Moves the given task to the start of the queue
 	 * 
 	 * @param task The task to run next
+	 * @return True if the task was found and moved; False otherwise
 	 */
-	public void prioritizeTask(Task task) {
+	public boolean prioritizeTask(Task task) {
 		synchronized (q) {
+			
+			if (task.equals(currentTask))
+				return true;
+			
 			if (q.remove(task)) {
 				q.add(0, task);
+				return true;	
 			}
+			return false;
+			
 		}
 	}
 	
@@ -70,13 +79,20 @@ public class TaskQueue {
 	 * Runs the next task in the queue and removes it
 	 */
 	public void runTask() {
-		Task task;
-		
 		synchronized (q) {
-			task = q.remove(0);
+			currentTask = q.remove(0);
 		}
 		
-		task.run(this);
+		currentTask.run(this);
+	}
+	
+	/**
+	 * Retrieves the most recently run task
+	 * 
+	 * @return The most recently run task, or null if none have been run
+	 */
+	public Task getLatestTask() {
+		return currentTask;
 	}
 	
 }

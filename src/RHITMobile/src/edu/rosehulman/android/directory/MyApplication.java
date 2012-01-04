@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Handler;
 import edu.rosehulman.android.directory.db.DatabaseHelper;
 import edu.rosehulman.android.directory.service.MobileDirectoryService;
 import edu.rosehulman.android.directory.service.MockClientFactory;
@@ -31,6 +32,8 @@ public class MyApplication extends Application {
 	public BetaManagerManager betaManagerManager;
 	
 	private static MyApplication instance;
+	
+	private Handler handler = new Handler();
 	
 	private static final boolean PURGE_DB = true;
 	
@@ -74,6 +77,10 @@ public class MyApplication extends Application {
 			purgeDb();
 		}
 		
+	}
+	
+	public void post(Runnable runnable) {
+		handler.post(runnable);
 	}
 	
 	public interface UpdateServiceListener {

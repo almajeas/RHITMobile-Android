@@ -13,6 +13,7 @@ import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
+import edu.rosehulman.android.directory.IDataUpdateService.AsyncRequest;
 import edu.rosehulman.android.directory.db.LocationAdapter;
 import edu.rosehulman.android.directory.db.VersionsAdapter;
 import edu.rosehulman.android.directory.model.Location;
@@ -81,9 +82,42 @@ public class DataUpdateService extends Service {
 			}
 		}
 		
+		private void performTask(Task task, AsyncRequest listener) {
+		
+			if (!updateTask.queue.prioritizeTask(task)) {
+				if (listener != null) {
+					listener.onCompleted();
+				}
+				return;
+			}
+			
+			updateTask.waitingListener = listener;
+			updateTask.waitingTask = task;
+
+			if (listener == null)
+				return;
+			
+			listener.onQueued(new Runnable() {
+				@Override
+				public void run() {
+					updateTask.waitingTask = null;
+					updateTask.waitingListener = null;
+				}
+			});
+		}
+		
 		@Override
 		public void requestTopLocations(AsyncRequest listener) {
-			//TODO implement
+			startUpdate();
+			
+			performTask(updateTask.new TopLocationsTask(), listener);
+		}
+		
+		@Override
+		public void requestInnerLocation(long id, AsyncRequest listener) {
+			startUpdate();
+			
+			performTask(updateTask.new InnerLocationTask(id), listener);
 		}
 		
 	}
@@ -104,6 +138,18 @@ public class DataUpdateService extends Service {
 		private int locationProgress;
 		private int locationCount;
 		
+		public TaskQueue queue;
+
+		public Task waitingTask;
+		public AsyncRequest waitingListener;
+		
+		public UpdateDataTask() {
+			queue = new TaskQueue();
+
+			queue.addTask(new TopLocationsTask());
+			queue.addTask(new CampusServicesTask());
+		}
+		
 		@Override
 		protected void onPreExecute() {
 			createNotification();
@@ -118,12 +164,19 @@ public class DataUpdateService extends Service {
 		@Override
 		protected Void doInBackground(Void... params) {
 			
-			TaskQueue queue = new TaskQueue();
-			queue.addTask(new TopLocationsTask());
-			queue.addTask(new CampusServicesTask());
-			
 			while (!queue.isEmpty()) {
 				queue.runTask();
+				
+				if (waitingTask != null && waitingListener != null &&
+						waitingTask.equals(queue.getLatestTask())) {
+					final AsyncRequest listener = waitingListener;
+					MyApplication.getInstance().post(new Runnable() {
+						@Override
+						public void run() {
+							listener.onCompleted();	
+						}
+					});
+				}
 				
 				if (isCancelled())
 					return null;
@@ -230,7 +283,7 @@ public class DataUpdateService extends Service {
 			        buildingAdapter.open();
 					long[] ids = buildingAdapter.getUnloadedTopLocations();
 					locationCount = buildingAdapter.getAllTopLocations().length;
-					locationProgress = locationCount - ids.length;
+					locationProgress = locationCount - ids.length - 1;
 			        buildingAdapter.close();
 			        for (long id : ids) {
 			        	queue.addTask(new InnerLocationTask(id));
