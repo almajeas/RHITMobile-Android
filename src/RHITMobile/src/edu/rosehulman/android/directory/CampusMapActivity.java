@@ -289,6 +289,14 @@ public class CampusMapActivity extends MapActivity {
         return true;
     }
     
+    @Override
+    public boolean onSearchRequested() {
+    	if (updateService.get().isUpdating())
+    		return false;
+    	
+    	return super.onSearchRequested();
+    }
+    
     private void showTopLocations() {
     	TopLocations task = new TopLocations();
     	taskManager.addTask(task);

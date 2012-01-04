@@ -12,4 +12,6 @@ public interface IDataUpdateService {
 	
 	void requestTopLocations(AsyncRequest listener);
 	void requestInnerLocation(long id, AsyncRequest listener);
+	
+	boolean isUpdating();
 }

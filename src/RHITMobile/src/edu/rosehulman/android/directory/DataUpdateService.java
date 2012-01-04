@@ -120,6 +120,13 @@ public class DataUpdateService extends Service {
 			performTask(updateTask.new InnerLocationTask(id), listener);
 		}
 		
+		@Override
+		public boolean isUpdating() {
+			startUpdate();
+			
+			return updateTask.getStatus() != AsyncTask.Status.FINISHED;
+		}
+		
 	}
 	
 	private enum UpdateStatus {

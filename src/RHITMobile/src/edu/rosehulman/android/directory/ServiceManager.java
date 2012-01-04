@@ -147,6 +147,18 @@ public class ServiceManager<T> extends ContextWrapper {
 	}
 	
 	/**
+	 * Retrieves the service managed by this instance.
+	 * 
+	 * NOTE: The instance returned by this may be a service that has disconnected.
+	 *       You are better off using the run method.  That is what it is there for. 
+	 * 
+	 * @return The service instance, if it exists.
+	 */
+	public T get() {
+		return serviceConn.service;
+	}
+	
+	/**
 	 * Clears all pending operations and disconnects from the service cache
 	 */
 	public void cancel() {
