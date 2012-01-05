@@ -21,7 +21,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
@@ -305,7 +304,7 @@ public class CampusMapActivity extends MapActivity {
     private long getFocusedLocation() {
     	long id = buildingLayer.getSelectedBuilding();
     	
-    	if (id >= 0)
+    	if (id >= 0 || poiLayer == null)
     		return id;
     	
     	return poiLayer.getFocusId();
@@ -482,8 +481,8 @@ public class CampusMapActivity extends MapActivity {
 	}
 	
 	private void generateDirectionsLayer(Directions directions) {
-		Drawable marker = getResources().getDrawable(R.drawable.map_marker);
-		directionsLayer = new DirectionsLayer(marker, mapView, taskManager, directions);
+
+		directionsLayer = new DirectionsLayer(mapView, taskManager, directions);
 		
 		BoundingBox bounds = directionsLayer.bounds;
 		Point center = bounds.getCenter();
@@ -717,17 +716,6 @@ public class CampusMapActivity extends MapActivity {
 		@Override
 		protected void onPostExecute(Directions directions) {
 			dialog.dismiss();
-			
-			//TODO remove
-			{
-				StringBuilder idMsg = new StringBuilder();
-	    		long[] ids = getIntent().getLongArrayExtra(EXTRA_WAYPOINTS);
-	    		for (long id : ids) {
-	    			idMsg.append(id);
-	    			idMsg.append(' ');
-	    		}
-				Toast.makeText(CampusMapActivity.this, "TODO: show directions for location ids: " + idMsg.toString(), Toast.LENGTH_LONG).show();
-			}
 			
 			generateDirectionsLayer(directions);
 			rebuildOverlays();
