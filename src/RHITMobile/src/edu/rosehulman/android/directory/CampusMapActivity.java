@@ -40,6 +40,8 @@ import edu.rosehulman.android.directory.maps.LocationSearchLayer;
 import edu.rosehulman.android.directory.maps.OverlayManager;
 import edu.rosehulman.android.directory.maps.POILayer;
 import edu.rosehulman.android.directory.maps.TextOverlayLayer;
+import edu.rosehulman.android.directory.model.Directions;
+import edu.rosehulman.android.directory.model.DirectionsResponse;
 import edu.rosehulman.android.directory.model.Location;
 import edu.rosehulman.android.directory.model.LocationNamesCollection;
 import edu.rosehulman.android.directory.model.VersionType;
@@ -127,16 +129,10 @@ public class CampusMapActivity extends MapActivity {
     			setTitle("Search: " + searchQuery);
     		
         	} else if (ACTION_DIRECTIONS.equals(intent.getAction())) {
-        		StringBuilder idMsg = new StringBuilder();
         		long[] ids = intent.getLongArrayExtra(EXTRA_WAYPOINTS);
-        		for (long id : ids) {
-        			idMsg.append(id);
-        			idMsg.append(' ');
-        		}
-        		
-    			Toast.makeText(this, "TODO: show directions for location ids: " + idMsg.toString(), Toast.LENGTH_LONG).show();
-    			
+
     			LoadDirections task = new LoadDirections(ids);
+    			taskManager.addTask(task);
     			task.execute();
     		}
 
@@ -637,7 +633,7 @@ public class CampusMapActivity extends MapActivity {
 		
 	}
 
-	private class LoadDirections extends AsyncTask<Void, Void, Void> {
+	private class LoadDirections extends AsyncTask<Void, Integer, Directions> {
 		
 		private long[] ids;
 		private ProgressDialog dialog;
@@ -657,17 +653,49 @@ public class CampusMapActivity extends MapActivity {
 		}
 		
 		@Override
-		protected Void doInBackground(Void... params) {
+		protected Directions doInBackground(Void... params) {
+			
+			assert(ids.length == 2);
+			long from = ids[0];
+			long to = ids[1];
+			
+			MobileDirectoryService service = new MobileDirectoryService();
+			
+			DirectionsResponse response;
+			
 			try {
-				Thread.sleep(2000);
-			} catch (InterruptedException e) { }
-			return null;
+				response = service.getDirections(from, to);
+
+				while (response.done != 100) {
+					publishProgress(response.done);
+					response = service.getDirectionsStatus(response.requestID);
+				}
+				publishProgress(100);
+				
+			} catch (Exception e) {
+				Log.e(C.TAG, "Failed to download directions", e);
+				return null;
+			}
+
+			return response.result;
 		}
 
 		@Override
-		protected void onPostExecute(Void res) {
+		protected void onPostExecute(Directions directions) {
 			dialog.dismiss();
-		
+			
+			//TODO remove
+			{
+				StringBuilder idMsg = new StringBuilder();
+	    		long[] ids = getIntent().getLongArrayExtra(EXTRA_WAYPOINTS);
+	    		for (long id : ids) {
+	    			idMsg.append(id);
+	    			idMsg.append(' ');
+	    		}
+				Toast.makeText(CampusMapActivity.this, "TODO: show directions for location ids: " + idMsg.toString(), Toast.LENGTH_LONG).show();
+			}
+			
+			
 		}
 		
 		@Override

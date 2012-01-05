@@ -69,7 +69,22 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 	
 	@Override
 	public DirectionsResponse getDirections(long from, long to) throws Exception {
-		String url = String.format("directions/fromloc/%ld/toloc/%ld", from, to);
+		//FIXME temporary directions URL
+		String url = String.format("directions/testing/directions", from, to);
+		//String url = String.format("directions/fromloc/%d/toloc/%d", from, to);
+		JsonClient client = factory.makeJsonClient(HOST, PORT, url);
+		
+		JSONObject root = client.execute();
+		if (root == null) {
+			return null;
+		}
+		
+		return DirectionsResponse.deserialize(root);
+	}
+	
+	@Override
+	public DirectionsResponse getTour() throws Exception {
+		String url = String.format("directions/testing/tour");
 		JsonClient client = factory.makeJsonClient(HOST, PORT, url);
 		
 		JSONObject root = client.execute();

@@ -48,6 +48,15 @@ public interface IMobileDirectoryService {
 	public DirectionsResponse getDirections(long from, long to) throws Exception;
 	
 	/**
+	 * Start a tour generation request
+	 * 
+	 * @return A DirectionsResponse with the id of the request and possibly results
+	 * @throws Exception On error
+	 */
+	@Deprecated
+	public DirectionsResponse getTour() throws Exception;
+	
+	/**
 	 * Checks the status of a directions request
 	 * @param requestId
 	 * @return
