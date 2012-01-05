@@ -10,6 +10,7 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -41,6 +42,7 @@ import edu.rosehulman.android.directory.maps.LocationSearchLayer;
 import edu.rosehulman.android.directory.maps.OverlayManager;
 import edu.rosehulman.android.directory.maps.POILayer;
 import edu.rosehulman.android.directory.maps.TextOverlayLayer;
+import edu.rosehulman.android.directory.maps.ViewController;
 import edu.rosehulman.android.directory.model.Directions;
 import edu.rosehulman.android.directory.model.DirectionsResponse;
 import edu.rosehulman.android.directory.model.Location;
@@ -59,7 +61,9 @@ public class CampusMapActivity extends MapActivity {
 
 	public static final String EXTRA_BUILDING_ID = "BUILDING_ID";
 	public static final String EXTRA_WAYPOINTS = "WAYPOINTS";
-
+	
+	private static final int MIN_ZOOM_LEVEL = 16;
+	
 	public static Intent createIntent(Context context) {
 		return new Intent(context, CampusMapActivity.class);
 	}
@@ -433,8 +437,15 @@ public class CampusMapActivity extends MapActivity {
     	public boolean onTap(GeoPoint p, MapView mapView) {
     		//tap not handled by any other overlay
     		overlayManager.clearSelection();
-    		
     		return true;
+    	}
+    	
+    	@Override
+    	public void draw(Canvas canvas, MapView mapView, boolean shadow) {
+    		if (mapView.getZoomLevel() < MIN_ZOOM_LEVEL) {
+    			mapView.getController().zoomIn();
+    		}
+    		super.draw(canvas, mapView, shadow);
     	}
     }
 
