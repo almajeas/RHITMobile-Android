@@ -36,6 +36,7 @@ import edu.rosehulman.android.directory.db.LocationAdapter;
 import edu.rosehulman.android.directory.db.VersionsAdapter;
 import edu.rosehulman.android.directory.maps.BuildingOverlayLayer;
 import edu.rosehulman.android.directory.maps.BuildingOverlayLayer.OnBuildingSelectedListener;
+import edu.rosehulman.android.directory.maps.DirectionsLayer;
 import edu.rosehulman.android.directory.maps.LocationSearchLayer;
 import edu.rosehulman.android.directory.maps.OverlayManager;
 import edu.rosehulman.android.directory.maps.POILayer;
@@ -91,6 +92,7 @@ public class CampusMapActivity extends MapActivity {
     private LocationListener locationListener;
 
     private OverlayManager overlayManager;
+    private DirectionsLayer directionsLayer;
     private LocationSearchLayer searchOverlay;
     private POILayer poiLayer;
     private BuildingOverlayLayer buildingLayer;
@@ -350,6 +352,11 @@ public class CampusMapActivity extends MapActivity {
     		overlayManager.addOverlay(searchOverlay);
     	}
     	
+    	if (directionsLayer != null) {
+    		overlays.add(directionsLayer);
+    		overlayManager.addOverlay(directionsLayer);
+    	}
+    	
     	//Remove any old overlays
     	overlayManager.prune(overlays);
     	
@@ -430,16 +437,13 @@ public class CampusMapActivity extends MapActivity {
     		return true;
     	}
     }
-    
 
-    
-
-    private void generateBuildings() {
+    private void generateBuildingsLayer() {
     	BuildingOverlayLayer buildings = new BuildingOverlayLayer(mapView, buildingSelectedListener);
     	buildingLayer = buildings;
     }
     
-    private void generatePOI() {
+    private void generatePOILayer() {
     	Drawable marker = getResources().getDrawable(R.drawable.map_marker);
     	POILayer poi = new POILayer(marker, mapView, taskManager);
 
@@ -457,8 +461,13 @@ public class CampusMapActivity extends MapActivity {
     	poiLayer = poi;
     }
 
-	private void generateText() {
+	private void generateTextLayer() {
         textLayer = new TextOverlayLayer();
+	}
+	
+	private void generateDirectionsLayer(Directions directions) {
+		Drawable marker = getResources().getDrawable(R.drawable.map_marker);
+		directionsLayer = new DirectionsLayer(marker, mapView, taskManager, directions);
 	}
 	
 	private class LoadOverlays extends AsyncTask<Void, Void, Void> {
@@ -476,7 +485,7 @@ public class CampusMapActivity extends MapActivity {
 	    	
 			TextOverlayLayer.initializeCache();
 			
-			generatePOI();
+			generatePOILayer();
 			
 			//don't generate buildings or POI if we are searching
 			if (searchQuery != null) {
@@ -499,14 +508,14 @@ public class CampusMapActivity extends MapActivity {
 				dialog.cancel();
 			}
 
-			generateText();
+			generateTextLayer();
 			
 			//don't generate buildings or POI if we are searching
 			if (searchQuery != null) {
 				return;
 			}
 			
-			generateBuildings();
+			generateBuildingsLayer();
 			rebuildOverlays();
 			
 			Intent intent = getIntent();
@@ -695,7 +704,8 @@ public class CampusMapActivity extends MapActivity {
 				Toast.makeText(CampusMapActivity.this, "TODO: show directions for location ids: " + idMsg.toString(), Toast.LENGTH_LONG).show();
 			}
 			
-			
+			generateDirectionsLayer(directions);
+			rebuildOverlays();
 		}
 		
 		@Override

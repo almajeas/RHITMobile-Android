@@ -4,6 +4,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import edu.rosehulman.android.directory.util.BoundingBox;
+
 public class Directions {
 	
 	public double distance;
@@ -36,6 +38,27 @@ public class Directions {
 		res.paths = deserializePaths(root.getJSONArray("Paths"));
 
 		return res;
+	}
+	
+	/**
+	 * Computes the bounding box for the set of directions
+	 * 
+	 * @return The bounds of the coordinates contained in the directions
+	 */
+	public BoundingBox getBounds() {
+		int left = start.lon;
+		int right = start.lon;
+		int top = start.lat;
+		int bottom = start.lat;
+		
+		for (Path path : paths) {
+			left = Math.min(left, path.dest.lon);
+			right = Math.max(right, path.dest.lon);
+			bottom = Math.min(bottom, path.dest.lat);
+			top = Math.max(top, path.dest.lat);
+			
+		}
+		return new BoundingBox(left, right, top, bottom);
 	}
 
 }
