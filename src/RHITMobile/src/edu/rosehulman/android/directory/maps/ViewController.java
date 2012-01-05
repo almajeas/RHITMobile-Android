@@ -29,6 +29,24 @@ public class ViewController {
 	 * Animate to a location on the map
 	 * 
 	 * @param center The GeoPoint that we want to 'center'
+	 * @param spanLat How much latitude should be visible on the screen
+	 * @param spanLon How much longitude should be visible on the screen
+	 * @param animate True if the point should be animated to
+	 */
+	public void animateTo(GeoPoint center, int spanLat, int spanLon, boolean animate) {
+		int level = mapView.getZoomLevel();
+		controller.zoomToSpan(spanLat, spanLon);
+		int newLevel = mapView.getZoomLevel();
+		controller.setZoom(level);
+		Point pt = new Point(mapView.getWidth() / 2, mapView.getHeight() / 2);
+		
+		animateTo(center, pt, newLevel, animate);
+	}
+	
+	/**
+	 * Animate to a location on the map
+	 * 
+	 * @param center The GeoPoint that we want to 'center'
 	 * @param pt The location on the screen center should be located
 	 * @param spanLat How much latitude should be visible on the screen
 	 * @param spanLon How much longitude should be visible on the screen

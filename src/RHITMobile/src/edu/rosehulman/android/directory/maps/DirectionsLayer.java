@@ -24,7 +24,7 @@ public class DirectionsLayer extends BalloonItemizedOverlay<OverlayItem> impleme
 	private TaskManager taskManager;
 	
 	private Directions directions;
-	private BoundingBox bounds;
+	public BoundingBox bounds;
 	
 	private boolean animate = true;
 

@@ -83,5 +83,31 @@ public class BoundingBox implements BoundingArea {
 	public boolean contains(int x, int y) {
 		return (x >= left) && (x <= right) && (y >= bottom) && (y <= top);
 	}
+	
+	/**
+	 * Computes the center point of the bounding box
+	 * 
+	 * @return The center of the region
+	 */
+	public Point getCenter() {
+		return new Point((left + right)/2, (top + bottom) / 2);
+	}
 
+	/**
+	 * Computes the width of the bounding box
+	 * 
+	 * @return The width of the bounding box
+	 */
+	public int getWidth() {
+		return right - left;
+	}
+
+	/**
+	 * Computes the height of the bounding box
+	 * 
+	 * @return The height of the bounding box
+	 */
+	public int getHeight() {
+		return top - bottom;
+	}
 }

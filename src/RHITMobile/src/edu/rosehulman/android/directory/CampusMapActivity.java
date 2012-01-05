@@ -49,6 +49,8 @@ import edu.rosehulman.android.directory.model.Location;
 import edu.rosehulman.android.directory.model.LocationNamesCollection;
 import edu.rosehulman.android.directory.model.VersionType;
 import edu.rosehulman.android.directory.service.MobileDirectoryService;
+import edu.rosehulman.android.directory.util.BoundingBox;
+import edu.rosehulman.android.directory.util.Point;
 
 /**
  * Main entry point into MobileDirectory
@@ -88,6 +90,7 @@ public class CampusMapActivity extends MapActivity {
 		return intent;
 	}
 
+	private Intent intent;
     private MapView mapView;
     
     private String searchQuery;
@@ -114,6 +117,8 @@ public class CampusMapActivity extends MapActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.campus_map);
+        
+        intent = getIntent();
         
         taskManager = new TaskManager();
         
@@ -479,6 +484,11 @@ public class CampusMapActivity extends MapActivity {
 	private void generateDirectionsLayer(Directions directions) {
 		Drawable marker = getResources().getDrawable(R.drawable.map_marker);
 		directionsLayer = new DirectionsLayer(marker, mapView, taskManager, directions);
+		
+		BoundingBox bounds = directionsLayer.bounds;
+		Point center = bounds.getCenter();
+		GeoPoint pt = new GeoPoint(center.y, center.x);
+		new ViewController(mapView).animateTo(pt, bounds.getHeight(), bounds.getWidth(), false);
 	}
 	
 	private class LoadOverlays extends AsyncTask<Void, Void, Void> {
@@ -495,13 +505,14 @@ public class CampusMapActivity extends MapActivity {
 			BuildingOverlayLayer.initializeCache();
 	    	
 			TextOverlayLayer.initializeCache();
-			
-			generatePOILayer();
-			
-			//don't generate buildings or POI if we are searching
-			if (searchQuery != null) {
+
+			//don't generate POI if we are searching or showing directions
+			if (ACTION_DIRECTIONS.equals(intent.getAction()) ||
+					Intent.ACTION_SEARCH.equals(intent.getAction())) {
 				return null;
 			}
+			
+			generatePOILayer();
 			
 	    	return null;
 		}
@@ -521,15 +532,18 @@ public class CampusMapActivity extends MapActivity {
 
 			generateTextLayer();
 			
-			//don't generate buildings or POI if we are searching
-			if (searchQuery != null) {
+			//don't generate buildings if we are searching
+			if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
 				return;
 			}
 			
 			generateBuildingsLayer();
 			rebuildOverlays();
-			
-			Intent intent = getIntent();
+
+			//don't focus anything if we are showing directions
+			if (ACTION_DIRECTIONS.equals(intent.getAction())) {
+				return;
+			}
 			
 			//set a selected location
 	    	if (savedInstanceState != null) {
