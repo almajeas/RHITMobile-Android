@@ -681,7 +681,13 @@ public class CampusMapActivity extends MapActivity {
 			dialog.setTitle(null);
 			dialog.setMessage("Getting Directions...");
 			dialog.setIndeterminate(true);
-			dialog.setCancelable(false);
+			dialog.setCancelable(true);
+			dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+				@Override
+				public void onCancel(DialogInterface dialog) {
+					cancel(true);
+				}
+			});
 			dialog.show();
 		}
 		
@@ -694,21 +700,42 @@ public class CampusMapActivity extends MapActivity {
 			
 			MobileDirectoryService service = new MobileDirectoryService();
 			
-			DirectionsResponse response;
+			DirectionsResponse response = null;
 			
-			try {
-				response = service.getDirections(from, to);
-
-				while (response.done != 100) {
-					publishProgress(response.done);
-					response = service.getDirectionsStatus(response.requestID);
+			do {
+				try {
+					response = service.getDirections(from, to);
+				} catch (Exception e) {
+					Log.e(C.TAG, "Failed to download initial directions");
+					if (isCancelled()) {
+						return null;
+					}
+					try {
+						Thread.sleep(2000);
+					} catch (InterruptedException ex) {
+						return null;
+					}
 				}
-				publishProgress(100);
-				
-			} catch (Exception e) {
-				Log.e(C.TAG, "Failed to download directions", e);
-				return null;
+			} while (response == null);
+			int requestID = response.requestID;
+			
+			while (response.done != 100) {
+				publishProgress(response.done);
+				try {
+					response = service.getDirectionsStatus(requestID);
+				} catch (Exception e) {
+					Log.e(C.TAG, "Failed to download directions");
+					if (isCancelled()) {
+						return null;
+					}
+					try {
+						Thread.sleep(2000);
+					} catch (InterruptedException ex) {
+						return null;
+					}
+				}
 			}
+			publishProgress(100);
 
 			return response.result;
 		}
@@ -717,13 +744,16 @@ public class CampusMapActivity extends MapActivity {
 		protected void onPostExecute(Directions directions) {
 			dialog.dismiss();
 			
-			generateDirectionsLayer(directions);
-			rebuildOverlays();
+			if (directions != null) {
+				generateDirectionsLayer(directions);
+				rebuildOverlays();
+			}
 		}
 		
 		@Override
 		protected void onCancelled() {
 			dialog.dismiss();
+			finish();
 		}
 		
 	}
