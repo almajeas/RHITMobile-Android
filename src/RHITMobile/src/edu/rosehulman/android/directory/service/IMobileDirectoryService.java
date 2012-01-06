@@ -3,11 +3,20 @@ package edu.rosehulman.android.directory.service;
 import edu.rosehulman.android.directory.model.DirectionsResponse;
 import edu.rosehulman.android.directory.model.LocationCollection;
 import edu.rosehulman.android.directory.model.LocationNamesCollection;
+import edu.rosehulman.android.directory.model.VersionResponse;
 
 /**
  * Interface for communicating with the mobile directory web service
  */
 public interface IMobileDirectoryService {
+	
+	/**
+	 * Retrieve the current versions of all server data
+	 * 
+	 * @return The current version of server data
+	 * @throws Exception On error
+	 */
+	public VersionResponse getVersions() throws Exception;
 
 	/**
 	 * Retrieve top-level location data contained on the server

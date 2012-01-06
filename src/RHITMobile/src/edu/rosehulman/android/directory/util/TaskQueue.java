@@ -95,4 +95,16 @@ public class TaskQueue {
 		return currentTask;
 	}
 	
+	/**
+	 * Determines if the queue will execute the task in question
+	 * 
+	 * @param task The task to check
+	 * @return True if the task is enqueued to be run
+	 */
+	public boolean contains(Task task) {
+		synchronized (q) {
+			return q.contains(task);
+		}
+	}
+	
 }

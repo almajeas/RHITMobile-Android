@@ -18,6 +18,7 @@ import edu.rosehulman.android.directory.db.LocationAdapter;
 import edu.rosehulman.android.directory.db.VersionsAdapter;
 import edu.rosehulman.android.directory.model.Location;
 import edu.rosehulman.android.directory.model.LocationCollection;
+import edu.rosehulman.android.directory.model.VersionResponse;
 import edu.rosehulman.android.directory.model.VersionType;
 import edu.rosehulman.android.directory.service.MobileDirectoryService;
 import edu.rosehulman.android.directory.util.TaskQueue;
@@ -91,8 +92,10 @@ public class DataUpdateService extends Service {
 				return;
 			}
 			
-			updateTask.waitingListener = listener;
-			updateTask.waitingTask = task;
+			synchronized (updateTask.queue) {
+				updateTask.waitingListener = listener;
+				updateTask.waitingTask = task;
+			}
 
 			if (listener == null)
 				return;
@@ -100,8 +103,10 @@ public class DataUpdateService extends Service {
 			listener.onQueued(new Runnable() {
 				@Override
 				public void run() {
-					updateTask.waitingTask = null;
-					updateTask.waitingListener = null;
+					synchronized (updateTask.queue) {
+						updateTask.waitingTask = null;
+						updateTask.waitingListener = null;
+					}
 				}
 			});
 		}
@@ -109,7 +114,7 @@ public class DataUpdateService extends Service {
 		@Override
 		public void requestTopLocations(AsyncRequest listener) {
 			startUpdate();
-			
+
 			performTask(updateTask.new TopLocationsTask(), listener);
 		}
 		
@@ -130,6 +135,7 @@ public class DataUpdateService extends Service {
 	}
 	
 	private enum UpdateStatus {
+		UPDATE_VERSIONS,
 		UPDATE_LOCATIONS,
 		UPDATE_SERVICES
 	}
@@ -139,7 +145,7 @@ public class DataUpdateService extends Service {
 		private PendingIntent startupIntent;
 		private Notification updateNotification;
 		
-		private UpdateStatus step;
+		public UpdateStatus step;
 		private int progress;
 		
 		private int locationProgress;
@@ -153,8 +159,7 @@ public class DataUpdateService extends Service {
 		public UpdateDataTask() {
 			queue = new TaskQueue();
 
-			queue.addTask(new TopLocationsTask());
-			queue.addTask(new CampusServicesTask());
+			queue.addTask(new VersionsTask());
 		}
 		
 		@Override
@@ -174,15 +179,18 @@ public class DataUpdateService extends Service {
 			while (!queue.isEmpty()) {
 				queue.runTask();
 				
-				if (waitingTask != null && waitingListener != null &&
-						waitingTask.equals(queue.getLatestTask())) {
-					final AsyncRequest listener = waitingListener;
-					MyApplication.getInstance().post(new Runnable() {
-						@Override
-						public void run() {
-							listener.onCompleted();	
-						}
-					});
+				synchronized (queue) {
+					if (waitingTask != null && waitingListener != null &&
+							waitingTask.equals(queue.getLatestTask()) &&
+							!queue.contains(waitingTask)) {
+						final AsyncRequest listener = waitingListener;
+						MyApplication.getInstance().post(new Runnable() {
+							@Override
+							public void run() {
+								listener.onCompleted();	
+							}
+						});
+					}
 				}
 				
 				if (isCancelled())
@@ -244,6 +252,11 @@ public class DataUpdateService extends Service {
 			notifyManager.cancel(NOTIFICATION_ID);
 		}
 		
+		private void updateVersionsProgress() {
+			step = UpdateStatus.UPDATE_VERSIONS;
+			publishProgress();
+		}
+		
 		private void updateLocationProgress() {
 			step = UpdateStatus.UPDATE_LOCATIONS;
 			progress = locationProgress;
@@ -253,6 +266,51 @@ public class DataUpdateService extends Service {
 		private void updateServicesProgress() {
 			step = UpdateStatus.UPDATE_SERVICES;
 			publishProgress();
+		}
+		
+		class VersionsTask implements Task {
+
+			@Override
+			public void run(TaskQueue queue) {
+				updateVersionsProgress();
+				
+				VersionsAdapter versionsAdapter = new VersionsAdapter();
+				versionsAdapter.open();
+				String locationsVersion = versionsAdapter.getVersion(VersionType.MAP_AREAS);
+				String servicesVersion = versionsAdapter.getVersion(VersionType.CAMPUS_SERVICES);
+		    	versionsAdapter.close();
+				
+				MobileDirectoryService service = new MobileDirectoryService();
+		    	
+				VersionResponse versions = null;
+				do {
+					
+					try {
+						versions = service.getVersions();
+					} catch (Exception e) {
+						Log.e(C.TAG, "Failed to downlaod version information", e);
+						sleep(1000);
+						
+						//FIXME remove when the server API is added
+						versions = new VersionResponse();
+						versions.locations = locationsVersion;
+						versions.services = servicesVersion;
+					}
+				} while (versions == null);
+				
+				if (locationsVersion == null || !locationsVersion.equals(versions.locations)) {
+					queue.addTask(new TopLocationsTask());
+				}
+				if (servicesVersion == null || !servicesVersion.equals(versions.services)) {
+					queue.addTask(new CampusServicesTask());
+				}
+			}
+
+			@Override
+			public boolean equals(Object o) {
+				return o instanceof VersionsTask;
+			}
+			
 		}
 		
 		class TopLocationsTask implements Task {
@@ -276,7 +334,7 @@ public class DataUpdateService extends Service {
 				} catch (Exception e) {
 					Log.e(C.TAG, "Failed to download new locations", e);
 					//wait a bit and try again
-					queue.addTask(new TopLocationsTask());
+					queue.addTask(this);
 					sleep(5000);
 					return;
 				}
@@ -389,6 +447,11 @@ public class DataUpdateService extends Service {
 			public void run(TaskQueue queue) {
 				updateServicesProgress();
 				sleep(1000);
+				
+				VersionsAdapter versions = new VersionsAdapter();
+				versions.open();
+				versions.setVersion(VersionType.CAMPUS_SERVICES, "0.0");
+				versions.close();
 			}
 			
 			@Override

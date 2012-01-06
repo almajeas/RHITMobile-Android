@@ -5,6 +5,7 @@ import org.json.JSONObject;
 import edu.rosehulman.android.directory.model.DirectionsResponse;
 import edu.rosehulman.android.directory.model.LocationCollection;
 import edu.rosehulman.android.directory.model.LocationNamesCollection;
+import edu.rosehulman.android.directory.model.VersionResponse;
 
 /**
  * Wraps logic of communicating with the mobile directory web service into
@@ -27,6 +28,18 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 	 */
 	public static void setClientFactory(ClientFactory factory) {
 		MobileDirectoryService.factory = factory;
+	}
+	
+	@Override
+	public VersionResponse getVersions() throws Exception {
+		JsonClient client = factory.makeJsonClient(HOST, PORT, "");
+		
+		JSONObject root = client.execute();
+		if (root == null) {
+			return null;
+		}
+		
+		return VersionResponse.deserialize(root);
 	}
 	
 	@Override

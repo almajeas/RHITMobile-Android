@@ -5,6 +5,8 @@ package edu.rosehulman.android.directory.model;
  */
 public enum VersionType {
 	/** Version for map area information */
-	MAP_AREAS
-
+	MAP_AREAS,
+	
+	/** Version for campus services information */
+	CAMPUS_SERVICES
 }
