@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Window;
 import edu.rosehulman.android.directory.model.Directions;
 import edu.rosehulman.android.directory.model.Location;
 
@@ -22,6 +23,7 @@ public class DirectionListActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.direction_list);
     }
         
