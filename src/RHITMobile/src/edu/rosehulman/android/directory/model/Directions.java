@@ -4,9 +4,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import edu.rosehulman.android.directory.util.BoundingBox;
 
-public class Directions {
+public class Directions implements Parcelable {
 	
 	public double distance;
 	
@@ -61,4 +64,41 @@ public class Directions {
 		return new BoundingBox(left, right, top, bottom);
 	}
 
+
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeDouble(distance);
+		dest.writeParcelable(start, flags);
+		dest.writeInt(stairsUp);
+		dest.writeInt(stairsDown);
+		dest.writeParcelableArray(paths, flags);
+	}
+	
+	public static final Parcelable.Creator<Directions> CREATOR = new Parcelable.Creator<Directions>() {
+
+		@Override
+		public Directions createFromParcel(Parcel in) {
+			Directions res = new Directions();
+			
+			res.distance = in.readDouble();
+			res.start = in.readParcelable(LatLon.class.getClassLoader());
+			res.stairsUp = in.readInt();
+			res.stairsDown = in.readInt();
+			res.paths = (Path[])in.readParcelableArray(Path.class.getClassLoader());
+			
+			return res;
+		}
+
+		@Override
+		public Directions[] newArray(int size) {
+			return new Directions[size];
+		}
+		
+	};
+	
 }

@@ -156,6 +156,11 @@ public class CampusMapActivity extends MapActivity {
     			setTitle("Search: " + searchQuery);
     		
         	} else if (ACTION_DIRECTIONS.equals(intent.getAction())) {
+        		if (!intent.hasExtra(EXTRA_WAYPOINTS) || intent.getLongArrayExtra(EXTRA_WAYPOINTS) == null) {
+            		//TODO remove
+        			intent.putExtra(EXTRA_WAYPOINTS, new long[] {1300000, 1111570});
+        		}
+        		
         		long[] ids = intent.getLongArrayExtra(EXTRA_WAYPOINTS);
 
     			LoadDirections task = new LoadDirections(ids);
@@ -384,6 +389,10 @@ public class CampusMapActivity extends MapActivity {
     }
 
     private void btnListDirections_clicked() {
+    	if (directionsLayer == null)
+    		return;
+    	
+    	directionsLayer.showDirectionsList(-1);
     }
 
     
@@ -589,9 +598,9 @@ public class CampusMapActivity extends MapActivity {
         textLayer = new TextOverlayLayer();
 	}
 	
-	private void generateDirectionsLayer(Directions directions) {
+	private void generateDirectionsLayer(Directions directions, Location[] locations) {
 
-		directionsLayer = new DirectionsLayer(mapView, taskManager, directions, new UIListener() {
+		directionsLayer = new DirectionsLayer(mapView, taskManager, directions, locations, new UIListener() {
 			@Override
 			public void setPrevButtonEnabled(boolean enabled) {
 				btnPrev.setEnabled(enabled);
@@ -789,6 +798,8 @@ public class CampusMapActivity extends MapActivity {
 		private long[] ids;
 		private ProgressDialog dialog;
 		
+		private Location[] nodes;
+		
 		public LoadDirections(long[] ids) {
 			this.ids = ids;
 		}
@@ -853,6 +864,16 @@ public class CampusMapActivity extends MapActivity {
 					}
 				}
 			}
+			
+			//load the relevant locations
+			nodes = new Location[ids.length];
+			LocationAdapter locationAdapter = new LocationAdapter();
+			locationAdapter.open();
+			for (int i = 0; i < ids.length; i++) {
+				nodes[i] = locationAdapter.getLocation(ids[i]);
+			}
+			locationAdapter.close();
+			
 			publishProgress(100);
 
 			return response.result;
@@ -863,7 +884,7 @@ public class CampusMapActivity extends MapActivity {
 			dialog.dismiss();
 			
 			if (directions != null) {
-				generateDirectionsLayer(directions);
+				generateDirectionsLayer(directions, nodes);
 				rebuildOverlays();
 			}
 		}

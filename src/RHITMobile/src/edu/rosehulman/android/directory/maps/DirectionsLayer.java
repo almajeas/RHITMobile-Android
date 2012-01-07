@@ -2,6 +2,7 @@ package edu.rosehulman.android.directory.maps;
 
 import java.io.InputStream;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -13,16 +14,17 @@ import android.graphics.Paint.Style;
 import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapView;
 import com.google.android.maps.OverlayItem;
 import com.google.android.maps.Projection;
 import com.readystatesoftware.mapviewballoons.BalloonItemizedOverlay;
 
+import edu.rosehulman.android.directory.DirectionListActivity;
 import edu.rosehulman.android.directory.R;
 import edu.rosehulman.android.directory.TaskManager;
 import edu.rosehulman.android.directory.model.Directions;
+import edu.rosehulman.android.directory.model.Location;
 import edu.rosehulman.android.directory.model.Path;
 import edu.rosehulman.android.directory.util.BoundingBox;
 
@@ -39,10 +41,10 @@ public class DirectionsLayer extends BalloonItemizedOverlay<OverlayItem> impleme
 	private static Drawable transparent;
 	
 	private OverlayManagerControl manager;
-	private TaskManager taskManager;
 	private UIListener uiListener;
 	
 	private Directions directions;
+	private Location[] locations;
 	public BoundingBox bounds;
 	
 	private int nodeCount;
@@ -50,10 +52,10 @@ public class DirectionsLayer extends BalloonItemizedOverlay<OverlayItem> impleme
 	
 	private boolean animate = true;
 
-	public DirectionsLayer(MapView mapView, TaskManager taskManager, Directions directions, UIListener uiListener) {
+	public DirectionsLayer(MapView mapView, TaskManager taskManager, Directions directions, Location[] locations, UIListener uiListener) {
 		super(boundCenter(getDirectionsDrawable(mapView.getResources(), DirectionsBitmap.NODE)), mapView);
-		this.taskManager = taskManager;
 		this.directions = directions;
+		this.locations = locations;
 		this.uiListener = uiListener;
 
 		if (transparent == null) {
@@ -114,8 +116,7 @@ public class DirectionsLayer extends BalloonItemizedOverlay<OverlayItem> impleme
 	
 	@Override
 	protected boolean onBalloonTap(int index, OverlayItem item) {
-		//TODO show directions list
-		
+		showDirectionsList(index);
 		return true;
 	}
 	
@@ -205,6 +206,16 @@ public class DirectionsLayer extends BalloonItemizedOverlay<OverlayItem> impleme
 		this.animate = true;
 		
 		return true;
+	}
+	
+	/**
+	 * Shows the list of directions.
+	 * 
+	 * @param step The step to move to, or -1
+	 */
+	public void showDirectionsList(int step) {
+		Context context = getMapView().getContext();
+		context.startActivity(DirectionListActivity.createIntent(context, directions, locations));
 	}
 	
 	private enum DirectionsBitmap {

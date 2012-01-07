@@ -3,10 +3,13 @@ package edu.rosehulman.android.directory.model;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.android.maps.GeoPoint;
 
 /** Represents a Latitude/Longitude pair in microdegree form. */
-public class LatLon {
+public class LatLon implements Parcelable {
 	
 	/** Latitude represented in microdegrees */
 	public int lat;
@@ -55,5 +58,33 @@ public class LatLon {
 	public GeoPoint asGeoPoint() {
 		return new GeoPoint(lat, lon);
 	}
+
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeInt(lat);
+		dest.writeInt(lon);
+	}
+	
+	public static final Parcelable.Creator<LatLon> CREATOR = new Parcelable.Creator<LatLon>() {
+
+		@Override
+		public LatLon createFromParcel(Parcel in) {
+			int lat = in.readInt();
+			int lon = in.readInt();
+			
+			return new LatLon(lat, lon);
+		}
+
+		@Override
+		public LatLon[] newArray(int size) {
+			return new LatLon[size];
+		}
+		
+	};
 
 }
