@@ -289,12 +289,7 @@ public class DataUpdateService extends Service {
 						versions = service.getVersions();
 					} catch (Exception e) {
 						Log.e(C.TAG, "Failed to downlaod version information", e);
-						sleep(1000);
-						
-						//FIXME remove when the server API is added
-						versions = new VersionResponse();
-						versions.locations = locationsVersion;
-						versions.services = servicesVersion;
+						sleep(2000);
 					}
 				} while (versions == null);
 				
@@ -450,7 +445,7 @@ public class DataUpdateService extends Service {
 				
 				VersionsAdapter versions = new VersionsAdapter();
 				versions.open();
-				versions.setVersion(VersionType.CAMPUS_SERVICES, "0.0");
+				versions.setVersion(VersionType.CAMPUS_SERVICES, "0");
 				versions.close();
 			}
 			
