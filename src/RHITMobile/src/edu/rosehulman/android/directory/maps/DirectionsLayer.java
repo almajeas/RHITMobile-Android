@@ -30,11 +30,17 @@ import edu.rosehulman.android.directory.util.BoundingBox;
  * Overlay containing Point Of Interest markers
  */
 public class DirectionsLayer extends BalloonItemizedOverlay<OverlayItem> implements ManageableOverlay {
+	
+	public interface UIListener {
+		public void setPrevButtonEnabled(boolean enabled);
+		public void setNextButtonEnabled(boolean enabled);
+	}
 
 	private static Drawable transparent;
 	
 	private OverlayManagerControl manager;
 	private TaskManager taskManager;
+	private UIListener uiListener;
 	
 	private Directions directions;
 	public BoundingBox bounds;
@@ -44,10 +50,11 @@ public class DirectionsLayer extends BalloonItemizedOverlay<OverlayItem> impleme
 	
 	private boolean animate = true;
 
-	public DirectionsLayer(MapView mapView, TaskManager taskManager, Directions directions) {
+	public DirectionsLayer(MapView mapView, TaskManager taskManager, Directions directions, UIListener uiListener) {
 		super(boundCenter(getDirectionsDrawable(mapView.getResources(), DirectionsBitmap.NODE)), mapView);
 		this.taskManager = taskManager;
 		this.directions = directions;
+		this.uiListener = uiListener;
 
 		if (transparent == null) {
 			transparent = getMapView().getResources().getDrawable(android.R.color.transparent);
@@ -159,6 +166,45 @@ public class DirectionsLayer extends BalloonItemizedOverlay<OverlayItem> impleme
 	@Override
 	public void setManager(OverlayManagerControl manager) {
 		this.manager = manager;
+	}
+	
+	public void stepNext() {
+		int maxStep = pathNodes.length;
+		int currentStep = getLastFocusedIndex();
+		currentStep = Math.min(currentStep+1, maxStep);
+		if (currentStep == maxStep) {
+			uiListener.setNextButtonEnabled(false);
+		}
+		uiListener.setPrevButtonEnabled(true);
+		focus(currentStep, true);
+	}
+	
+	public void stepPrevious() {
+		int minStep = 0;
+		int currentStep = getLastFocusedIndex();
+		currentStep = Math.max(currentStep-1, minStep);
+		if (currentStep == minStep) {
+			uiListener.setPrevButtonEnabled(false);
+		}
+		uiListener.setNextButtonEnabled(true);
+		focus(currentStep, true);
+	}
+	
+	/**
+	 * Focus a particular step
+	 * 
+	 * @param step The index of the step to focus
+	 * @param animate Whether the focus operation should animate or not
+	 * 
+	 * @return True if the step was focused
+	 */
+	public boolean focus(int step, boolean animate) {
+		this.animate = animate;
+		this.setLastFocusedIndex(step);
+		this.onTap(step);
+		this.animate = true;
+		
+		return true;
 	}
 	
 	private enum DirectionsBitmap {

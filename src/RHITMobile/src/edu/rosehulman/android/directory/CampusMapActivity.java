@@ -41,6 +41,7 @@ import edu.rosehulman.android.directory.db.VersionsAdapter;
 import edu.rosehulman.android.directory.maps.BuildingOverlayLayer;
 import edu.rosehulman.android.directory.maps.BuildingOverlayLayer.OnBuildingSelectedListener;
 import edu.rosehulman.android.directory.maps.DirectionsLayer;
+import edu.rosehulman.android.directory.maps.DirectionsLayer.UIListener;
 import edu.rosehulman.android.directory.maps.LocationSearchLayer;
 import edu.rosehulman.android.directory.maps.OverlayManager;
 import edu.rosehulman.android.directory.maps.POILayer;
@@ -369,9 +370,17 @@ public class CampusMapActivity extends MapActivity {
     }
 
     private void btnPrev_clicked() {
+    	if (directionsLayer == null)
+    		return;
+    	
+    	directionsLayer.stepPrevious();
     }
 
     private void btnNext_clicked() {
+    	if (directionsLayer == null)
+    		return;
+    	
+    	directionsLayer.stepNext();
     }
 
     private void btnListDirections_clicked() {
@@ -578,7 +587,16 @@ public class CampusMapActivity extends MapActivity {
 	
 	private void generateDirectionsLayer(Directions directions) {
 
-		directionsLayer = new DirectionsLayer(mapView, taskManager, directions);
+		directionsLayer = new DirectionsLayer(mapView, taskManager, directions, new UIListener() {
+			@Override
+			public void setPrevButtonEnabled(boolean enabled) {
+				btnPrev.setEnabled(enabled);
+			}
+			@Override
+			public void setNextButtonEnabled(boolean enabled) {
+				btnNext.setEnabled(enabled);
+			}
+		});
 		
 		BoundingBox bounds = directionsLayer.bounds;
 		Point center = bounds.getCenter();
