@@ -179,24 +179,28 @@ public abstract class TableAdapter {
 		}
 	}
 	
-	private synchronized static void ref(SQLiteDatabase db) {
-		int count = 0;
-		
-		if (dbCount.containsKey(db)) {
-			count = dbCount.get(db);
+	private static void ref(SQLiteDatabase db) {
+		synchronized (dbCount) {
+			int count = 0;
+			
+			if (dbCount.containsKey(db)) {
+				count = dbCount.get(db);
+			}
+			
+			dbCount.put(db, count + 1);
 		}
-		
-		dbCount.put(db, count + 1);
 	}
 	
-	private synchronized static void deref(SQLiteDatabase db) {
-		int count = dbCount.get(db);
-		
-		if (count == 1) {
-			dbCount.remove(db);
-			db.close();
-		} else {
-			dbCount.put(db, count - 1);
+	private static void deref(SQLiteDatabase db) {
+		synchronized (dbCount) {
+			int count = dbCount.get(db);
+			
+			if (count == 1) {
+				dbCount.remove(db);
+				db.close();
+			} else {
+				dbCount.put(db, count - 1);
+			}
 		}
 	}
 
