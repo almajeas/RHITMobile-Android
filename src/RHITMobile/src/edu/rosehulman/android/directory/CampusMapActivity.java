@@ -435,8 +435,12 @@ public class CampusMapActivity extends MapActivity {
 
 	@Override
 	protected boolean isRouteDisplayed() {
-		//FIXME update when we start displaying route information
-		return false;
+		return ACTION_DIRECTIONS.equals(getIntent().getAction());
+	}
+	
+	@Override
+	protected boolean isLocationDisplayed() {
+		return true;
 	}
 	
     private void rebuildOverlays() {
