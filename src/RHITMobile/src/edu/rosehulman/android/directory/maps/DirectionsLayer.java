@@ -43,8 +43,8 @@ public class DirectionsLayer extends BalloonItemizedOverlay<OverlayItem> impleme
 	private OverlayManagerControl manager;
 	private UIListener uiListener;
 	
-	private Directions directions;
-	private Location[] locations;
+	public Directions directions;
+	public Location[] locations;
 	public BoundingBox bounds;
 	
 	private int nodeCount;

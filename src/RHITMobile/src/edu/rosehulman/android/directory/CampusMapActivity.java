@@ -145,19 +145,19 @@ public class CampusMapActivity extends MapActivity {
         overlayManager = new OverlayManager();
         myLocation = new MyLocationOverlay(this, mapView);
         eventLayer = new EventOverlay();
+
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+			searchQuery = intent.getStringExtra(SearchManager.QUERY);
+			SearchLocations task = new SearchLocations();
+			taskManager.addTask(task);
+			task.execute(searchQuery);
+			setTitle("Search: " + searchQuery);
+		
+    	}
         
         if (savedInstanceState == null) {
         	
-        	Intent intent = getIntent();
-        	
-        	if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-    			searchQuery = intent.getStringExtra(SearchManager.QUERY);
-    			SearchLocations task = new SearchLocations();
-    			taskManager.addTask(task);
-    			task.execute(searchQuery);
-    			setTitle("Search: " + searchQuery);
-    		
-        	} else if (ACTION_DIRECTIONS.equals(intent.getAction())) {
+        	 if (ACTION_DIRECTIONS.equals(intent.getAction())) {
         		if (!intent.hasExtra(EXTRA_WAYPOINTS) || intent.getLongArrayExtra(EXTRA_WAYPOINTS) == null) {
             		//TODO remove
         			intent.putExtra(EXTRA_WAYPOINTS, new long[] {1300000, 1111570});
@@ -186,6 +186,16 @@ public class CampusMapActivity extends MapActivity {
 	    	this.savedInstanceState = savedInstanceState;
 	    	
 	    	//restore state
+			if (ACTION_DIRECTIONS.equals(intent.getAction())) {
+				Directions directions = savedInstanceState.getParcelable("Directions");
+				Location[] locations = (Location[])savedInstanceState.getParcelableArray("Locations");
+				
+				generateDirectionsLayer(directions, locations);
+				
+				btnListDirections.setVisibility(View.VISIBLE);
+				btnPrev.setVisibility(View.VISIBLE);
+				btnNext.setVisibility(View.VISIBLE);
+			}
 	    }
 
         mapView.setBuiltInZoomControls(true);
@@ -272,10 +282,15 @@ public class CampusMapActivity extends MapActivity {
     @Override
     protected void onSaveInstanceState(Bundle bundle) {
     	super.onSaveInstanceState(bundle);
-    	//TODO save our state
+    	
     	if (buildingLayer != null) {
     		bundle.putLong(SELECTED_ID, getFocusedLocation());
     	}
+    	
+    	if (directionsLayer != null) {
+    		bundle.putParcelable("Directions", directionsLayer.directions);
+    		bundle.putParcelableArray("Locations", directionsLayer.locations);
+		}
     }
     
     @Override
