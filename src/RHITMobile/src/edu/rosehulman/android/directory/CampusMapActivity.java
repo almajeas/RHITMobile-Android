@@ -7,7 +7,6 @@ import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Canvas;
@@ -21,6 +20,11 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
+import android.widget.Button;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
@@ -64,6 +68,7 @@ public class CampusMapActivity extends MapActivity {
 	public static final String EXTRA_WAYPOINTS = "WAYPOINTS";
 	
 	private static final int MIN_ZOOM_LEVEL = 16;
+	private static final int MAX_ZOOM_LEVEL = 22;
 	
 	public static Intent createIntent(Context context) {
 		return new Intent(context, CampusMapActivity.class);
@@ -106,6 +111,12 @@ public class CampusMapActivity extends MapActivity {
     private EventOverlay eventLayer;
     private MyLocationOverlay myLocation;
     
+    private Button btnZoomIn;
+    private Button btnZoomOut;
+    private Button btnPrev;
+    private Button btnNext;
+    private Button btnListDirections;
+    
     private TaskManager taskManager;
     
     private ServiceManager<IDataUpdateService> updateService;
@@ -122,6 +133,11 @@ public class CampusMapActivity extends MapActivity {
         taskManager = new TaskManager();
         
         mapView = (MapView)findViewById(R.id.mapview);
+        btnZoomIn = (Button)findViewById(R.id.btnZoomIn);
+        btnZoomOut = (Button)findViewById(R.id.btnZoomOut);
+        btnPrev = (Button)findViewById(R.id.btnPrev);
+        btnNext = (Button)findViewById(R.id.btnNext);
+        btnListDirections = (Button)findViewById(R.id.btnListDirections);
         
         overlayManager = new OverlayManager();
         myLocation = new MyLocationOverlay(this, mapView);
@@ -144,6 +160,10 @@ public class CampusMapActivity extends MapActivity {
     			LoadDirections task = new LoadDirections(ids);
     			taskManager.addTask(task);
     			task.execute();
+    			
+    			btnListDirections.setVisibility(View.VISIBLE);
+    			btnPrev.setVisibility(View.VISIBLE);
+    			btnNext.setVisibility(View.VISIBLE);
     		}
 
 	        mapView.setSatellite(true);
@@ -162,7 +182,50 @@ public class CampusMapActivity extends MapActivity {
 
         mapView.setBuiltInZoomControls(true);
         
+		btnZoomIn.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				btnZoomIn_clicked();
+			}
+		});
+		btnZoomOut.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				btnZoomOut_clicked();
+			}
+		});
+		btnPrev.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				btnPrev_clicked();
+			}
+		});
+		btnNext.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				btnNext_clicked();
+			}
+		});
+		btnListDirections.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				btnListDirections_clicked();
+			}
+		});
+		
+    	mapView.setBuiltInZoomControls(false);
+    	
         rebuildOverlays();
+        
+        mapView.setOnTouchListener(new OnTouchListener() {
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				if (event.getAction() == MotionEvent.ACTION_UP) {
+					updateZoomControls();
+				}
+				return false;
+			}
+		});
         
 		updateService = new ServiceManager<IDataUpdateService>(getApplicationContext(),
 				DataUpdateService.createIntent(getApplicationContext()));
@@ -281,6 +344,39 @@ public class CampusMapActivity extends MapActivity {
     	
     	return super.onSearchRequested();
     }
+    
+    private void updateZoomControls() {
+    	int zoomLevel = mapView.getZoomLevel();
+    	
+    	if (zoomLevel == MIN_ZOOM_LEVEL) {
+    		btnZoomOut.setEnabled(false);
+    	} else if (zoomLevel == MAX_ZOOM_LEVEL) {
+    		btnZoomIn.setEnabled(false);
+    	} else {
+    		btnZoomIn.setEnabled(true);
+    		btnZoomOut.setEnabled(true);
+    	}
+    }
+    
+    private void btnZoomIn_clicked() {
+    	mapView.getController().zoomIn();
+    	updateZoomControls();
+    }
+
+    private void btnZoomOut_clicked() {
+    	mapView.getController().zoomOut();
+    	updateZoomControls();
+    }
+
+    private void btnPrev_clicked() {
+    }
+
+    private void btnNext_clicked() {
+    }
+
+    private void btnListDirections_clicked() {
+    }
+
     
     private void showTopLocations() {
     	TopLocations task = new TopLocations();
@@ -585,7 +681,7 @@ public class CampusMapActivity extends MapActivity {
 		protected void onPostExecute(Void res) {
 	    	AlertDialog dialog = new AlertDialog.Builder(CampusMapActivity.this)
 	    		.setTitle("Top Locations")
-	    		.setItems(names, new OnClickListener() {
+	    		.setItems(names, new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						focusLocation(ids[which], true);

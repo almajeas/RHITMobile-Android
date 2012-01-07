@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     >
@@ -12,4 +11,54 @@
         android:clickable="true"
         android:apiKey="03v-vSSy4cBYVGPmnnCKs0Wwf9554R_IdexaPFg"
     />
-</LinearLayout>
+	
+	<RelativeLayout
+	    android:layout_width="fill_parent"
+	    android:layout_height="fill_parent"
+	    android:padding="10dp" >
+	    
+		<Button
+		    android:id="@+id/btnZoomOut"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:layout_alignParentBottom="true"
+		    android:layout_alignParentRight="true"
+		    android:background="@drawable/btn_zoom_down" />
+	
+		<Button
+		    android:id="@+id/btnZoomIn"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:layout_above="@+id/btnZoomOut"
+		    android:layout_alignParentRight="true"
+		    android:background="@drawable/btn_zoom_up" />
+	
+		<Button
+		    android:id="@+id/btnListDirections"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:layout_alignParentBottom="true"
+		    android:layout_alignParentLeft="true"
+		    android:layout_marginRight="20dp"
+		    android:visibility="invisible"
+		    android:background="@drawable/btn_list_directions" />
+	
+		<Button
+		    android:id="@+id/btnPrev"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:layout_alignParentBottom="true"
+		    android:layout_toRightOf="@+id/btnShowDirections"
+		    android:visibility="invisible"
+		    android:background="@drawable/btn_prev_down" />
+	
+		<Button
+		    android:id="@+id/btnNext"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:layout_alignParentBottom="true"
+		    android:layout_toRightOf="@+id/btnPrev"
+		    android:visibility="invisible"
+		    android:background="@drawable/btn_next_up" />
+	</RelativeLayout>
+</RelativeLayout>

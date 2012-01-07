@@ -57,7 +57,7 @@ public class POILayer extends BalloonItemizedOverlay<OverlayItem> implements Man
 	 * @param taskManager The task manager that can be used to abort tasks if the activity is paused
 	 */
 	public POILayer(Drawable defaultMarker, MapView mapView, TaskManager taskManager) {
-		super(boundCenter(defaultMarker), mapView);
+		super(boundCenterBottom(defaultMarker), mapView);
 		this.taskManager = taskManager;
 		poiMap = new HashMap<Long, PointOfInterest>();
 		pois = new ArrayList<PointOfInterest>();
