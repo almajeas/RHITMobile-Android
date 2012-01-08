@@ -2,6 +2,7 @@ package edu.rosehulman.android.directory;
 
 import java.util.List;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
@@ -22,9 +23,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.Window;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
+import android.view.Window;
 import android.widget.Button;
 
 import com.google.android.maps.GeoPoint;
@@ -68,10 +69,11 @@ public class CampusMapActivity extends MapActivity {
 
 	public static final String EXTRA_BUILDING_ID = "BUILDING_ID";
 	public static final String EXTRA_WAYPOINTS = "WAYPOINTS";
+	public static final String EXTRA_DIRECTIONS_FOCUS_INDEX = "DIRECTIONS_FOCUS_INDEX";
 	
 	private static final int MIN_ZOOM_LEVEL = 16;
 	private static final int MAX_ZOOM_LEVEL = 22;
-	
+
 	public static Intent createIntent(Context context) {
 		return new Intent(context, CampusMapActivity.class);
 	}
@@ -93,6 +95,12 @@ public class CampusMapActivity extends MapActivity {
 		Intent intent = createIntent(context);
 		intent.setAction(ACTION_DIRECTIONS);
 		intent.putExtra(EXTRA_WAYPOINTS, ids);
+		return intent;
+	}
+	
+	public static Intent createResultIntent(int directionsFocusIndex) {
+		Intent intent = new Intent();
+		intent.putExtra(EXTRA_DIRECTIONS_FOCUS_INDEX, directionsFocusIndex);
 		return intent;
 	}
 
@@ -368,6 +376,20 @@ public class CampusMapActivity extends MapActivity {
     	return super.onSearchRequested();
     }
     
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    	if (requestCode != DirectionsLayer.REQUEST_DIRECTIONS_LIST)
+    		return;
+    	
+    	switch (resultCode) {
+    		case Activity.RESULT_OK:
+    			//focus the requested step
+    			int step = data.getIntExtra(EXTRA_DIRECTIONS_FOCUS_INDEX, -1);
+    			directionsLayer.focus(step, false);
+    			break;	
+    	}
+    }
+    
     private void updateZoomControls() {
     	int zoomLevel = mapView.getZoomLevel();
     	
@@ -625,6 +647,10 @@ public class CampusMapActivity extends MapActivity {
 			@Override
 			public void setNextButtonEnabled(boolean enabled) {
 				btnNext.setEnabled(enabled);
+			}
+			@Override
+			public void startActivityForResult(Intent intent, int requestCode) {
+				CampusMapActivity.this.startActivityForResult(intent, requestCode);
 			}
 		});
 		

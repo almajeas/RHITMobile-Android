@@ -6,7 +6,7 @@ import org.json.JSONObject;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
+import edu.rosehulman.android.directory.util.ArrayUtil;
 import edu.rosehulman.android.directory.util.BoundingBox;
 
 public class Directions implements Parcelable {
@@ -89,7 +89,10 @@ public class Directions implements Parcelable {
 			res.start = in.readParcelable(LatLon.class.getClassLoader());
 			res.stairsUp = in.readInt();
 			res.stairsDown = in.readInt();
-			res.paths = (Path[])in.readParcelableArray(Path.class.getClassLoader());
+			
+			Parcelable[] paths = in.readParcelableArray(Path.class.getClassLoader());
+			res.paths = new Path[paths.length];
+			ArrayUtil.cast(paths, res.paths);
 			
 			return res;
 		}

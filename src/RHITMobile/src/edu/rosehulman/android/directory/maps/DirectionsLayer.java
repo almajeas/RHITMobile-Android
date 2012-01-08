@@ -3,6 +3,7 @@ package edu.rosehulman.android.directory.maps;
 import java.io.InputStream;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -14,6 +15,7 @@ import android.graphics.Paint.Style;
 import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapView;
 import com.google.android.maps.OverlayItem;
@@ -33,9 +35,12 @@ import edu.rosehulman.android.directory.util.BoundingBox;
  */
 public class DirectionsLayer extends BalloonItemizedOverlay<OverlayItem> implements ManageableOverlay {
 	
+	public static final int REQUEST_DIRECTIONS_LIST = 1;
+	
 	public interface UIListener {
 		public void setPrevButtonEnabled(boolean enabled);
 		public void setNextButtonEnabled(boolean enabled);
+		void startActivityForResult(Intent intent, int requestCode);
 	}
 
 	private static Drawable transparent;
@@ -215,7 +220,8 @@ public class DirectionsLayer extends BalloonItemizedOverlay<OverlayItem> impleme
 	 */
 	public void showDirectionsList(int step) {
 		Context context = getMapView().getContext();
-		context.startActivity(DirectionListActivity.createIntent(context, directions, locations));
+		Intent intent = DirectionListActivity.createIntent(context, directions, locations);
+		uiListener.startActivityForResult(intent, REQUEST_DIRECTIONS_LIST);
 	}
 	
 	private enum DirectionsBitmap {
