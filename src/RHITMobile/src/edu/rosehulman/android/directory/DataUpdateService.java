@@ -295,6 +295,17 @@ public class DataUpdateService extends Service {
 				
 				if (locationsVersion == null || !locationsVersion.equals(versions.locations)) {
 					queue.addTask(new TopLocationsTask());
+				} else {
+					//Finish loading inner locations
+					LocationAdapter buildingAdapter = new LocationAdapter();
+			        buildingAdapter.open();
+					long[] ids = buildingAdapter.getUnloadedTopLocations();
+					locationCount = buildingAdapter.getAllTopLocations().length;
+					locationProgress = locationCount - ids.length - 1;
+			        buildingAdapter.close();
+			        for (long id : ids) {
+			        	queue.addTask(new InnerLocationTask(id));
+			        }
 				}
 				if (servicesVersion == null || !servicesVersion.equals(versions.services)) {
 					queue.addTask(new CampusServicesTask());
