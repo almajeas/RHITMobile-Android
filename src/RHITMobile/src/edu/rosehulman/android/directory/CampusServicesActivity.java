@@ -1,9 +1,12 @@
 package edu.rosehulman.android.directory;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +16,7 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.ExpandableListView.OnChildClickListener;
 import android.widget.TextView;
+import edu.rosehulman.android.directory.db.CampusServicesAdapter;
 import edu.rosehulman.android.directory.model.CampusServicesCategory;
 import edu.rosehulman.android.directory.model.Hyperlink;
 
@@ -22,28 +26,11 @@ public class CampusServicesActivity extends Activity {
 		return new Intent(context, CampusServicesActivity.class);
 	}
 	
+	private TaskManager taskManager = new TaskManager();
+	
 	private ExpandableListView tree;
 	
-	private CampusServicesCategory[] groups = new CampusServicesCategory[] {
-			new CampusServicesCategory("Career Services", new Hyperlink[] {
-					new Hyperlink("Contacts", "http://www.rose-hulman.edu/careerservices/contacts.htm"),
-					new Hyperlink("eRecruiting", "http://rhit.experience.com/er/security/login.jsp")
-			}),
-			new CampusServicesCategory("Dining Services", new Hyperlink[] {
-					new Hyperlink("Cafeteria Hours", "http://www.campusdish.com/en-US/CSMW/RoseHulman/Locations/HulmanUnionCafeteria.htm"),
-					new Hyperlink("Cafeteria Menu", "http://www.campusdish.com/en-US/CSMW/RoseHulman/Locations/HulmanUnionCafeteriaMenu1.htm"),
-					new Hyperlink("Subway Hours", "http://www.campusdish.com/en-US/CSMW/RoseHulman/Locations/Subway.htm"),
-					new Hyperlink("Noble Roman's", "http://www.campusdish.com/en-US/CSMW/RoseHulman/Locations/NobleRomansintheWorx.htm"),
-					new Hyperlink("C3", "http://www.campusdish.com/en-US/CSMW/RoseHulman/Locations/C3ConvenienceStore.htm"),
-					new Hyperlink("Java City", "http://www.campusdish.com/en-US/CSMW/RoseHulman/Locations/JavaCity.htm"),
-					new Hyperlink("Logan's", "http://www.campusdish.com/en-US/CSMW/RoseHulman/Locations/Logans.htm")
-			}),
-			new CampusServicesCategory("Health Services", new Hyperlink[] {
-					new Hyperlink("Hours and Staff", "http://www.rose-hulman.edu/HealthServices/staff.htm"),
-					new Hyperlink("Services Offered", "http://www.rose-hulman.edu/HealthServices/services.htm"),
-					new Hyperlink("Forms", "http://www.rose-hulman.edu/HealthServices/forms.htm")
-			})
-	};
+	private CampusServicesCategory[] categories;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -52,15 +39,32 @@ public class CampusServicesActivity extends Activity {
 		setContentView(R.layout.campus_services);
 		
 		tree = (ExpandableListView)findViewById(R.id.tree);
-		tree.setAdapter(new TreeAdapter(groups));
+		
+		LoadServices loadServices = new LoadServices();
+		taskManager.addTask(loadServices);
+		loadServices.execute();
 		
 		tree.setOnChildClickListener(new OnChildClickListener() {
 			@Override
 			public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
-				tree_childClicked(groups[groupPosition].entries[childPosition]);
+				if (categories == null)
+					return false;
+				
+				tree_childClicked(categories[groupPosition].entries[childPosition]);
 				return true;
 			}
 		});
+	}
+	
+	@Override
+	public void onResume() {
+		super.onResume();
+	}
+	
+	@Override
+	public void onPause() {
+		super.onPause();
+		taskManager.abortTasks();
 	}
 	
 	private void tree_childClicked(Hyperlink child) {
@@ -145,6 +149,53 @@ public class CampusServicesActivity extends Activity {
 		@Override
 		public boolean hasStableIds() {
 			return true;
+		}
+		
+	}
+	
+	private class LoadServices extends AsyncTask<Void, Void, CampusServicesCategory[]> {
+		
+		private ProgressDialog dialog;
+		
+		@Override
+		protected void onPreExecute() {
+			dialog = new ProgressDialog(CampusServicesActivity.this);
+			dialog.setTitle(null);
+			dialog.setMessage("Loading...");
+			dialog.setIndeterminate(true);
+			dialog.setCancelable(true);
+			dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+				@Override
+				public void onCancel(DialogInterface dialog) {
+					cancel(true);
+				}
+			});
+			dialog.show();
+		}
+
+		@Override
+		protected CampusServicesCategory[] doInBackground(Void... args) {
+			//TODO query service
+			
+			CampusServicesAdapter adapter = new CampusServicesAdapter();
+			adapter.open();
+			CampusServicesCategory categories[] = adapter.getCategories("");
+			adapter.close();
+			
+			return categories;
+		}
+		
+		@Override
+		protected void onCancelled() {
+			dialog.dismiss();
+		}
+		
+		@Override
+		protected void onPostExecute(CampusServicesCategory res[]) {
+			dialog.dismiss();
+			
+			categories = res;
+			tree.setAdapter(new TreeAdapter(categories));
 		}
 		
 	}

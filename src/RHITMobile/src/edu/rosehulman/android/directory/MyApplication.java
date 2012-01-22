@@ -35,7 +35,7 @@ public class MyApplication extends Application {
 	
 	private Handler handler = new Handler();
 	
-	private static final boolean PURGE_DB = true;
+	private static final boolean PURGE_DB = false;
 	
 	/**
 	 * Get the globally accessible application instance

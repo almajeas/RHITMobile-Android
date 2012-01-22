@@ -97,7 +97,7 @@ public class CampusServicesAdapter extends TableAdapter {
 				String url = cursor.getString(cursor.getColumnIndex(KEY_URL));
 				links.add(new Hyperlink(name, url));
 				cursor.moveToNext();
-			} while (category.name.equals(cursor.getString(cursor.getColumnIndex(KEY_CATEGORY))));
+			} while (!cursor.isAfterLast() && category.name.equals(cursor.getString(cursor.getColumnIndex(KEY_CATEGORY))));
 			
 			category.entries = new Hyperlink[links.size()];
 			links.toArray(category.entries);
