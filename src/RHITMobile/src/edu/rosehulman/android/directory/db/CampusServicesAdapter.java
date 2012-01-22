@@ -95,7 +95,7 @@ public class CampusServicesAdapter extends TableAdapter {
 		String query = "SELECT " + columns(
 				columnAlias(KEY_ID, "_id"),
 				columnAlias(KEY_ID, SearchManager.SUGGEST_COLUMN_INTENT_DATA),
-				columnAlias(KEY_NAME, SearchManager.SUGGEST_COLUMN_TEXT_1),
+				columnAlias(KEY_CATEGORY+"||'/'||"+KEY_NAME, SearchManager.SUGGEST_COLUMN_TEXT_1),
 				columnAlias(KEY_URL, SearchManager.SUGGEST_COLUMN_TEXT_2)
 				) + 
 				"FROM " + TABLE_NAME + " " +
@@ -118,40 +118,31 @@ public class CampusServicesAdapter extends TableAdapter {
 		String where = KEY_NAME + " LIKE ? OR " + KEY_CATEGORY + " LIKE ?";
 		String order = KEY_CATEGORY + ", " + KEY_NAME;
 		cursor = db.query(TABLE_NAME, projection, where, args, null, null, order);
+		cursor.moveToFirst();
 		
-		DbIterator<CampusServicesCategory> it = new CategoryIterator(cursor);
 		List<CampusServicesCategory> categories = new ArrayList<CampusServicesCategory>();
-		while (it.hasNext()) {
-			categories.add(it.getNext());
+		while (!cursor.isAfterLast()) {
+			categories.add(getNextCategory(cursor));
 		}
 		CampusServicesCategory res[] = new CampusServicesCategory[categories.size()];
 		categories.toArray(res);
 		
 		return res;
 	}
-
-	private class CategoryIterator extends DbIterator<CampusServicesCategory> {
-
-		public CategoryIterator(Cursor cursor) {
-			super(cursor);
-		}
-
-		@Override
-		protected CampusServicesCategory convertRow(Cursor cursor) {
-			CampusServicesCategory category = new CampusServicesCategory();
-			category.name = cursor.getString(cursor.getColumnIndex(KEY_CATEGORY));
-			List<Hyperlink> links = new ArrayList<Hyperlink>();
-			do {
-				String name = cursor.getString(cursor.getColumnIndex(KEY_NAME));
-				String url = cursor.getString(cursor.getColumnIndex(KEY_URL));
-				links.add(new Hyperlink(name, url));
-				cursor.moveToNext();
-			} while (!cursor.isAfterLast() && category.name.equals(cursor.getString(cursor.getColumnIndex(KEY_CATEGORY))));
-			
-			category.entries = new Hyperlink[links.size()];
-			links.toArray(category.entries);
-			return category;
-		}
+	
+	private CampusServicesCategory getNextCategory(Cursor cursor) {
+		CampusServicesCategory category = new CampusServicesCategory();
+		category.name = cursor.getString(cursor.getColumnIndex(KEY_CATEGORY));
+		List<Hyperlink> links = new ArrayList<Hyperlink>();
+		do {
+			String name = cursor.getString(cursor.getColumnIndex(KEY_NAME));
+			String url = cursor.getString(cursor.getColumnIndex(KEY_URL));
+			links.add(new Hyperlink(name, url));
+			cursor.moveToNext();
+		} while (!cursor.isAfterLast() && category.name.equals(cursor.getString(cursor.getColumnIndex(KEY_CATEGORY))));
 		
-	}	
+		category.entries = new Hyperlink[links.size()];
+		links.toArray(category.entries);
+		return category;
+	}
 }
