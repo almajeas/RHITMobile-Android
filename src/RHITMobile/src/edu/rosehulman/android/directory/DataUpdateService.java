@@ -14,8 +14,12 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 import edu.rosehulman.android.directory.IDataUpdateService.AsyncRequest;
+import edu.rosehulman.android.directory.db.CampusServicesAdapter;
 import edu.rosehulman.android.directory.db.LocationAdapter;
 import edu.rosehulman.android.directory.db.VersionsAdapter;
+import edu.rosehulman.android.directory.model.CampusServicesCategory;
+import edu.rosehulman.android.directory.model.CampusServicesResponse;
+import edu.rosehulman.android.directory.model.Hyperlink;
 import edu.rosehulman.android.directory.model.Location;
 import edu.rosehulman.android.directory.model.LocationCollection;
 import edu.rosehulman.android.directory.model.VersionResponse;
@@ -448,15 +452,66 @@ public class DataUpdateService extends Service {
 		}
 		
 		class CampusServicesTask implements Task {
+			
+			//TODO remove
+			private boolean failed;
 
 			@Override
 			public void run(TaskQueue queue) {
 				updateServicesProgress();
-				sleep(1000);
-				
+
 				VersionsAdapter versions = new VersionsAdapter();
 				versions.open();
-				versions.setVersion(VersionType.CAMPUS_SERVICES, "0");
+				String currentVersion = versions.getVersion(VersionType.CAMPUS_SERVICES);
+				versions.close();
+
+				CampusServicesResponse response;
+				if (!failed) {
+					MobileDirectoryService service = new MobileDirectoryService();
+					try {
+						response = service.getCampusServicesData(currentVersion);
+					} catch (Exception e) {
+						Log.e(C.TAG, "Failed to download campus services", e);
+						//wait a bit and try again
+						failed = true;
+						queue.addTask(this);
+						sleep(5000);
+						return;
+					}
+				} else {
+					response = new CampusServicesResponse();
+					response.version = "0";
+					response.categories = new CampusServicesCategory[] {
+							new CampusServicesCategory("Career Services", new Hyperlink[] {
+									new Hyperlink("Contacts", "http://www.rose-hulman.edu/careerservices/contacts.htm"),
+									new Hyperlink("eRecruiting", "http://rhit.experience.com/er/security/login.jsp")
+							}),
+							new CampusServicesCategory("Dining Services", new Hyperlink[] {
+									new Hyperlink("Cafeteria Hours", "http://www.campusdish.com/en-US/CSMW/RoseHulman/Locations/HulmanUnionCafeteria.htm"),
+									new Hyperlink("Cafeteria Menu", "http://www.campusdish.com/en-US/CSMW/RoseHulman/Locations/HulmanUnionCafeteriaMenu1.htm"),
+									new Hyperlink("Subway Hours", "http://www.campusdish.com/en-US/CSMW/RoseHulman/Locations/Subway.htm"),
+									new Hyperlink("Noble Roman's", "http://www.campusdish.com/en-US/CSMW/RoseHulman/Locations/NobleRomansintheWorx.htm"),
+									new Hyperlink("C3", "http://www.campusdish.com/en-US/CSMW/RoseHulman/Locations/C3ConvenienceStore.htm"),
+									new Hyperlink("Java City", "http://www.campusdish.com/en-US/CSMW/RoseHulman/Locations/JavaCity.htm"),
+									new Hyperlink("Logan's", "http://www.campusdish.com/en-US/CSMW/RoseHulman/Locations/Logans.htm")
+							}),
+							new CampusServicesCategory("Health Services", new Hyperlink[] {
+									new Hyperlink("Hours and Staff", "http://www.rose-hulman.edu/HealthServices/staff.htm"),
+									new Hyperlink("Services Offered", "http://www.rose-hulman.edu/HealthServices/services.htm"),
+									new Hyperlink("Forms", "http://www.rose-hulman.edu/HealthServices/forms.htm")
+							})
+					};
+				}
+				
+				//update our cached data
+				CampusServicesAdapter servicesAdapter = new CampusServicesAdapter();
+				servicesAdapter.open();
+				servicesAdapter.replaceData(response.categories);
+				servicesAdapter.close();
+				
+				//mark it as updated
+				versions.open();
+				versions.setVersion(VersionType.CAMPUS_SERVICES, response.version);
 				versions.close();
 			}
 			

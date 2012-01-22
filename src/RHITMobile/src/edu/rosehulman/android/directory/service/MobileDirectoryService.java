@@ -2,6 +2,7 @@ package edu.rosehulman.android.directory.service;
 
 import org.json.JSONObject;
 
+import edu.rosehulman.android.directory.model.CampusServicesResponse;
 import edu.rosehulman.android.directory.model.DirectionsResponse;
 import edu.rosehulman.android.directory.model.LocationCollection;
 import edu.rosehulman.android.directory.model.LocationNamesCollection;
@@ -40,6 +41,22 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 		}
 		
 		return VersionResponse.deserialize(root);
+	}
+	
+	@Override
+	public CampusServicesResponse getCampusServicesData(String currentVersion) throws Exception {
+		//FIXME: use real URL when it exists
+		JsonClient client = factory.makeJsonClient(HOST, PORT, "services/data");
+		if (currentVersion != null) {
+			client.addParameter("version", currentVersion);
+		}
+		
+		JSONObject root = client.execute();
+		if (root == null) {
+			return null;
+		}
+		
+		return CampusServicesResponse.deserialize(root);
 	}
 	
 	@Override

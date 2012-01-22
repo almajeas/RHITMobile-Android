@@ -1,5 +1,6 @@
 package edu.rosehulman.android.directory.service;
 
+import edu.rosehulman.android.directory.model.CampusServicesResponse;
 import edu.rosehulman.android.directory.model.DirectionsResponse;
 import edu.rosehulman.android.directory.model.LocationCollection;
 import edu.rosehulman.android.directory.model.LocationNamesCollection;
@@ -17,6 +18,15 @@ public interface IMobileDirectoryService {
 	 * @throws Exception On error
 	 */
 	public VersionResponse getVersions() throws Exception;
+	
+	/**
+	 * Retrieve campus services links
+	 * 
+	 * @param currentVersion The current version data, or null if not known
+	 * @return A collection of categories
+	 * @throws Exception On error
+	 */
+	public CampusServicesResponse getCampusServicesData(String currentVersion) throws Exception;
 
 	/**
 	 * Retrieve top-level location data contained on the server
