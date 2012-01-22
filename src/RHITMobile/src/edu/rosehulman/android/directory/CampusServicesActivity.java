@@ -268,6 +268,12 @@ public class CampusServicesActivity extends Activity {
 			
 			categories = res;
 			tree.setAdapter(new TreeAdapter(categories));
+			
+			if (query.length() > 0) {
+				for (int i = 0; i < res.length; i++) {
+					tree.expandGroup(i);
+				}
+			}
 		}
 		
 	}
