@@ -3,6 +3,7 @@ package edu.rosehulman.android.directory.db;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.app.SearchManager;
 import android.content.ContentValues;
 import android.database.Cursor;
 import edu.rosehulman.android.directory.model.CampusServicesCategory;
@@ -57,6 +58,54 @@ public class CampusServicesAdapter extends TableAdapter {
 	}
 	
 	/**
+	 * Loads a single hyperlink by id
+	 * 
+	 * @param id The id of the link to load
+	 * @return The Hyperlink
+	 */
+	public Hyperlink getHyperLink(Long id) {
+		String projection[] = {KEY_NAME, KEY_URL};
+		String args[] = {String.valueOf(id)};
+		Cursor cursor;
+		String where = KEY_ID + "=?";
+		cursor = db.query(TABLE_NAME, projection, where, args, null, null, null);
+		
+		if (cursor.getCount() != 1)
+			return null;
+		cursor.moveToFirst();
+		
+		String name = cursor.getString(cursor.getColumnIndex(KEY_NAME));
+		String url = cursor.getString(cursor.getColumnIndex(KEY_URL));
+		cursor.close();
+		
+		return new Hyperlink(name, url);
+	}
+	
+	/**
+	 * Provides search suggestions to the corresponding provider
+	 * 
+	 * @param path The search filter
+	 * @return A cursor suitable for the provider
+	 */
+	public Cursor searchSuggestions(String path) {
+		if (path.length() == 0) {
+			return null;
+		}
+		
+		String query = "SELECT " + columns(
+				columnAlias(KEY_ID, "_id"),
+				columnAlias(KEY_ID, SearchManager.SUGGEST_COLUMN_INTENT_DATA),
+				columnAlias(KEY_NAME, SearchManager.SUGGEST_COLUMN_TEXT_1),
+				columnAlias(KEY_URL, SearchManager.SUGGEST_COLUMN_TEXT_2)
+				) + 
+				"FROM " + TABLE_NAME + " " +
+				"WHERE Name LIKE ? OR Category LIKE ? LIMIT 10";
+		
+		String[] args = new String[] {"%" + path + "%", "%" + path + "%"};
+		return db.rawQuery(query, args);
+	}
+	
+	/**
 	 * Retrieves an array of categories for a given filter
 	 * 
 	 * @param filter The string used to filter the category or hyperlink name
@@ -104,7 +153,5 @@ public class CampusServicesAdapter extends TableAdapter {
 			return category;
 		}
 		
-	}
-	
-	
+	}	
 }

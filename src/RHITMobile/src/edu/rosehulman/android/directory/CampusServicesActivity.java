@@ -2,6 +2,7 @@ package edu.rosehulman.android.directory;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -16,6 +17,7 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.ExpandableListView.OnChildClickListener;
 import android.widget.TextView;
+import edu.rosehulman.android.directory.LoadCampusServiceHyperlink.OnHyperlinkLoadedListener;
 import edu.rosehulman.android.directory.db.CampusServicesAdapter;
 import edu.rosehulman.android.directory.model.CampusServicesCategory;
 import edu.rosehulman.android.directory.model.Hyperlink;
@@ -40,10 +42,6 @@ public class CampusServicesActivity extends Activity {
 		
 		tree = (ExpandableListView)findViewById(R.id.tree);
 		
-		LoadServices loadServices = new LoadServices();
-		taskManager.addTask(loadServices);
-		loadServices.execute();
-		
 		tree.setOnChildClickListener(new OnChildClickListener() {
 			@Override
 			public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
@@ -54,6 +52,48 @@ public class CampusServicesActivity extends Activity {
 				return true;
 			}
 		});
+		
+    	handleIntent(getIntent());
+	}
+	
+	@Override
+	protected void onNewIntent(Intent intent) {
+		handleIntent(intent);
+	}
+	
+	private void handleIntent(Intent intent) {
+		if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+    		runSearch(intent.getStringExtra(SearchManager.QUERY));
+    		
+    	} else if (Intent.ACTION_VIEW.equals(intent.getAction())) {
+		    Uri data = intent.getData();
+		    
+		    long id = Long.parseLong(data.getPath());
+		    LoadCampusServiceHyperlink task = new LoadCampusServiceHyperlink(new OnHyperlinkLoadedListener() {
+				
+				@Override
+				public void onLinkLoaded(Hyperlink link) {
+					finish();
+					Intent newIntent = new Intent(Intent.ACTION_VIEW);
+					newIntent.setData(Uri.parse(link.url));
+					startActivity(newIntent);
+				}
+			}); 
+		    taskManager.addTask(task);
+		    task.execute(id);
+    	} else {
+    		runSearch("");	
+    	}
+	}
+
+	private void runSearch(String query) {
+		LoadServices loadServices = new LoadServices(query);
+		taskManager.addTask(loadServices);
+		loadServices.execute();
+		
+		if (!"".equals(query)) {
+			setTitle("Search: " + query);
+		}
 	}
 	
 	@Override
@@ -156,7 +196,12 @@ public class CampusServicesActivity extends Activity {
 	private class LoadServices extends AsyncTask<Void, Void, CampusServicesCategory[]> {
 		
 		private ProgressDialog dialog;
+		private String query;
 		
+		public LoadServices(String query) {
+			this.query = query;
+		}
+
 		@Override
 		protected void onPreExecute() {
 			dialog = new ProgressDialog(CampusServicesActivity.this);
@@ -179,7 +224,7 @@ public class CampusServicesActivity extends Activity {
 			
 			CampusServicesAdapter adapter = new CampusServicesAdapter();
 			adapter.open();
-			CampusServicesCategory categories[] = adapter.getCategories("");
+			CampusServicesCategory categories[] = adapter.getCategories(query);
 			adapter.close();
 			
 			return categories;
