@@ -10,6 +10,9 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -106,6 +109,30 @@ public class CampusServicesActivity extends Activity {
 		super.onPause();
 		taskManager.abortTasks();
 	}
+	
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.campus_services, menu);
+        return true;
+    }
+    
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        return true;
+    }
+    
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        //handle item selection
+        switch (item.getItemId()) {
+        case R.id.search:
+        	onSearchRequested();
+        	return true;
+        default:
+            return super.onOptionsItemSelected(item);
+        }
+    }
 	
 	private void tree_childClicked(Hyperlink child) {
 		String earl = child.url;
