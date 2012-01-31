@@ -13,19 +13,17 @@ public class Directions implements Parcelable {
 	
 	public double distance;
 	
-	public LatLon start;
-	
 	public int stairsUp;
 	
 	public int stairsDown;
 	
-	public Path[] paths;
+	public DirectionPath[] paths;
 
-	private static Path[] deserializePaths(JSONArray root) throws JSONException {
-		Path[] res = new Path[root.length()];
+	private static DirectionPath[] deserializePaths(JSONArray root) throws JSONException {
+		DirectionPath[] res = new DirectionPath[root.length()];
 		
 		for (int i = 0; i < res.length; i++) {
-			res[i] = Path.deserialize(root.getJSONObject(i));
+			res[i] = DirectionPath.deserialize(root.getJSONObject(i));
 		}
 		
 		return res;
@@ -35,7 +33,6 @@ public class Directions implements Parcelable {
 		Directions res = new Directions();
 		
 		res.distance = root.getDouble("Dist");
-		res.start = LatLon.deserialize(root.getJSONObject("Start"));
 		res.stairsUp = root.getInt("StairsUp");
 		res.stairsDown = root.getInt("StairsDown");
 		res.paths = deserializePaths(root.getJSONArray("Paths"));
@@ -49,16 +46,20 @@ public class Directions implements Parcelable {
 	 * @return The bounds of the coordinates contained in the directions
 	 */
 	public BoundingBox getBounds() {
-		int left = start.lon;
-		int right = start.lon;
-		int top = start.lat;
-		int bottom = start.lat;
+		if (paths.length == 0)
+			return null;
 		
-		for (Path path : paths) {
-			left = Math.min(left, path.dest.lon);
-			right = Math.max(right, path.dest.lon);
-			bottom = Math.min(bottom, path.dest.lat);
-			top = Math.max(top, path.dest.lat);
+		LatLon pos = paths[0].coord;
+		int left = pos.lon;
+		int right = pos.lon;
+		int bottom = pos.lat;
+		int top = pos.lat;
+		
+		for (DirectionPath path : paths) {
+			left = Math.min(left, path.coord.lon);
+			right = Math.max(right, path.coord.lon);
+			bottom = Math.min(bottom, path.coord.lat);
+			top = Math.max(top, path.coord.lat);
 			
 		}
 		return new BoundingBox(left, right, top, bottom);
@@ -73,7 +74,6 @@ public class Directions implements Parcelable {
 	@Override
 	public void writeToParcel(Parcel dest, int flags) {
 		dest.writeDouble(distance);
-		dest.writeParcelable(start, flags);
 		dest.writeInt(stairsUp);
 		dest.writeInt(stairsDown);
 		dest.writeParcelableArray(paths, flags);
@@ -86,12 +86,11 @@ public class Directions implements Parcelable {
 			Directions res = new Directions();
 			
 			res.distance = in.readDouble();
-			res.start = in.readParcelable(LatLon.class.getClassLoader());
 			res.stairsUp = in.readInt();
 			res.stairsDown = in.readInt();
 			
-			Parcelable[] paths = in.readParcelableArray(Path.class.getClassLoader());
-			res.paths = new Path[paths.length];
+			Parcelable[] paths = in.readParcelableArray(DirectionPath.class.getClassLoader());
+			res.paths = new DirectionPath[paths.length];
 			ArrayUtil.cast(paths, res.paths);
 			
 			return res;

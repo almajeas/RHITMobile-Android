@@ -25,9 +25,9 @@ import com.readystatesoftware.mapviewballoons.BalloonItemizedOverlay;
 import edu.rosehulman.android.directory.DirectionListActivity;
 import edu.rosehulman.android.directory.R;
 import edu.rosehulman.android.directory.TaskManager;
+import edu.rosehulman.android.directory.model.DirectionPath;
 import edu.rosehulman.android.directory.model.Directions;
 import edu.rosehulman.android.directory.model.Location;
-import edu.rosehulman.android.directory.model.Path;
 import edu.rosehulman.android.directory.util.BoundingBox;
 
 /**
@@ -53,7 +53,7 @@ public class DirectionsLayer extends BalloonItemizedOverlay<OverlayItem> impleme
 	public BoundingBox bounds;
 	
 	private int nodeCount;
-	private Path pathNodes[];
+	private DirectionPath pathNodes[];
 	
 	private boolean animate = true;
 
@@ -69,15 +69,16 @@ public class DirectionsLayer extends BalloonItemizedOverlay<OverlayItem> impleme
 		
 		bounds = directions.getBounds();
 
-		nodeCount = 2;
-		for (Path path : directions.paths) {
-			if (path.dir != null)
+		nodeCount = 1;
+		for (DirectionPath path : directions.paths) {
+			if (path.hasDirection())
 				nodeCount++;
 		}
-		pathNodes = new Path[nodeCount-1];
+		
+		pathNodes = new DirectionPath[nodeCount];
 		int i = 0;
-		for (Path path : directions.paths) {
-			if (path.dir != null) {
+		for (DirectionPath path : directions.paths) {
+			if (path.hasDirection()) {
 				pathNodes[i] = path;
 				i++;
 			}
@@ -99,16 +100,12 @@ public class DirectionsLayer extends BalloonItemizedOverlay<OverlayItem> impleme
 	protected OverlayItem createItem(int i) {
 		OverlayItem overlay;
 		
-		if (i == 0) {
-			overlay = new OverlayItem(directions.start.asGeoPoint(), "Starting location", "");
-			overlay.setMarker(boundCenterBottom(getDirectionsDrawable(getMapView().getResources(), DirectionsBitmap.START)));
-		} else {
-			Path path = pathNodes[i-1];
-			overlay = new OverlayItem(path.dest.asGeoPoint(), path.dir, "");
+		DirectionPath path = pathNodes[i];
+		overlay = new OverlayItem(path.coord.asGeoPoint(), path.dir, "");
 
-			if (path.flag) {
-				overlay.setMarker(boundCenterBottom(getDirectionsDrawable(getMapView().getResources(), DirectionsBitmap.END)));
-			}
+		if (path.flag || i == 0) {
+			DirectionsBitmap marker = (i == 0) ? DirectionsBitmap.START : DirectionsBitmap.END;
+			overlay.setMarker(boundCenterBottom(getDirectionsDrawable(getMapView().getResources(), marker)));
 		}
 		
 		return overlay;
@@ -151,11 +148,12 @@ public class DirectionsLayer extends BalloonItemizedOverlay<OverlayItem> impleme
 		Projection proj = mapView.getProjection();
 		android.graphics.Path directionsPath = new android.graphics.Path();
 		
-		pt = proj.toPixels(directions.start.asGeoPoint(), pt);
+		pt = proj.toPixels(directions.paths[0].coord.asGeoPoint(), pt);
 		directionsPath.moveTo(pt.x, pt.y);
 		
-		for (Path path : directions.paths) {
-			proj.toPixels(path.dest.asGeoPoint(), pt);
+		for (int i = 1; i < directions.paths.length; i++) {
+			DirectionPath path = directions.paths[i];
+			proj.toPixels(path.coord.asGeoPoint(), pt);
 			directionsPath.lineTo(pt.x, pt.y);
 		}
 		
@@ -175,7 +173,7 @@ public class DirectionsLayer extends BalloonItemizedOverlay<OverlayItem> impleme
 	}
 	
 	public void stepNext() {
-		int maxStep = pathNodes.length;
+		int maxStep = pathNodes.length-1;
 		int currentStep = getLastFocusedIndex();
 		currentStep = Math.min(currentStep+1, maxStep);
 		if (currentStep == maxStep) {

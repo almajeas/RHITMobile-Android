@@ -19,9 +19,9 @@ import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import edu.rosehulman.android.directory.model.DirectionPath;
 import edu.rosehulman.android.directory.model.Directions;
 import edu.rosehulman.android.directory.model.Location;
-import edu.rosehulman.android.directory.model.Path;
 import edu.rosehulman.android.directory.util.ArrayUtil;
 
 public class DirectionListActivity extends Activity {
@@ -63,11 +63,11 @@ public class DirectionListActivity extends Activity {
         listItems.add(new GoalListItem(locations[0].name, locations[0]));
         
         int iLoc = 1;
-        for (Path path : directions.paths) {
+        for (DirectionPath path : directions.paths) {
 			if (path.flag){
 				listItems.add(new GoalListItem(locations[iLoc].name, locations[iLoc]));
 				iLoc++;
-			} else if (path.dir != null) {
+			} else if (path.hasDirection()) {
 				listItems.add(new StepListItem(path));
 			}
 		}
@@ -111,9 +111,9 @@ public class DirectionListActivity extends Activity {
 	
 	private class StepListItem implements ListItem {
 		
-		private Path path;
+		private DirectionPath path;
 		
-		public StepListItem(Path path) {
+		public StepListItem(DirectionPath path) {
 			this.path = path;
 		}
 
@@ -129,8 +129,51 @@ public class DirectionListActivity extends Activity {
 			LayoutInflater inflater = (LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE);
 			View v = inflater.inflate(R.layout.directions_list_item, null);
 			
-			//TODO add an icon
-			((ImageView)v.findViewById(R.id.icon)).setImageDrawable(getResources().getDrawable(R.drawable.turn_right));
+			int icon;
+			switch (path.action) {
+			case GO_STRAIGHT:
+				icon = R.drawable.turn_straight;
+				break;
+			case CROSS_STREET:
+				icon = R.drawable.turn_straight;
+				break;
+			case FOLLOW_PATH:
+				icon = R.drawable.turn_straight;
+				break;
+			case SLIGHT_LEFT:
+				icon = R.drawable.turn_slight_left;
+				break;
+			case SLIGHT_RIGHT:
+				icon = R.drawable.turn_slight_right;
+				break;
+			case TURN_LEFT:
+				icon = R.drawable.turn_left;
+				break;
+			case TURN_RIGHT:
+				icon = R.drawable.turn_right;
+				break;
+			case SHARP_LEFT:
+				icon = R.drawable.turn_sharp_left;
+				break;
+			case SHARP_RIGHT:
+				icon = R.drawable.turn_sharp_right;
+				break;
+			case ENTER_BUILDING:
+				icon = R.drawable.turn_enter_building;
+				break;
+			case EXIT_BUILDING:
+				icon = R.drawable.turn_exit_building;
+				break;
+			case ASCEND_STAIRS:
+				icon = R.drawable.turn_up_stairs;
+				break;
+			case DESCEND_STAIRS:
+				icon = R.drawable.turn_down_stairs;
+				break;
+			default:
+				icon = R.drawable.turn_unknown;
+			}
+			((ImageView)v.findViewById(R.id.icon)).setImageDrawable(getResources().getDrawable(icon));
 			((TextView)v.findViewById(R.id.text)).setText(path.dir);
 			((TextView)v.findViewById(R.id.distance)).setText("100 ft");
 			
