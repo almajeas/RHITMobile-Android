@@ -45,8 +45,7 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 	
 	@Override
 	public CampusServicesResponse getCampusServicesData(String currentVersion) throws Exception {
-		//FIXME: use real URL when it exists
-		JsonClient client = factory.makeJsonClient(HOST, PORT, "services/data");
+		JsonClient client = factory.makeJsonClient(HOST, PORT, "services");
 		if (currentVersion != null) {
 			client.addParameter("version", currentVersion);
 		}

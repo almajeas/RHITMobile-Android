@@ -14,6 +14,9 @@ public class CampusServicesCategory {
 	
 	/** The array of entries for this category */
 	public Hyperlink entries[];
+	
+	/** All categories contained under this parent */
+	public CampusServicesCategory children[];
 
 	/**
 	 * Creates a new, empty CampusServicesCategory
@@ -43,6 +46,16 @@ public class CampusServicesCategory {
 		return res;
 	}
 	
+	private static CampusServicesCategory[] deserializeChildren(JSONArray root) throws JSONException {
+		CampusServicesCategory res[] = new CampusServicesCategory[root.length()];
+
+		for (int i = 0; i < res.length; i++) {
+			res[i] = CampusServicesCategory.deserialize(root.getJSONObject(i));
+		}
+		
+		return res;
+	}
+	
 	/**
 	 * Deserialize the given JSONObject into a new instance of CampusServicesCategory
 	 * 
@@ -55,6 +68,7 @@ public class CampusServicesCategory {
 		
 		res.name = root.getString("Name");
 		res.entries = deserializeEntries(root.getJSONArray("Links"));
+		res.children = deserializeChildren(root.getJSONArray("Children"));
 		
 		return res;
 	}
