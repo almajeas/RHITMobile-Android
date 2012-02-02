@@ -173,6 +173,11 @@ public class StartupActivity extends Activity {
 		Intent intent = CampusServicesActivity.createIntent(this);
 		startActivity(intent);
 	}
+
+	private void taskTours_clicked() {
+		Intent intent = CampusToursActivity.createIntent(this);
+		startActivity(intent);
+	}
 	
 	private void taskBeta_clicked() {
 		betaManager.launchBetaActivity(BetaManagerManager.ACTION_SHOW_BETA_MANAGER);
@@ -218,6 +223,14 @@ public class StartupActivity extends Activity {
 				@Override
 				public void onClick(View v) {
 					taskServices_clicked();
+				}
+			}),
+			new Task("Tours",
+					android.R.drawable.ic_menu_directions,
+					new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					taskTours_clicked();
 				}
 			}),
 			new Task("My Schedule",
