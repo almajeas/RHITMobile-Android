@@ -4,6 +4,7 @@ import edu.rosehulman.android.directory.model.CampusServicesResponse;
 import edu.rosehulman.android.directory.model.DirectionsResponse;
 import edu.rosehulman.android.directory.model.LocationCollection;
 import edu.rosehulman.android.directory.model.LocationNamesCollection;
+import edu.rosehulman.android.directory.model.TourTagsResponse;
 import edu.rosehulman.android.directory.model.VersionResponse;
 
 /**
@@ -27,6 +28,15 @@ public interface IMobileDirectoryService {
 	 * @throws Exception On error
 	 */
 	public CampusServicesResponse getCampusServicesData(String currentVersion) throws Exception;
+	
+	/**
+	 * Retrieve tour categories
+	 * 
+	 * @param currentVersion The current version data, or null if not known
+	 * @return A collection of groups
+	 * @throws Exception On error
+	 */
+	public TourTagsResponse getTourTagData(String currentVersion) throws Exception;
 
 	/**
 	 * Retrieve top-level location data contained on the server
