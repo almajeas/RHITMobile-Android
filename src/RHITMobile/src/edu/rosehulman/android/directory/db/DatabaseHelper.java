@@ -43,15 +43,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		return instance;
 	}
 
-	private static final int DATABASE_VERSION = 16;
+	private static final int DATABASE_VERSION = 18;
 	
 	private static final String TABLE_CAMPUS_SERVICES = "CampusServices";
 	private static final String CREATE_TABLE_CAMPUS_SERVICES =
 			"CREATE TABLE " + TABLE_CAMPUS_SERVICES + " " +
 				"( _Id INTEGER PRIMARY KEY AUTOINCREMENT" +
-				", Category TEXT NOT NULL" +
 				", Name TEXT NOT NULL" +
-				", Url TEXT NOT NULL" +
+				", Url TEXT NULL" +
+				", Pre INTEGER NOT NULL" +
+				", Post INTEGER NOT NULL" +
 				");";
 
 	private static final String TABLE_LOCATIONS = "Locations";
