@@ -6,3 +6,4 @@ proguard.cfg
 local.properties
 *.swp
 todos.sh
+*.txt
