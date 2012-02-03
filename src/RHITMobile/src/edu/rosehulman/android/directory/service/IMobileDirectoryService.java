@@ -3,6 +3,7 @@ package edu.rosehulman.android.directory.service;
 import edu.rosehulman.android.directory.model.CampusServicesResponse;
 import edu.rosehulman.android.directory.model.DirectionsResponse;
 import edu.rosehulman.android.directory.model.LocationCollection;
+import edu.rosehulman.android.directory.model.LocationIdsResponse;
 import edu.rosehulman.android.directory.model.LocationNamesCollection;
 import edu.rosehulman.android.directory.model.TourTagsResponse;
 import edu.rosehulman.android.directory.model.VersionResponse;
@@ -85,6 +86,15 @@ public interface IMobileDirectoryService {
 	 * @throws Exception On error
 	 */
 	public DirectionsResponse getTour(long startId, long[] tagIds) throws Exception;
+	
+	/**
+	 * Start a tour generation request, offsite
+	 * 
+	 * @param tagIds The selected tags of interest
+	 * @return A DirectionsResponse with the id of the request and possibly results
+	 * @throws Exception On error
+	 */
+	public LocationIdsResponse getTour(long[] tagIds) throws Exception;
 	
 	/**
 	 * Start a tour generation request

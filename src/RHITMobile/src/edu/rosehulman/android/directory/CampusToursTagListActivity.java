@@ -146,20 +146,25 @@ public class CampusToursTagListActivity extends Activity {
     
     private void btnTour_clicked() {
     	Intent intent = getIntent();
-    	
+
+		long[] tagIds = new long[tagItems.size()];
+		for (int i = 0; i < tagItems.size(); i++) {
+			tagIds[i] = tagItems.get(i).tag.id;
+		}
+		
     	if (intent.hasExtra(EXTRA_START_LOCATION)) {
+    		//on campus (inside) tour
     		long startId = intent.getLongExtra(EXTRA_START_LOCATION, -1);
     		if (startId < 0) {
     			finish();
     			return;
     		}
     		
-    		long[] tagIds = new long[tagItems.size()];
-    		for (int i = 0; i < tagItems.size(); i++) {
-				tagIds[i] = tagItems.get(i).tag.id;
-			}
-    		
     		Intent newIntent = CampusMapActivity.createTourIntent(this, startId, tagIds);
+    		startActivity(newIntent);
+    	} else {
+    		//off campus tour
+    		Intent newIntent = CampusToursOffCampusActivity.createIntent(this, tagIds);
     		startActivity(newIntent);
     	}
     	

@@ -188,10 +188,6 @@ public class CampusToursStartupActivity extends Activity {
     		Toast.makeText(this, "Outside tours not yet supported", Toast.LENGTH_SHORT).show();
     		groupLocation.clearCheck();
     		return;
-    	} else if (rdoOffCampus.isChecked()) {
-    		Toast.makeText(this, "Off Campus tours not yet supported", Toast.LENGTH_SHORT).show();
-    		groupLocation.clearCheck();
-    		return;
     	}
     	
     	if (rdoGeneral.isChecked()) {
@@ -200,8 +196,13 @@ public class CampusToursStartupActivity extends Activity {
     		return;
     	} else {
     		//special interest tours
-    		Intent intent = CampusToursTagListActivity.createIntent(this, startLocation.id);
-    		startActivity(intent);
+    		if (rdoOffCampus.isChecked()) {
+    			Intent intent = CampusToursTagListActivity.createIntent(this);
+    			startActivity(intent);
+    		} else {
+	    		Intent intent = CampusToursTagListActivity.createIntent(this, startLocation.id);
+	    		startActivity(intent);
+    		}
     	}
     }
     

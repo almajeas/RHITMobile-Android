@@ -5,6 +5,7 @@ import org.json.JSONObject;
 import edu.rosehulman.android.directory.model.CampusServicesResponse;
 import edu.rosehulman.android.directory.model.DirectionsResponse;
 import edu.rosehulman.android.directory.model.LocationCollection;
+import edu.rosehulman.android.directory.model.LocationIdsResponse;
 import edu.rosehulman.android.directory.model.LocationNamesCollection;
 import edu.rosehulman.android.directory.model.TourTag;
 import edu.rosehulman.android.directory.model.TourTagsGroup;
@@ -70,20 +71,20 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 			TourTagsResponse res = new TourTagsResponse();
 			res.version = "0";
 			res.root = new TourTagsGroup(null, new TourTag[] {
-					new TourTag(0, "Best of Rose")
+					new TourTag(1, "Best of Rose")
 			}, new TourTagsGroup[] {
 					new TourTagsGroup("Academic", new TourTag[] {
 							new TourTag(1, "General"),
 					}, new TourTagsGroup[] {
 							new TourTagsGroup("Majors", new TourTag[] {
-									new TourTag(2, "Computer Science"),
-									new TourTag(3, "Software Engineering"),
+									new TourTag(101, "Computer Science"),
+									new TourTag(101, "Software Engineering"),
 									new TourTag(4, "Civil Engineering"),
 									new TourTag(5, "Mechanical Engineering")
 							}, new TourTagsGroup[] {})
 					}),
 					new TourTagsGroup("Athletics", new TourTag[] {
-							new TourTag(6, "General"),
+							new TourTag(1, "General"),
 					}, new TourTagsGroup[] {
 							new TourTagsGroup("Sports", new TourTag[] {
 									new TourTag(7, "Soccer"),
@@ -167,10 +168,24 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 		return getDirectionsResponse(url);
 	}
 	
+	@Override
 	public DirectionsResponse getTour(long startId, long[] tagIds) throws Exception {
 		String url = String.format("tours/oncampus/fromloc/%d/%s", 
 				startId, ArrayUtil.join(tagIds, "/"));
 		return getDirectionsResponse(url);
+	}
+
+	@Override
+	public LocationIdsResponse getTour(long[] tagIds) throws Exception {
+		String url = String.format("tours/offcampus/%s", ArrayUtil.join(tagIds, "/"));
+		JsonClient client = factory.makeJsonClient(HOST, PORT, url);
+		
+		JSONObject root = client.execute();
+		if (root == null) {
+			return null;
+		}
+		
+		return LocationIdsResponse.deserialize(root);
 	}
 	
 	@Override
