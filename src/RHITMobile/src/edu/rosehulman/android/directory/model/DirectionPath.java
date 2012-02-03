@@ -46,7 +46,10 @@ public class DirectionPath implements Parcelable {
 		res.altitude = root.getDouble("Altitude");
 		res.flag = root.getBoolean("Flag");
 		res.outside = root.getBoolean("Outside");
-		res.location = root.getLong("Location");
+		if (!root.isNull("Location"))
+			res.location = root.getLong("Location");
+		else
+			res.location = -1;
 		
 		return res;
 	}

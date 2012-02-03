@@ -152,14 +152,7 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 		//FIXME temporary directions URL
 		String url = String.format("directions/testing/directions", from, to);
 		//String url = String.format("directions/fromloc/%d/toloc/%d", from, to);
-		JsonClient client = factory.makeJsonClient(HOST, PORT, url);
-		
-		JSONObject root = client.execute();
-		if (root == null) {
-			return null;
-		}
-		
-		return DirectionsResponse.deserialize(root);
+		return getDirectionsResponse(url);
 	}
 	
 	@Override
