@@ -23,7 +23,7 @@
             android:layout_width="6dip"
             android:layout_height="wrap_content"
             android:layout_weight="1.0"
-            android:text="Add" />
+            android:text="Add Interest" />
 
         <Button
             android:id="@+id/btnTour"

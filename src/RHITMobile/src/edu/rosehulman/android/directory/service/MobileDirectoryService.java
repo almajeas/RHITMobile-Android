@@ -10,6 +10,7 @@ import edu.rosehulman.android.directory.model.TourTag;
 import edu.rosehulman.android.directory.model.TourTagsGroup;
 import edu.rosehulman.android.directory.model.TourTagsResponse;
 import edu.rosehulman.android.directory.model.VersionResponse;
+import edu.rosehulman.android.directory.util.ArrayUtil;
 
 /**
  * Wraps logic of communicating with the mobile directory web service into
@@ -163,19 +164,22 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 	@Override
 	public DirectionsResponse getTour() throws Exception {
 		String url = String.format("directions/testing/tour");
-		JsonClient client = factory.makeJsonClient(HOST, PORT, url);
-		
-		JSONObject root = client.execute();
-		if (root == null) {
-			return null;
-		}
-		
-		return DirectionsResponse.deserialize(root);
+		return getDirectionsResponse(url);
+	}
+	
+	public DirectionsResponse getTour(long startId, long[] tagIds) throws Exception {
+		String url = String.format("tours/oncampus/fromloc/%d/%s", 
+				startId, ArrayUtil.join(tagIds, "/"));
+		return getDirectionsResponse(url);
 	}
 	
 	@Override
 	public DirectionsResponse getDirectionsStatus(int requestId) throws Exception {
 		String url = String.format("directions/status/%d", requestId);
+		return getDirectionsResponse(url);
+	}
+	
+	private DirectionsResponse getDirectionsResponse(String url) throws Exception {
 		JsonClient client = factory.makeJsonClient(HOST, PORT, url);
 		
 		JSONObject root = client.execute();

@@ -22,6 +22,8 @@ public class DirectionPath implements Parcelable {
 	
 	public boolean outside;
 	
+	public long location;
+	
 	/**
 	 * Determines if this node represents
 	 * a direction that the user should follow
@@ -44,6 +46,7 @@ public class DirectionPath implements Parcelable {
 		res.altitude = root.getDouble("Altitude");
 		res.flag = root.getBoolean("Flag");
 		res.outside = root.getBoolean("Outside");
+		res.location = root.getLong("Location");
 		
 		return res;
 	}
@@ -80,6 +83,7 @@ public class DirectionPath implements Parcelable {
 		dest.writeDouble(altitude);
 		dest.writeInt(flag ? 1 : 0);
 		dest.writeInt(outside ? 1 : 0);
+		dest.writeLong(location);
 	}
 	
 	public static final Parcelable.Creator<DirectionPath> CREATOR = new Parcelable.Creator<DirectionPath>() {
@@ -94,6 +98,7 @@ public class DirectionPath implements Parcelable {
 			res.altitude = in.readDouble();
 			res.flag = in.readInt() > 0 ? true : false;
 			res.outside = in.readInt() > 0 ? true : false;
+			res.location = in.readLong();
 			
 			return res;
 		}

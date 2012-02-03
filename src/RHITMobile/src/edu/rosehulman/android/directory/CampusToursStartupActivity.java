@@ -106,6 +106,8 @@ public class CampusToursStartupActivity extends Activity {
 		super.onPause();
 		taskManager.abortTasks();
 	}
+	
+	private Location startLocation;
 
 	private void rdoOnCampusInside_checked(boolean isChecked) {
 		if (!isChecked) {
@@ -113,6 +115,7 @@ public class CampusToursStartupActivity extends Activity {
 			return;
 		}
 		
+		startLocation = null;
 		new UITask<String, Location>() {
 
 			@Override
@@ -165,8 +168,8 @@ public class CampusToursStartupActivity extends Activity {
 
 			@Override
 			public void taskCompleted(Location res) {
-				//TODO use the user's room number
 				rdoOnCampusInside.setText("On Campus (near " + res.name + ")");
+				startLocation = res;
 			}
 
 		}.start();		
@@ -174,13 +177,32 @@ public class CampusToursStartupActivity extends Activity {
 	
 	private void rdoOnCampusOutside_checked(boolean isChecked) {
 		//TODO start/stop GPS
+
 	}
 	
 	private void rdoOffCampus_checked(boolean isChecked) {
 	}
 	
     private void btnTour_clicked() {
-    	//TODO implement
+    	if (rdoOnCampusOutside.isChecked()) {
+    		Toast.makeText(this, "Outside tours not yet supported", Toast.LENGTH_SHORT).show();
+    		groupLocation.clearCheck();
+    		return;
+    	} else if (rdoOffCampus.isChecked()) {
+    		Toast.makeText(this, "Off Campus tours not yet supported", Toast.LENGTH_SHORT).show();
+    		groupLocation.clearCheck();
+    		return;
+    	}
+    	
+    	if (rdoGeneral.isChecked()) {
+    		Toast.makeText(this, "General tours not yet supported", Toast.LENGTH_SHORT).show();
+    		groupType.clearCheck();
+    		return;
+    	} else {
+    		//special interest tours
+    		Intent intent = CampusToursTagListActivity.createIntent(this, startLocation.id);
+    		startActivity(intent);
+    	}
     }
     
     private void enableButton() {

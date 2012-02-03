@@ -77,6 +77,16 @@ public interface IMobileDirectoryService {
 	public DirectionsResponse getDirections(long from, long to) throws Exception;
 	
 	/**
+	 * Start a tour generation request, starting at a location
+	 * 
+	 * @param startId The id of the start location
+	 * @param tagIds The selected tags of interest
+	 * @return A DirectionsResponse with the id of the request and possibly results
+	 * @throws Exception On error
+	 */
+	public DirectionsResponse getTour(long startId, long[] tagIds) throws Exception;
+	
+	/**
 	 * Start a tour generation request
 	 * 
 	 * @return A DirectionsResponse with the id of the request and possibly results

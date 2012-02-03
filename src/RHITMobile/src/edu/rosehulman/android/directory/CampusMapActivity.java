@@ -1,5 +1,6 @@
 package edu.rosehulman.android.directory;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
@@ -49,6 +50,7 @@ import edu.rosehulman.android.directory.maps.OverlayManager;
 import edu.rosehulman.android.directory.maps.POILayer;
 import edu.rosehulman.android.directory.maps.TextOverlayLayer;
 import edu.rosehulman.android.directory.maps.ViewController;
+import edu.rosehulman.android.directory.model.DirectionPath;
 import edu.rosehulman.android.directory.model.Directions;
 import edu.rosehulman.android.directory.model.DirectionsResponse;
 import edu.rosehulman.android.directory.model.Location;
@@ -66,9 +68,12 @@ public class CampusMapActivity extends MapActivity {
     private static final String SELECTED_ID = "SelectedId";
     
     public static final String ACTION_DIRECTIONS = "edu.rosehulman.android.directory.intent.action.DIRECTIONS";
+    public static final String ACTION_TOUR = "edu.rosehulman.android.directory.intent.action.TOUR";
 
 	public static final String EXTRA_BUILDING_ID = "BUILDING_ID";
 	public static final String EXTRA_WAYPOINTS = "WAYPOINTS";
+	public static final String EXTRA_TOUR_START_ID = "TOUR_START_ID";
+	public static final String EXTRA_TOUR_TAGS = "TOUR_TAGS";
 	public static final String EXTRA_DIRECTIONS_FOCUS_INDEX = "DIRECTIONS_FOCUS_INDEX";
 	
 	private static final int MIN_ZOOM_LEVEL = 16;
@@ -95,6 +100,14 @@ public class CampusMapActivity extends MapActivity {
 		Intent intent = createIntent(context);
 		intent.setAction(ACTION_DIRECTIONS);
 		intent.putExtra(EXTRA_WAYPOINTS, ids);
+		return intent;
+	}
+	
+	public static Intent createTourIntent(Context context, long startId, long[] tags) {
+		Intent intent = createIntent(context);
+		intent.setAction(ACTION_TOUR);
+		intent.putExtra(EXTRA_TOUR_START_ID, startId);
+		intent.putExtra(EXTRA_TOUR_TAGS, tags);
 		return intent;
 	}
 	
@@ -174,6 +187,17 @@ public class CampusMapActivity extends MapActivity {
         		long[] ids = intent.getLongArrayExtra(EXTRA_WAYPOINTS);
 
     			LoadDirections task = new LoadDirections(ids);
+    			taskManager.addTask(task);
+    			task.execute();
+    			
+    			btnListDirections.setVisibility(View.VISIBLE);
+    			btnPrev.setVisibility(View.VISIBLE);
+    			btnNext.setVisibility(View.VISIBLE);
+    		} else if (ACTION_TOUR.equals(intent.getAction())) {
+    			long startId = intent.getLongExtra(EXTRA_TOUR_START_ID, -1);
+    			long[] tagIds = intent.getLongArrayExtra(EXTRA_TOUR_TAGS);
+    			
+    			LoadTour task = new LoadTour(startId, tagIds);
     			taskManager.addTask(task);
     			task.execute();
     			
@@ -835,37 +859,17 @@ public class CampusMapActivity extends MapActivity {
 		}
 		
 	}
-
-	private class LoadDirections extends AsyncTask<Void, Integer, Directions> {
+	
+private class LoadDirections extends ProcessDirections {
 		
-		private long[] ids;
-		private ProgressDialog dialog;
-		
-		private Location[] nodes;
+		private long ids[];
 		
 		public LoadDirections(long[] ids) {
+			super("Getting Directions...");
 			this.ids = ids;
 		}
-
-		@Override
-		protected void onPreExecute() {
-			dialog = new ProgressDialog(CampusMapActivity.this);
-			dialog.setTitle(null);
-			dialog.setMessage("Getting Directions...");
-			dialog.setIndeterminate(true);
-			dialog.setCancelable(true);
-			dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-				@Override
-				public void onCancel(DialogInterface dialog) {
-					cancel(true);
-				}
-			});
-			dialog.show();
-		}
 		
-		@Override
-		protected Directions doInBackground(Void... params) {
-			
+		protected DirectionsResponse getDirections() {
 			assert(ids.length == 2);
 			long from = ids[0];
 			long to = ids[1];
@@ -889,6 +893,89 @@ public class CampusMapActivity extends MapActivity {
 					}
 				}
 			} while (response == null);
+			
+			return response;
+		}
+		
+	}
+	
+	private class LoadTour extends ProcessDirections {
+		
+		private long startId;
+		private long tagIds[];
+		
+		public LoadTour(long startId, long[] tagIds) {
+			super("Building Tour...");
+			this.startId = startId;
+			this.tagIds = tagIds;
+		}
+		
+		protected DirectionsResponse getDirections() {
+			
+			MobileDirectoryService service = new MobileDirectoryService();
+			
+			DirectionsResponse response = null;
+			
+			do {
+				try {
+					response = service.getTour(startId, tagIds);
+				} catch (Exception e) {
+					Log.e(C.TAG, "Failed to download tour data");
+					if (isCancelled()) {
+						return null;
+					}
+					try {
+						Thread.sleep(2000);
+					} catch (InterruptedException ex) {
+						return null;
+					}
+				}
+			} while (response == null);
+			
+			return response;
+		}
+		
+	}
+
+	private abstract class ProcessDirections extends AsyncTask<Void, Integer, Directions> {
+		
+		private ProgressDialog dialog;
+		
+		private String message;
+		
+		private Location[] nodes;
+		
+		public ProcessDirections(String message) {
+			this.message = message;
+		}
+		
+		protected abstract DirectionsResponse getDirections();
+
+		@Override
+		protected void onPreExecute() {
+			dialog = new ProgressDialog(CampusMapActivity.this);
+			dialog.setTitle(null);
+			dialog.setMessage(message);
+			dialog.setIndeterminate(true);
+			dialog.setCancelable(true);
+			dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+				@Override
+				public void onCancel(DialogInterface dialog) {
+					cancel(true);
+				}
+			});
+			dialog.show();
+		}
+		
+		@Override
+		protected Directions doInBackground(Void... params) {
+			
+			MobileDirectoryService service = new MobileDirectoryService();
+			
+			DirectionsResponse response = getDirections();
+			if (response == null) {
+				return null;
+			}
 			int requestID = response.requestID;
 			
 			while (response.done != 100) {
@@ -909,13 +996,18 @@ public class CampusMapActivity extends MapActivity {
 			}
 			
 			//load the relevant locations
-			nodes = new Location[ids.length];
 			LocationAdapter locationAdapter = new LocationAdapter();
 			locationAdapter.open();
-			for (int i = 0; i < ids.length; i++) {
-				nodes[i] = locationAdapter.getLocation(ids[i]);
+			List<Location> nodeList = new ArrayList<Location>();
+			for (DirectionPath path : response.result.paths) {
+				if (path.location >= 0) {
+					Location loc = locationAdapter.getLocation(path.location);
+					nodeList.add(loc);
+				}
 			}
 			locationAdapter.close();
+			nodes = new Location[nodeList.size()];
+			nodeList.toArray(nodes);
 			
 			publishProgress(100);
 
@@ -929,6 +1021,8 @@ public class CampusMapActivity extends MapActivity {
 			if (directions != null) {
 				generateDirectionsLayer(directions, nodes);
 				rebuildOverlays();
+			} else {
+				finish();
 			}
 		}
 		
@@ -939,6 +1033,5 @@ public class CampusMapActivity extends MapActivity {
 		}
 		
 	}
-	
 	
 }

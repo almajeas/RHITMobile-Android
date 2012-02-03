@@ -23,4 +23,39 @@ public class ArrayUtil {
     	return out;
     }
 	
+    
+    /**
+     * Joins an array with a separator
+     * 
+     * @param <T> The type of the arrray
+     * @param arr The array
+     * @param sep The separator between elements in the array
+     * @return The string representation of the joined array
+     */
+    public static <T> String join(T[] arr, String sep) {
+    	StringBuilder res = new StringBuilder();
+    	for (T o : arr) {
+    		res.append(o);
+    		res.append(sep);
+    	}
+    	res.delete(res.length()-sep.length(), res.length());
+    	return res.toString();
+    }
+    
+    /**
+     * Joins an array with a separator
+     * 
+     * @param arr The array
+     * @param sep The separator between elements in the array
+     * @return The string representation of the joined array
+     */
+    public static String join(long[] arr, String sep) {
+    	StringBuilder res = new StringBuilder();
+    	for (long o : arr) {
+    		res.append(o);
+    		res.append(sep);
+    	}
+    	res.delete(res.length()-sep.length(), res.length());
+    	return res.toString();
+    }
 }
