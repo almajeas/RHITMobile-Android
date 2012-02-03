@@ -175,7 +175,7 @@ public class StartupActivity extends Activity {
 	}
 
 	private void taskTours_clicked() {
-		Intent intent = CampusToursTagListActivity.createIntent(this);
+		Intent intent = CampusToursStartupActivity.createIntent(this);
 		startActivity(intent);
 	}
 	

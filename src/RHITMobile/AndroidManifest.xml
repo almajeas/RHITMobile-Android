@@ -70,13 +70,19 @@
         </activity>
         
         <activity
-            android:label="@string/app_name"
+            android:label="Tour of Campus"
+            android:name=".CampusToursStartupActivity" 
+            android:configChanges="keyboardHidden|orientation" >
+        </activity>
+                
+        <activity
+            android:label="Tour Interest Selection"
             android:name=".CampusToursTagListActivity" 
             android:configChanges="keyboardHidden|orientation" >
         </activity>
         
         <activity
-            android:label="@string/app_name"
+            android:label="Tour Interests"
             android:name=".CampusToursTagSelectActivity" 
             android:configChanges="keyboardHidden|orientation" >
         </activity>
