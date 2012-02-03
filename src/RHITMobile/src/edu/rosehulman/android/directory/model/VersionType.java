@@ -8,5 +8,8 @@ public enum VersionType {
 	MAP_AREAS,
 	
 	/** Version for campus services information */
-	CAMPUS_SERVICES
+	CAMPUS_SERVICES,
+	
+	/** Version for tour tags */
+	TOUR_TAGS
 }

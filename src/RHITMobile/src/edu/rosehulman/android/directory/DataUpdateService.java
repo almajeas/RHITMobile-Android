@@ -16,10 +16,12 @@ import android.util.Log;
 import edu.rosehulman.android.directory.IDataUpdateService.AsyncRequest;
 import edu.rosehulman.android.directory.db.CampusServicesAdapter;
 import edu.rosehulman.android.directory.db.LocationAdapter;
+import edu.rosehulman.android.directory.db.TourTagsAdapter;
 import edu.rosehulman.android.directory.db.VersionsAdapter;
 import edu.rosehulman.android.directory.model.CampusServicesResponse;
 import edu.rosehulman.android.directory.model.Location;
 import edu.rosehulman.android.directory.model.LocationCollection;
+import edu.rosehulman.android.directory.model.TourTagsResponse;
 import edu.rosehulman.android.directory.model.VersionResponse;
 import edu.rosehulman.android.directory.model.VersionType;
 import edu.rosehulman.android.directory.service.MobileDirectoryService;
@@ -139,7 +141,8 @@ public class DataUpdateService extends Service {
 	private enum UpdateStatus {
 		UPDATE_VERSIONS,
 		UPDATE_LOCATIONS,
-		UPDATE_SERVICES
+		UPDATE_SERVICES,
+		UPDATE_TAGS
 	}
 	
 	private class UpdateDataTask extends AsyncTask<Void, Void, Void> {
@@ -229,6 +232,9 @@ public class DataUpdateService extends Service {
 			case UPDATE_SERVICES:
 				updateNotification("Updating campus services...");
 				break;
+			case UPDATE_TAGS:
+				updateNotification("Updating tour data...");
+				break;
 			}
 		}
 		
@@ -270,6 +276,11 @@ public class DataUpdateService extends Service {
 			publishProgress();
 		}
 		
+		private void updateTagsProgress() {
+			step = UpdateStatus.UPDATE_TAGS;
+			publishProgress();
+		}
+		
 		class VersionsTask implements Task {
 
 			@Override
@@ -280,6 +291,7 @@ public class DataUpdateService extends Service {
 				versionsAdapter.open();
 				String locationsVersion = versionsAdapter.getVersion(VersionType.MAP_AREAS);
 				String servicesVersion = versionsAdapter.getVersion(VersionType.CAMPUS_SERVICES);
+				String tagsVersion = versionsAdapter.getVersion(VersionType.TOUR_TAGS);
 		    	versionsAdapter.close();
 				
 				MobileDirectoryService service = new MobileDirectoryService();
@@ -311,6 +323,9 @@ public class DataUpdateService extends Service {
 				}
 				if (servicesVersion == null || !servicesVersion.equals(versions.services)) {
 					queue.addTask(new CampusServicesTask());
+				}
+				if (tagsVersion == null || !tagsVersion.equals(versions.tags)) {
+					queue.addTask(new TourTagsTask());
 				}
 			}
 
@@ -487,6 +502,47 @@ public class DataUpdateService extends Service {
 			@Override
 			public boolean equals(Object o) {
 				return o instanceof CampusServicesTask;
+			}
+		}
+		
+		class TourTagsTask implements Task {
+
+			@Override
+			public void run(TaskQueue queue) {
+				updateTagsProgress();
+
+				VersionsAdapter versions = new VersionsAdapter();
+				versions.open();
+				String currentVersion = versions.getVersion(VersionType.TOUR_TAGS);
+				versions.close();
+
+				TourTagsResponse response;
+				MobileDirectoryService service = new MobileDirectoryService();
+				try {
+					response = service.getTourTagData(currentVersion);
+				} catch (Exception e) {
+					Log.e(C.TAG, "Failed to download tour tags", e);
+					//wait a bit and try again
+					queue.addTask(this);
+					sleep(5000);
+					return;
+				}
+				
+				//update our cached data
+				TourTagsAdapter tagsAdapter = new TourTagsAdapter();
+				tagsAdapter.open();
+				tagsAdapter.replaceData(response.root);
+				tagsAdapter.close();
+				
+				//mark it as updated
+				versions.open();
+				versions.setVersion(VersionType.TOUR_TAGS, response.version);
+				versions.close();
+			}
+			
+			@Override
+			public boolean equals(Object o) {
+				return o instanceof TourTagsTask;
 			}
 		}
 		

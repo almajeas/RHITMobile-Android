@@ -49,6 +49,18 @@ public class TourTag implements Parcelable {
 		return new TourTag(root.getLong("Id"), root.getString("Name"));
 	}
 
+	public boolean equals(TourTag o) {
+		return o.id == id &&
+				o.name.equals(name);
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof TourTag)
+			return equals((TourTag)o);
+		return false;
+	}
+	
 	@Override
 	public int describeContents() {
 		return 0;

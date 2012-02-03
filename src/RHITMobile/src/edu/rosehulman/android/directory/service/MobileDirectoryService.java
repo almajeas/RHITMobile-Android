@@ -64,12 +64,12 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 	@Override
 	public TourTagsResponse getTourTagData(String currentVersion) throws Exception {
 		
-		if (currentVersion == "") {
+		if (true) {
 			//FIXME remove
 			TourTagsResponse res = new TourTagsResponse();
 			res.version = "0";
 			res.root = new TourTagsGroup(null, new TourTag[] {
-					new TourTag(0, "General")
+					new TourTag(0, "Best of Rose")
 			}, new TourTagsGroup[] {
 					new TourTagsGroup("Academic", new TourTag[] {
 							new TourTag(1, "General"),

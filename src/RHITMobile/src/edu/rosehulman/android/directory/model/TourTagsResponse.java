@@ -1,6 +1,5 @@
 package edu.rosehulman.android.directory.model;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -15,16 +14,6 @@ public class TourTagsResponse {
 	/** Version associated with the given collection of objects */
 	public String version;
 	
-	private static TourTagsGroup[] deserializeGroups(JSONArray array) throws JSONException {
-		TourTagsGroup res[] = new TourTagsGroup[array.length()];
-		
-		for (int i = 0; i < res.length; i++) {
-			res[i] = TourTagsGroup.deserialize(array.getJSONObject(i));
-		}
-		
-		return res;
-	}
-	
 	/**
 	 * Deserialize the given JSONObject into a new instance of TourTagsResponse
 	 * 
@@ -36,8 +25,7 @@ public class TourTagsResponse {
 		TourTagsResponse res = new TourTagsResponse();
 		
 		res.version = root.getString("Version");
-		//FIXME implement
-		//res.groups = deserializeGroups(root.getJSONArray("Categories"));
+		res.root = TourTagsGroup.deserialize(root.getJSONObject("Root"));
 		
 		return res;
 	}

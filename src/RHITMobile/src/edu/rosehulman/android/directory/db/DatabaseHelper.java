@@ -43,16 +43,26 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		return instance;
 	}
 
-	private static final int DATABASE_VERSION = 18;
+	private static final int DATABASE_VERSION = 20;
 	
 	private static final String TABLE_CAMPUS_SERVICES = "CampusServices";
 	private static final String CREATE_TABLE_CAMPUS_SERVICES =
 			"CREATE TABLE " + TABLE_CAMPUS_SERVICES + " " +
 				"( _Id INTEGER PRIMARY KEY AUTOINCREMENT" +
-				", Name TEXT NOT NULL" +
-				", Url TEXT NULL" +
 				", Pre INTEGER NOT NULL" +
 				", Post INTEGER NOT NULL" +
+				", Name TEXT NULL" +
+				", Url TEXT NULL" +
+				");";
+	
+	private static final String TABLE_TOUR_TAGS = "TourTags";
+	private static final String CREATE_TABLE_TOUR_TAGS =
+			"CREATE TABLE " + TABLE_TOUR_TAGS + " " +
+				"( _Id INTEGER PRIMARY KEY AUTOINCREMENT" +
+				", Pre INTEGER NOT NULL" +
+				", Post INTEGER NOT NULL" +
+				", Name TEXT NULL" +
+				", TagId INTEGER NULL" +
 				");";
 
 	private static final String TABLE_LOCATIONS = "Locations";
@@ -124,6 +134,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		db.execSQL(CREATE_TABLE_HYPERLINKS);
 		db.execSQL(CREATE_TABLE_VERSIONS);
 		db.execSQL(CREATE_TABLE_CAMPUS_SERVICES);
+		db.execSQL(CREATE_TABLE_TOUR_TAGS);
 	}
 
 	@Override
@@ -135,6 +146,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		db.execSQL("DROP TABLE IF EXISTS " + TABLE_MAP_AREA_CORNERS);
 		db.execSQL("DROP TABLE IF EXISTS " + TABLE_MAP_AREA_DATA);
 		db.execSQL("DROP TABLE IF EXISTS " + TABLE_CAMPUS_SERVICES);
+		db.execSQL("DROP TABLE IF EXISTS " + TABLE_TOUR_TAGS);
 		
 		onCreate(db);
 	}

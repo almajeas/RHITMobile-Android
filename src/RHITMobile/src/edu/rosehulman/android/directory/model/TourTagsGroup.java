@@ -9,6 +9,9 @@ import org.json.JSONObject;
  */
 public class TourTagsGroup {
 	
+	/** The internal id of this group */
+	public long id;
+	
 	/** The name of the category */
 	public String name;
 	
@@ -22,7 +25,7 @@ public class TourTagsGroup {
 	 * Creates a new, empty CampusServicesCategory
 	 */
 	public TourTagsGroup() {
-		
+		this.id = -1;
 	}
 	
 	/**
@@ -32,6 +35,7 @@ public class TourTagsGroup {
 	 * @param tags The array of entries
 	 */
 	public TourTagsGroup(String name, TourTag[] tags, TourTagsGroup[] children) {
+		this.id = -1;
 		this.name = name;
 		this.tags = tags;
 		this.children = children;
