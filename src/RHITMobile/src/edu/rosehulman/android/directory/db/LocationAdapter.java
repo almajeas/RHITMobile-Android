@@ -272,13 +272,28 @@ public class LocationAdapter extends TableAdapter {
 	 * @return The id of the building, or -1 if 0 or multiple matches exist
 	 */
 	public long findBuilding(String name) {
+		Cursor cursor;
+		
 		String sql = "SELECT _Id FROM Locations WHERE UPPER(Name)=UPPER(?) " + 
 				"UNION " +
 				"SELECT LocationId AS _Id FROM AltNames WHERE UPPER(Name)=UPPER(?)";
 		
-		Cursor cursor = db.rawQuery(sql, new String[] {name, name});
+		cursor = db.rawQuery(sql, new String[] {name, name});
+		if (cursor.getCount() == 1) {
+			cursor.moveToFirst();
+			long id = cursor.getLong(0); 
+			cursor.close();
+			return id;
+		}
+		cursor.close();
 		
-		if (cursor.getCount() != 1) {
+		sql = "SELECT _Id FROM " +
+				"(SELECT _Id, Name FROM Locations WHERE Name LIKE ? " + 
+				"UNION " +
+				"SELECT LocationId, Name AS _Id FROM AltNames WHERE Name LIKE ?)" +
+				"ORDER BY Name";
+		cursor = db.rawQuery(sql, new String[] {"%" + name + "%", "%" + name + "%"});
+		if (cursor.getCount() == 0) {
 			cursor.close();
 			return -1;
 		}
@@ -286,8 +301,7 @@ public class LocationAdapter extends TableAdapter {
 		cursor.moveToFirst();
 		long id = cursor.getLong(0); 
 		cursor.close();
-		
-		return id; 
+		return id;
 	}
 	
 	/**
