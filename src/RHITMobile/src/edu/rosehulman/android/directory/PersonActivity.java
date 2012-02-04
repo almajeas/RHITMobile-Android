@@ -37,8 +37,12 @@ public class PersonActivity extends Activity {
 	public static final String EXTRA_PERSON = "PERSON"; 
 	
 	public static Intent createIntent(Context context) {
+		return createIntent(context, "");
+	}
+
+	public static Intent createIntent(Context context, String person) {
 		Intent intent = new Intent(context, PersonActivity.class);
-		intent.putExtra(EXTRA_PERSON, "");
+		intent.putExtra(EXTRA_PERSON, person);
 		return intent;
 	}
 	

@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -80,7 +79,7 @@ public class ScheduleRoomActivity extends TabActivity {
 	TabHost.TabContentFactory tabFactory = new TabHost.TabContentFactory() {
 		
 		@Override
-		public View createTabContent(String tag) {
+		public View createTabContent(final String tag) {
 			LayoutInflater inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			View root = inflater.inflate(R.layout.schedule_list, null);
 			ListView list = (ListView)root.findViewById(R.id.list);
@@ -95,7 +94,10 @@ public class ScheduleRoomActivity extends TabActivity {
 					if (adapter == null)
 						return;
 					
-					Log.d(C.TAG, "Item clicked: " + position);
+					RoomScheduleItem item = schedule.getDay(tag).items[position];
+					
+					Intent intent = ScheduleCourseActivity.createIntent(ScheduleRoomActivity.this, item.course, item.section);
+					startActivity(intent);
 				}
 				
 			});

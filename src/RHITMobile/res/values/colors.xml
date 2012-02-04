@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <color name="light_blue">#ff6699ff</color>
+    <color name="list_section_header_color">#ff6f8fc7</color>
+
 </resources>
