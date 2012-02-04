@@ -199,7 +199,7 @@ public class PersonActivity extends Activity {
     	
     	@Override
     	public void onClick() {
-    		Intent intent = PersonScheduleActivity.createIntent(PersonActivity.this, person);
+    		Intent intent = SchedulePersonActivity.createIntent(PersonActivity.this, person);
     		startActivity(intent);
     	}
     }

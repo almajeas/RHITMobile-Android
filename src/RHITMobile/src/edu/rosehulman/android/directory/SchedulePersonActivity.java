@@ -19,12 +19,12 @@ import android.widget.ListView;
 import android.widget.TabHost;
 import android.widget.TextView;
 
-public class PersonScheduleActivity extends TabActivity {
+public class SchedulePersonActivity extends TabActivity {
 	
 	public static final String EXTRA_PERSON = "PERSON";
 	
 	public static Intent createIntent(Context context, String person) {
-		Intent intent = new Intent(context, PersonScheduleActivity.class);
+		Intent intent = new Intent(context, SchedulePersonActivity.class);
 		intent.putExtra(EXTRA_PERSON, person);
 		return intent;
 	}
@@ -171,7 +171,7 @@ public class PersonScheduleActivity extends TabActivity {
 
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
-			LayoutInflater inflater = LayoutInflater.from(PersonScheduleActivity.this);
+			LayoutInflater inflater = LayoutInflater.from(SchedulePersonActivity.this);
 			View v = convertView;
 			if (v == null) {
 				v = inflater.inflate(R.layout.schedule_list_item, null);

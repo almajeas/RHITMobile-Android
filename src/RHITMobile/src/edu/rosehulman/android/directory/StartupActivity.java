@@ -238,7 +238,7 @@ public class StartupActivity extends Activity {
 					new OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					Intent intent = PersonScheduleActivity.createIntent(StartupActivity.this, "Kevin");
+					Intent intent = SchedulePersonActivity.createIntent(StartupActivity.this, "Kevin");
 					startActivity(intent);
 				}
 			})
