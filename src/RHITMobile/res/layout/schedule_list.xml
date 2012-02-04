@@ -2,6 +2,8 @@
 <ListView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/list"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content" >
+    android:layout_height="wrap_content"
+    android:divider="@android:id/empty"
+    android:dividerHeight="0dp" >
 
 </ListView>
