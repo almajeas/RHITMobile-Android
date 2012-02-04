@@ -22,11 +22,11 @@ public class ClickableLocationSpan extends ClickableSpan {
 
 	@Override
 	public void onClick(View v) {
-		final CharSequence[] locations = {"Room Info", "Room Schedule"};
+		final CharSequence[] options = {"Room Info", "Room Schedule"};
 
-    	new AlertDialog.Builder(v.getContext())
+    	new AlertDialog.Builder(context)
     		.setTitle("Select action")
-    		.setItems(locations, new DialogInterface.OnClickListener() {
+    		.setItems(options, new DialogInterface.OnClickListener() {
 	    	    public void onClick(DialogInterface dialog, int item) {
 	    	    	switch (item) {
 	    	    	case 0: //room info
@@ -38,8 +38,10 @@ public class ClickableLocationSpan extends ClickableSpan {
 	    	    			}
 	    	    		}).execute();
 	    	    		break;
+	    	    		
 	    	    	case 1: //room schedule
-	    	    		//TODO
+	    	    		Intent intent = ScheduleRoomActivity.createIntent(context, name);
+	    	    		context.startActivity(intent);
 	    	    		break;
 	    	    	}
 	    	    }
