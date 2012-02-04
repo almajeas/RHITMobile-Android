@@ -89,7 +89,7 @@ public class LocationSearchActivity extends ListActivity {
 		    Uri data = intent.getData();
 		    
 		    long id = Long.parseLong(data.getPath());
-		    LoadLocation task = new LoadLocation(new OnLocationLoadedListener() {
+		    LoadLocation task = new LoadLocation(id, new OnLocationLoadedListener() {
 				@Override
 				public void onLocationLoaded(Location location) {
 					finish();
@@ -99,7 +99,7 @@ public class LocationSearchActivity extends ListActivity {
 				}
 			});
 		    taskManager.addTask(task);
-		    task.execute(id);
+		    task.execute();
 		    
     	} else {
     		//are you lost?
@@ -120,7 +120,7 @@ public class LocationSearchActivity extends ListActivity {
 	protected void onListItemClick(ListView l, View v, int position, long rowId)
 	{
 		long id = locations[position].id; 
-	    LoadLocation task = new LoadLocation(new OnLocationLoadedListener() {
+	    LoadLocation task = new LoadLocation(id, new OnLocationLoadedListener() {
 			@Override
 			public void onLocationLoaded(Location location) {
 				finish();
@@ -129,7 +129,7 @@ public class LocationSearchActivity extends ListActivity {
 			}
 		});
 	    taskManager.addTask(task);
-	    task.execute(id);
+	    task.execute();
 	}
 	
 	private void btnShowOnMap_clicked() {

@@ -87,7 +87,7 @@ public class CampusToursOffCampusActivity extends ListActivity {
 	protected void onListItemClick(ListView l, View v, int position, long rowId)
 	{
 		long id = locations[position].id; 
-	    LoadLocation task = new LoadLocation(new OnLocationLoadedListener() {
+	    LoadLocation task = new LoadLocation(id, new OnLocationLoadedListener() {
 			@Override
 			public void onLocationLoaded(Location location) {
 				Intent newIntent = LocationActivity.createIntent(CampusToursOffCampusActivity.this, location);
@@ -95,7 +95,7 @@ public class CampusToursOffCampusActivity extends ListActivity {
 			}
 		});
 	    taskManager.addTask(task);
-	    task.execute(id);
+	    task.execute();
 	}
 	
 	private class LoadTour extends AsyncTask<String, Void, LocationInfo[]> {

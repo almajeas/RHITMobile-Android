@@ -1,16 +1,22 @@
 package edu.rosehulman.android.directory;
 
+import java.util.Arrays;
+
 import android.app.TabActivity;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.method.LinkMovementMethod;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.Window;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.BaseAdapter;
+import android.widget.ListView;
 import android.widget.TabHost;
-import android.widget.TableLayout;
-import android.widget.TableRow;
 import android.widget.TextView;
 
 public class PersonScheduleActivity extends TabActivity {
@@ -23,29 +29,29 @@ public class PersonScheduleActivity extends TabActivity {
 		return intent;
 	}
 	
+	private static final String[] HOURS = new String[] {"",
+			"8:05am", "9:00am", "9:55am",
+			"10:50am", "11:45am", "12:40pm",
+			"1:35pm", "2:30pm", "3:25pm",
+			"4:20pm"};
+
+	
+	private TaskManager taskManager = new TaskManager();
+	
 	private TabHost tabHost;
+	
+	private PersonScheduleWeek schedule;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		setContentView(R.layout.person_schedule);
-	
+		setContentView(R.layout.schedule_person);
 		
-		//TabHost tabHost = getTabHost();
 		tabHost = (TabHost)findViewById(android.R.id.tabhost);
-		createTab("mon", "Mon");
-		createTab("tue", "Tue");
-		createTab("wed", "Wed");
-		createTab("thu", "Thu");
-		createTab("fri", "Fri");
 		
-		//TODO don't just redirect to a webpage
-		String earl = "https://prodweb.rose-hulman.edu/regweb-cgi/reg-sched.pl?termcode=201220&view=tgrid&id1=wellska1&bt1=ID%2Username";
-		Intent intent = new Intent(Intent.ACTION_VIEW);
-		intent.setData(Uri.parse(earl));
-		startActivity(intent);
-		//finish();
+		LoadSchedule task = new LoadSchedule();
+		taskManager.addTask(task);
+		task.execute();
 	}
 	
 	private void createTab(String tag, String label) {
@@ -66,56 +72,168 @@ public class PersonScheduleActivity extends TabActivity {
 
 	TabHost.TabContentFactory tabFactory = new TabHost.TabContentFactory() {
 		
-		private TableRow makeRow(String tag, int i) {
-			
-			String times[] = new String[] {"", "8:05", "9:00", "9:55", "10:50", "11:45", "12:40", "1:35", "2:30", "3:25", "4:20"};
-
-			LayoutInflater inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			View v = inflater.inflate(R.layout.schedule_table_row, null);
-
-			TextView hour = (TextView)v.findViewById(R.id.hour);
-			TextView time = (TextView)v.findViewById(R.id.time);
-			TextView course = (TextView)v.findViewById(R.id.course);
-			TextView room = (TextView)v.findViewById(R.id.room);
-
-			hour.setText(String.valueOf(i));
-			time.setText(times[i]);
-			if (i == 2)
-			{
-				if ("mon".equals(tag) || "tue".equals(tag) || "thu".equals(tag)) {
-					course.setText("ECE480-01");
-					room.setText("DL119");
-				}
-			} else if (i == 5) {
-				if ("mon".equals(tag) || "tue".equals(tag) || "thu".equals(tag)) {
-					course.setText("IA241-02");
-					room.setText("A220");
-				}
-			} else if (i == 8) {
-				if ("mon".equals(tag) || "tue".equals(tag) || "thu".equals(tag) || "fri".equals(tag)) {
-					course.setText("CSSE474-01");
-					room.setText("G317");
-				}
-			} else if ("wed".equals(tag)) {
-				if (i >= 4 && i <= 6) {
-					course.setText("IA241-02");
-					room.setText("GM");
-				}
-			}
-			return (TableRow)v;
-		}
-		
 		@Override
 		public View createTabContent(String tag) {
 			LayoutInflater inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			View root = inflater.inflate(R.layout.schedule_table, null);
-			TableLayout table = (TableLayout)root.findViewById(R.id.table);
+			View root = inflater.inflate(R.layout.schedule_list, null);
+			ListView list = (ListView)root.findViewById(R.id.list);
 			
-			for (int i = 1; i < 11; i++) {
-				table.addView(makeRow(tag, i));
-			}
+			PersonScheduleDay day = schedule.getDay(tag);
+			list.setAdapter(new ScheduleAdapter(day.items));
+			
+			list.setOnItemClickListener(new OnItemClickListener() {
+
+				@Override
+				public void onItemClick(AdapterView<?> adapter, View v, int position, long id) {
+					if (adapter == null)
+						return;
+					
+					Log.d(C.TAG, "Item clicked: " + position);
+				}
+				
+			});
 			
 			return root;
 		}
 	};
+	
+	private class LoadSchedule extends AsyncTask<Void, Void, PersonScheduleWeek> {
+
+		@Override
+		protected PersonScheduleWeek doInBackground(Void... params) {
+			
+			PersonScheduleItem csse432 = 
+					new PersonScheduleItem("CSSE432", "Computer Networks", 1, 5, 5, "O205");
+			PersonScheduleItem csse404 = 
+					new PersonScheduleItem("CSSE404", "Compiler Construction", 1, 7, 7, "O267");
+			PersonScheduleItem csse304 = 
+					new PersonScheduleItem("CSSE304", "Programming Language Concepts", 1, 8, 8, "O257");
+			
+			
+			PersonScheduleItem csse404Wed = 
+					new PersonScheduleItem("CSSE404", "Compiler Construction", 1, 6, 6, "O267");
+			PersonScheduleItem csse499Wed = 
+					new PersonScheduleItem("CSSE499", "Senior Project III", 1, 7, 9, "O201");
+			
+			return new PersonScheduleWeek(
+					new String[] {"Mon", "Tue", "Wed", "Thu", "Fri"}, 
+					new PersonScheduleDay[] {
+							new PersonScheduleDay(new PersonScheduleItem[] {
+									csse432, csse404, csse304
+							}),
+							new PersonScheduleDay(new PersonScheduleItem[] {
+									csse432, csse404, csse304
+							}),
+							new PersonScheduleDay(new PersonScheduleItem[] {
+									csse404Wed, csse499Wed
+							}),
+							new PersonScheduleDay(new PersonScheduleItem[] {
+									csse432, csse404, csse304
+							}),
+							new PersonScheduleDay(new PersonScheduleItem[] {
+									csse432, csse304
+							})
+					});
+		}
+		
+		@Override
+		protected void onPostExecute(PersonScheduleWeek res) {
+			schedule = res;
+			for (String day : res.tags) {
+				createTab(day, day);
+			}
+		}
+		
+	}
+	
+	private class ScheduleAdapter extends BaseAdapter {
+		
+		private PersonScheduleItem[] items;
+		
+		public ScheduleAdapter(PersonScheduleItem[] items) {
+			this.items = items;
+		}
+
+		@Override
+		public int getCount() {
+			return items.length;
+		}
+
+		@Override
+		public Object getItem(int position) {
+			return items[position];
+		}
+
+		@Override
+		public long getItemId(int position) {
+			return position;
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			LayoutInflater inflater = LayoutInflater.from(PersonScheduleActivity.this);
+			View v = convertView;
+			if (v == null) {
+				v = inflater.inflate(R.layout.schedule_list_item, null);
+			}
+			
+			PersonScheduleItem item = items[position];
+			
+			TextView course = (TextView)v.findViewById(R.id.course);
+			TextView time = (TextView)v.findViewById(R.id.time);
+			TextView room = (TextView)v.findViewById(R.id.room);
+			
+			course.setText(String.format("%s-%02d %s", item.course, item.section, item.courseName));
+			time.setText(String.format("%s - %s", HOURS[item.hourStart], HOURS[item.hourEnd]));
+			ClickableLocationSpan.linkify(room, item.room);
+			
+			room.setMovementMethod(LinkMovementMethod.getInstance());
+			room.setFocusable(false);
+			room.setFocusableInTouchMode(false);
+			
+			return v;
+		}
+	}
+	
+	private class PersonScheduleItem {
+		public String course;
+		public String courseName;
+		public int section;
+		public int hourStart;
+		public int hourEnd;
+		public String room;
+		
+		public PersonScheduleItem(String course, String courseName, int section, int hourStart, int hourEnd, String room) {
+			this.course = course;
+			this.courseName = courseName;
+			this.section = section;
+			this.hourStart = hourStart;
+			this.hourEnd = hourEnd;
+			this.room = room;
+		}
+	}
+	
+	private class PersonScheduleDay {
+		
+		public PersonScheduleItem[] items;
+
+		public PersonScheduleDay(PersonScheduleItem[] items) {
+			this.items = items;
+		}
+	}
+	
+	private class PersonScheduleWeek {
+		
+		private String[] tags;
+		private PersonScheduleDay[] days;
+		
+		public PersonScheduleWeek(String[] tags, PersonScheduleDay[] days) {
+			this.tags = tags;
+			this.days = days;
+		}
+		
+		public PersonScheduleDay getDay(String tag) {
+			return days[Arrays.asList(tags).indexOf(tag)];
+		}
+	}
 }

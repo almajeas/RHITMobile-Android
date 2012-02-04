@@ -240,13 +240,13 @@ public class PersonActivity extends Activity {
     	
     	@Override
     	public void onClick() {
-    		new LoadLocation(new OnLocationLoadedListener() {
+    		new LoadLocation((long)1362170, new OnLocationLoadedListener() {
 				@Override
 				public void onLocationLoaded(Location location) {
 					Intent intent = LocationActivity.createIntent(PersonActivity.this, location);
 					startActivity(intent);
 				}
-			}).execute((long)1362170);
+			}).execute();
     		//FIXME find the actual location ID
     	}
     }
