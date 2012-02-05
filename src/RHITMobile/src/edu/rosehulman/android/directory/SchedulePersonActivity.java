@@ -2,6 +2,8 @@ package edu.rosehulman.android.directory;
 
 import java.util.Arrays;
 
+import edu.rosehulman.android.directory.util.Ordinal;
+
 import android.app.TabActivity;
 import android.content.Context;
 import android.content.Intent;
@@ -194,8 +196,22 @@ public class SchedulePersonActivity extends TabActivity {
 			TextView time = (TextView)v.findViewById(R.id.time);
 			TextView room = (TextView)v.findViewById(R.id.room);
 			
+			String hour;
+			if (item.hourStart == item.hourEnd) {
+				hour = String.format("%s - %s (%s hour)", 
+						HOURS[item.hourStart], HOURS[item.hourEnd+1], 
+						Ordinal.convert(item.hourStart));
+			} else {
+				hour = String.format("%s - %s (%s - %s hour)", 
+						HOURS[item.hourStart], HOURS[item.hourEnd+1], 
+						Ordinal.convert(item.hourStart),
+						Ordinal.convert(item.hourEnd+1));
+			}
+			
 			course.setText(String.format("%s-%02d %s", item.course, item.section, item.courseName));
-			time.setText(String.format("%s - %s", HOURS[item.hourStart], HOURS[item.hourEnd]));
+			
+			time.setText(hour);
+			
 			ClickableLocationSpan.linkify(room, item.room);
 			
 			room.setMovementMethod(LinkMovementMethod.getInstance());
