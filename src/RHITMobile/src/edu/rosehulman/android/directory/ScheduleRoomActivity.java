@@ -16,7 +16,7 @@ import android.widget.ListView;
 import android.widget.TabHost;
 import android.widget.TextView;
 
-public class ScheduleRoomActivity extends AuthenticatedTabActivity {
+public class ScheduleRoomActivity extends AuthenticatedActivity {
 	
 	public static final String EXTRA_ROOM = "ROOM";
 	
@@ -46,6 +46,7 @@ public class ScheduleRoomActivity extends AuthenticatedTabActivity {
 		setContentView(R.layout.schedule_room);
 		
 		tabHost = (TabHost)findViewById(android.R.id.tabhost);
+		tabHost.setup();
 		
 		Intent intent = getIntent();
 		if (!intent.hasExtra(EXTRA_ROOM)) {

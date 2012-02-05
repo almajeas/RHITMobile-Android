@@ -18,7 +18,7 @@ import android.widget.TabHost;
 import android.widget.TextView;
 import edu.rosehulman.android.directory.util.Ordinal;
 
-public class SchedulePersonActivity extends AuthenticatedTabActivity {
+public class SchedulePersonActivity extends AuthenticatedActivity {
 	
 	public static final String EXTRA_PERSON = "PERSON";
 	
@@ -48,6 +48,7 @@ public class SchedulePersonActivity extends AuthenticatedTabActivity {
 		setContentView(R.layout.schedule_person);
 		
 		tabHost = (TabHost)findViewById(android.R.id.tabhost);
+		tabHost.setup();
 		
 		Intent intent = getIntent();
 		if (!intent.hasExtra(EXTRA_PERSON)) {
