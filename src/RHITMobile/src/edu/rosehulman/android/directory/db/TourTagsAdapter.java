@@ -20,6 +20,7 @@ public class TourTagsAdapter extends TableAdapter {
 	public static final String KEY_PRE = "Pre";
 	public static final String KEY_POST = "Post";
 	public static final String KEY_NAME = "Name";
+	public static final String KEY_IS_DEFAULT = "IsDefault";
 	public static final String KEY_TAG_ID = "TagId";
 	
 	/**
@@ -57,6 +58,7 @@ public class TourTagsAdapter extends TableAdapter {
 			ContentValues values = new ContentValues();
 			values.put(KEY_NAME, link.name);
 			values.put(KEY_TAG_ID, link.id);
+			values.put(KEY_IS_DEFAULT, link.isDefault);
 			values.put(KEY_PRE, i);
 			values.put(KEY_POST, i+1);
 			i += 2;
@@ -102,7 +104,7 @@ public class TourTagsAdapter extends TableAdapter {
 	 * @return The TourTag
 	 */
 	public TourTag getTag(Long id) {
-		String projection[] = {KEY_NAME, KEY_TAG_ID};
+		String projection[] = {KEY_NAME, KEY_TAG_ID, KEY_IS_DEFAULT};
 		String args[] = {String.valueOf(id)};
 		Cursor cursor;
 		String where = KEY_TAG_ID + "=?";
@@ -114,9 +116,12 @@ public class TourTagsAdapter extends TableAdapter {
 		
 		String name = cursor.getString(cursor.getColumnIndex(KEY_NAME));
 		long tagId = cursor.getLong(cursor.getColumnIndex(KEY_TAG_ID));
+		boolean isDefault = getBoolean(cursor, cursor.getColumnIndex(KEY_IS_DEFAULT));
 		cursor.close();
 		
-		return new TourTag(tagId, name);
+		TourTag res = new TourTag(tagId, name);
+		res.isDefault = isDefault;
+		return res;
 	}
 	
 	/**
@@ -140,7 +145,9 @@ public class TourTagsAdapter extends TableAdapter {
 	}
 	
 	/**
-	 * Retrieves a filtered subset of a single tag group
+	 * Retrieves a filtered subset of a single tag group.
+	 * 
+	 * isDefault attribute is not loaded.
 	 * 
 	 * @param id The id of the group
 	 * @param query The search terms to use
@@ -179,7 +186,9 @@ public class TourTagsAdapter extends TableAdapter {
 	}
 	
 	/**
-	 * Provides search suggestions to the corresponding provider
+	 * Provides search suggestions to the corresponding provider.
+	 * 
+	 * isDefault attribute is not loaded.
 	 * 
 	 * @param path The search filter
 	 * @return A cursor suitable for the provider
@@ -209,6 +218,8 @@ public class TourTagsAdapter extends TableAdapter {
 	
 	/**
 	 * Retrieves a group for a given filter
+	 * 
+	 * isDefault attribute is not loaded.
 	 * 
 	 * @param filter The string used to filter the category or name
 	 * @return A group matching either criteria

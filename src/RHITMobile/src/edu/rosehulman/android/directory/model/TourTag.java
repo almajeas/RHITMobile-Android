@@ -22,6 +22,11 @@ public class TourTag implements Parcelable {
 	public String name;
 	
 	/**
+	 * Is this tag a default tag
+	 */
+	public boolean isDefault;
+	
+	/**
 	 * Creates a new, uninitialized TourTag
 	 */
 	public TourTag() {
@@ -46,7 +51,13 @@ public class TourTag implements Parcelable {
 	 * @throws JSONException
 	 */
 	public static TourTag deserialize(JSONObject root) throws JSONException {
-		return new TourTag(root.getLong("Id"), root.getString("Name"));
+		TourTag res = new TourTag();
+		
+		res.id = root.getLong("Id");
+		res.name = root.getString("Name");
+		res.isDefault = root.getBoolean("IsDefault");
+		
+		return res;
 	}
 
 	public boolean equals(TourTag o) {
@@ -70,16 +81,20 @@ public class TourTag implements Parcelable {
 	public void writeToParcel(Parcel out, int flags) {
 		out.writeLong(id);
 		out.writeString(name);
+		out.writeInt(isDefault ? 1 : 0);
 	}
 	
 	public static final Parcelable.Creator<TourTag> CREATOR = new Parcelable.Creator<TourTag>() {
 
 		@Override
 		public TourTag createFromParcel(Parcel in) {
-			long id = in.readLong();
-			String name = in.readString();
+			TourTag res = new TourTag();
 			
-			return new TourTag(id, name);
+			res.id = in.readLong();
+			res.name = in.readString();
+			res.isDefault = in.readInt() == 0 ? false : true;
+			
+			return res;
 		}
 
 		@Override
