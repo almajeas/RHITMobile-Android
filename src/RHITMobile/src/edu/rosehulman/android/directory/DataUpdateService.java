@@ -490,7 +490,7 @@ public class DataUpdateService extends Service {
 				//update our cached data
 				CampusServicesAdapter servicesAdapter = new CampusServicesAdapter();
 				servicesAdapter.open();
-				servicesAdapter.replaceData(response.categories);
+				servicesAdapter.replaceData(response.root);
 				servicesAdapter.close();
 				
 				//mark it as updated

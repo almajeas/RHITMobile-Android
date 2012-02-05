@@ -25,19 +25,17 @@ public class CampusServicesAdapter extends TableAdapter {
 	/**
 	 * Replace all data with the given categories
 	 * 
-	 * @param categories The new category data to use
+	 * @param root The new category data to use
 	 */
-	public void replaceData(CampusServicesCategory[] categories) {
+	public void replaceData(CampusServicesCategory root) {
 		db.beginTransaction();
 		
 		//delete all records
 		db.delete(TABLE_NAME, null, null);
 		
 		//add each record to the database
-		int pre = 1;
-		for (CampusServicesCategory category : categories) {
-			pre = addCategory(category, pre);
-		}
+		root.name = null;
+		addCategory(root, 1);
 		
 		db.setTransactionSuccessful();
 		db.endTransaction();
@@ -139,7 +137,7 @@ public class CampusServicesAdapter extends TableAdapter {
 	 */
 	public CampusServicesCategory[] getCategories(String filter) {
 		String query = "SELECT Pre, Post, Name, Url FROM CampusServices " +
-			"WHERE (Url IS NOT NULL AND Pre + 1 = Post AND Name LIKE ?) OR (Url IS NULL) " +
+			"WHERE Name IS NOT NULL AND ((Url IS NOT NULL AND Pre + 1 = Post AND Name LIKE ?) OR (Url IS NULL)) " +
 			"ORDER BY Pre";
 		String args[] = {"%" + filter + "%"};
 		Cursor cursor = db.rawQuery(query, args);
