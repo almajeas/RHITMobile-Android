@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import android.app.Activity;
 import android.content.ContentProviderOperation;
 import android.content.Context;
 import android.content.Intent;
@@ -32,7 +31,7 @@ import android.widget.TextView;
 import edu.rosehulman.android.directory.LoadLocation.OnLocationLoadedListener;
 import edu.rosehulman.android.directory.model.Location;
 
-public class PersonActivity extends Activity {
+public class PersonActivity extends AuthenticatedActivity {
 
 	public static final String EXTRA_PERSON = "PERSON"; 
 	

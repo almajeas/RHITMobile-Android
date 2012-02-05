@@ -1,6 +1,5 @@
 package edu.rosehulman.android.directory;
 
-import android.app.ListActivity;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
@@ -12,7 +11,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class PersonSearchActivity extends ListActivity {
+public class PersonSearchActivity extends AuthenticatedListActivity {
 	
 	private String searchQuery;
 

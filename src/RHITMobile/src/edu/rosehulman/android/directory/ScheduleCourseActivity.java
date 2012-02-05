@@ -3,7 +3,6 @@ package edu.rosehulman.android.directory;
 import java.util.LinkedList;
 import java.util.List;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -16,7 +15,7 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class ScheduleCourseActivity extends Activity {
+public class ScheduleCourseActivity extends AuthenticatedActivity {
 
 	public static final String EXTRA_COURSE = "PERSON";
 	public static final String EXTRA_SECTION = "SECTION";

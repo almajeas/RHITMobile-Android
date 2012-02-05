@@ -2,9 +2,6 @@ package edu.rosehulman.android.directory;
 
 import java.util.Arrays;
 
-import edu.rosehulman.android.directory.util.Ordinal;
-
-import android.app.TabActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -19,8 +16,9 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TabHost;
 import android.widget.TextView;
+import edu.rosehulman.android.directory.util.Ordinal;
 
-public class SchedulePersonActivity extends TabActivity {
+public class SchedulePersonActivity extends AuthenticatedTabActivity {
 	
 	public static final String EXTRA_PERSON = "PERSON";
 	

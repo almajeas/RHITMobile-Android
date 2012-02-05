@@ -111,6 +111,9 @@ public class LocationActivity extends Activity {
 	    	//restore state
 	    }
 
+        if (!User.isLoggedIn()) {
+        	btnSchedule.setVisibility(View.GONE);
+        }
     }
     
     @Override

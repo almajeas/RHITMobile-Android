@@ -2,7 +2,6 @@ package edu.rosehulman.android.directory;
 
 import java.util.Arrays;
 
-import android.app.TabActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -17,7 +16,7 @@ import android.widget.ListView;
 import android.widget.TabHost;
 import android.widget.TextView;
 
-public class ScheduleRoomActivity extends TabActivity {
+public class ScheduleRoomActivity extends AuthenticatedTabActivity {
 	
 	public static final String EXTRA_ROOM = "ROOM";
 	
