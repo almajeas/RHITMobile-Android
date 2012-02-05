@@ -11,7 +11,7 @@
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/header"
         android:dividerHeight="0dp" 
-        android:divider="@android:id/empty" >
+        android:divider="@null" >
     </ListView>
 
 </LinearLayout>
