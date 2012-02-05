@@ -2,6 +2,7 @@ package edu.rosehulman.android.directory;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Handler;
@@ -20,6 +21,11 @@ public class MyApplication extends Application {
 	 * Should we check for intensive work on the UI thread?
 	 */
 	public static boolean CHECK_UI_THREAD = false;
+
+	/**
+	 * The name of the global application preferences file
+	 */
+	public static final String PREFS_APP = "prefs";
 	
 	/**
 	 * The global database helper
@@ -46,9 +52,15 @@ public class MyApplication extends Application {
 		return instance;
 	}
 	
-	private void purgeDb() {
+	/**
+	 * Purges the database
+	 */
+	public void purgeDb() {
 		SQLiteDatabase db = dbHelper.getWritableDatabase();
+		db.beginTransaction();
 		dbHelper.onUpgrade(db, 0, 0);
+		db.setTransactionSuccessful();
+		db.endTransaction();
 		db.close();
 	}
 	
@@ -81,6 +93,10 @@ public class MyApplication extends Application {
 	
 	public void post(Runnable runnable) {
 		handler.post(runnable);
+	}
+	
+	public SharedPreferences getAppPreferences() {
+		return getSharedPreferences(PREFS_APP, MODE_PRIVATE);
 	}
 	
 	public interface UpdateServiceListener {

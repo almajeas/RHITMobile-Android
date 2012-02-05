@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <PreferenceCategory
+        android:summary="Modify preferences specific to the user"
+        android:title="User Settings" >
+
+        <Preference
+            android:key="logout"
+            android:summary="Logs the user out of the application"
+            android:title="Clear Login" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:summary="Settings that shouldn&apos;t be useful unless something breaks"
+        android:title="Debug" >
+
+        <Preference
+            android:key="clearData"
+            android:summary="Clears the local database"
+            android:title="Clear Local Data" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

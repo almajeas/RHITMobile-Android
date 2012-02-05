@@ -1,16 +1,22 @@
 package edu.rosehulman.android.directory;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -25,7 +31,7 @@ public class StartupActivity extends Activity {
 	
 	private BetaManagerManager betaManager;
 	
-	private ArrayAdapter<Task> taskAdapter;
+	private List<Task> tasks;
 	
 	private GridView tasksView;
 	
@@ -41,54 +47,17 @@ public class StartupActivity extends Activity {
 		
         betaManager = new BetaManagerManager(this);
         
-        if (betaManager.hasBetaManager()) {
-        	//Add the beta channel
-        	Task[] tasks = new Task[this.tasks.length+1];
-        	for (int i = 0; i < this.tasks.length; i++) {
-				tasks[i] = this.tasks[i];
-			}
-        	tasks[this.tasks.length] = new Task(
-        			"Beta",
-        			android.R.drawable.ic_menu_manage,
-        			new OnClickListener() {
-						@Override
-						public void onClick(View v) {
-							taskBeta_clicked();
-						}
-					});
-        	this.tasks = tasks;
-        }
-		
-		taskAdapter = new ArrayAdapter<Task>(
-				this, 
-				R.layout.startup_task, 
-				R.id.task_label, 
-				tasks) {
-			
-			@Override
-			public View getView(int position, View convertView, ViewGroup parent) {
-				LayoutInflater inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-				View v = inflater.inflate(R.layout.startup_task, null);
-				
-				TextView name = (TextView)v.findViewById(R.id.task_label);
-				ImageView icon = (ImageView)v.findViewById(R.id.task_image);
-				
-				name.setText(tasks[position].name);
-				icon.setImageResource(tasks[position].image);
-				
-				return v;
-			}
-		};
-		
 		tasksView = (GridView)findViewById(R.id.tasks);
-		tasksView.setAdapter(taskAdapter);
 		tasksView.setOnItemClickListener(new OnItemClickListener() {
 			@Override
-			public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-				tasks[position].listener.onClick(v);
+			public void onItemClick(AdapterView<?> adapter, View v, int position, long id) {
+				if (adapter == null)
+					return;
+				
+				tasks.get(position).listener.onClick(v);
 			}
 		});
-		
+        
 		if (savedInstanceState == null) {
 			if (betaManager.hasBetaManager() && betaManager.isBetaEnabled()) {
 				updateData = false;
@@ -117,6 +86,14 @@ public class StartupActivity extends Activity {
 				}
 			}
 		});
+	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		
+		//populate the tasks
+        updateUI();
 	}
 	
 	@Override
@@ -159,6 +136,40 @@ public class StartupActivity extends Activity {
     			break;	
     	}
     }
+    
+    @Override
+    public boolean onSearchRequested() {
+    	if (User.isLoggedIn()) {
+    		super.onSearchRequested();
+    		return true;
+    	}
+    	return false;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.startup, menu);
+        return true;
+    }
+    
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+    	return true;
+    }
+    
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        //handle item selection
+        switch (item.getItemId()) {
+        case R.id.preferences:
+        	startActivity(PreferencesActivity.createIntent(this));
+        	return true;
+        default:
+            return super.onOptionsItemSelected(item);
+        }
+    }
 	
 	private void taskMap_clicked() {
 		Intent intent = CampusMapActivity.createIntent(this);
@@ -183,6 +194,95 @@ public class StartupActivity extends Activity {
 		betaManager.launchBetaActivity(BetaManagerManager.ACTION_SHOW_BETA_MANAGER);
 	}
 	
+	private void updateUI() {
+		tasks = new ArrayList<Task>();
+		
+		boolean loggedIn = User.isLoggedIn();
+		
+		tasks.add(
+			new Task("Campus Map",
+				android.R.drawable.ic_menu_mapmode,
+				new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				taskMap_clicked();
+			}
+		}));
+		
+		if (loggedIn) {
+			tasks.add(
+				new Task("Directory",
+					android.R.drawable.ic_menu_send,
+					new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					taskDirectory_clicked();
+				}
+			}));
+		}
+		
+		tasks.add(
+			new Task("Campus Services",
+				android.R.drawable.ic_menu_slideshow,
+				new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				taskServices_clicked();
+			}
+		}));
+		
+		tasks.add(
+			new Task("Tours",
+				android.R.drawable.ic_menu_directions,
+				new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				taskTours_clicked();
+			}
+		}));
+		
+		if (loggedIn) {
+			tasks.add(
+				new Task("My Schedule",
+					android.R.drawable.ic_menu_my_calendar,
+					new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					Intent intent = SchedulePersonActivity.createIntent(StartupActivity.this, User.getUsername());
+					startActivity(intent);
+				}
+			}));
+		}
+		
+		if (!loggedIn) {
+			tasks.add(
+				new Task("Login",
+					R.drawable.ic_menu_login,
+					new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					Intent intent = LoginActivity.createIntent(StartupActivity.this);
+					startActivity(intent);
+				}
+			}));
+		}
+		
+		if (betaManager.hasBetaManager()) {
+        	//Add the beta channel
+			tasks.add(
+				new Task("Beta",
+        			android.R.drawable.ic_menu_manage,
+        			new OnClickListener() {
+						@Override
+						public void onClick(View v) {
+							taskBeta_clicked();
+						}
+					}));
+        }
+		
+		tasksView.setAdapter(new TasksAdapter(tasks));
+	}
+	
 	private class Task {
 		public String name;
 		public OnClickListener listener;
@@ -200,49 +300,51 @@ public class StartupActivity extends Activity {
 		}
 	}
 	
-	private Task[] tasks = new Task[] {
-			new Task("Campus Map",
-					android.R.drawable.ic_menu_mapmode,
-					new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					taskMap_clicked();
-				}
-			}), 
-			new Task("Directory",
-					android.R.drawable.ic_menu_send,
-					new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					taskDirectory_clicked();
-				}
-			}), 
-			new Task("Campus Services",
-					android.R.drawable.ic_menu_slideshow,
-					new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					taskServices_clicked();
-				}
-			}),
-			new Task("Tours",
-					android.R.drawable.ic_menu_directions,
-					new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					taskTours_clicked();
-				}
-			}),
-			new Task("My Schedule",
-					android.R.drawable.ic_menu_my_calendar,
-					new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					Intent intent = SchedulePersonActivity.createIntent(StartupActivity.this, "Kevin");
-					startActivity(intent);
-				}
-			})
-		};
+	private class TasksAdapter extends BaseAdapter {
+		
+		private List<Task> tasks;
+
+		public TasksAdapter(List<Task> tasks) {
+			this.tasks = tasks;
+		}
+
+		@Override
+		public int getCount() {
+			return tasks.size();
+		}
+
+		@Override
+		public Object getItem(int position) {
+			return tasks.get(position);
+		}
+
+		@Override
+		public long getItemId(int position) {
+			return position;
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			LayoutInflater inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			
+			View v = convertView;
+			if (v == null) {
+				v = inflater.inflate(R.layout.startup_task, null);
+			}
+			Task task = tasks.get(position);
+			
+			TextView name = (TextView)v.findViewById(R.id.task_label);
+			ImageView icon = (ImageView)v.findViewById(R.id.task_image);
+			
+			name.setText(task.name);
+			icon.setImageResource(task.image);
+			
+			return v;
+		}
+		
+		
+	}
+
 	
 
 }
