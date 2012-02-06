@@ -2,7 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="@drawable/directions_list_header" >
+    android:background="@drawable/directions_list_header"
+    android:minHeight="48dp" >
 
     <TextView
         android:id="@+id/name"

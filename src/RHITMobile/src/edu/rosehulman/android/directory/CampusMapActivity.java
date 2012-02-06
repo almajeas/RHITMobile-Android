@@ -1002,6 +1002,9 @@ private class LoadDirections extends ProcessDirections {
 			for (DirectionPath path : response.result.paths) {
 				if (path.location >= 0) {
 					Location loc = locationAdapter.getLocation(path.location);
+					locationAdapter.loadAlternateNames(loc);
+					locationAdapter.loadHyperlinks(loc);
+					locationAdapter.loadMapArea(loc, true);
 					nodeList.add(loc);
 				}
 			}
