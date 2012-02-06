@@ -1,7 +1,6 @@
 package edu.rosehulman.android.directory;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -176,8 +175,6 @@ public class CampusToursTagSelectActivity extends Activity {
 	}
     
 	private class LoadServices extends AsyncTask<Void, Void, TourTagsGroup> {
-		
-		private ProgressDialog dialog;
 		
 		private long rootId;
 		private String query;
