@@ -97,6 +97,32 @@ public class TourTagsAdapter extends TableAdapter {
 		}
 	}
 	
+	public DbIterator<TourTag> getDefaultTags() {
+		String projection[] = {KEY_NAME, KEY_TAG_ID};
+		Cursor cursor;
+		String where = KEY_IS_DEFAULT + "='1'";
+		cursor = db.query(TABLE_NAME, projection, where, null, null, null, null);
+		
+		if (cursor.getCount() == 0)
+			return null;
+
+		final int iTagId = cursor.getColumnIndex(KEY_TAG_ID);
+		final int iName = cursor.getColumnIndex(KEY_NAME);
+		
+		return new DbIterator<TourTag>(cursor) {
+			@Override
+			protected TourTag convertRow(Cursor cursor) {
+				TourTag res = new TourTag();
+				
+				res.id = cursor.getLong(iTagId);
+				res.name = cursor.getString(iName);
+				res.isDefault = true;
+				
+				return res;
+			}
+		};
+	}
+	
 	/**
 	 * Loads a single tag by tag id
 	 * 

@@ -1,5 +1,8 @@
 package edu.rosehulman.android.directory.db;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.database.Cursor;
 
 /**
@@ -45,7 +48,10 @@ public abstract class DbIterator<T> {
 	 */
 	public T getNext() {
 		cursor.moveToNext();
-		return convertRow(cursor);
+		T res = convertRow(cursor);
+		if (cursor.isLast())
+			cursor.close();
+		return res;
 	}
 	
 	/**
@@ -55,6 +61,19 @@ public abstract class DbIterator<T> {
 	 */
 	public int getCount() {
 		return cursor.getCount();
+	}
+	
+	/**
+	 * Read the remaining items into a list
+	 * 
+	 * @return the list of all of the remaining objects
+	 */
+	public List<T> toList() {
+		List<T> res = new ArrayList<T>();
+		while (hasNext()) {
+			res.add(getNext());
+		}
+		return res;
 	}
 	
 }

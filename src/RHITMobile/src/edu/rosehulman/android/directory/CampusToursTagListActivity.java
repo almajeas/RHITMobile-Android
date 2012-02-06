@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -27,16 +28,24 @@ public class CampusToursTagListActivity extends Activity {
     private static int REQUEST_TAG = 10;
     
     public static String EXTRA_START_LOCATION = "START_LOCATION";
+    public static String EXTRA_INITIAL_TAGS = "INITIAL_TAGS";
 	public static String EXTRA_TAG = "TAG";
 	public static String EXTRA_TAG_PATH = "TAG_PATH";
 	
-	public static Intent createIntent(Context context) {
-		return new Intent(context, CampusToursTagListActivity.class);
+	public static Intent createIntent(Context context, TourTag[] tags) {
+		Intent intent = new Intent(context, CampusToursTagListActivity.class);
+		if (tags != null) {
+			intent.putExtra(EXTRA_INITIAL_TAGS, tags);
+		}
+		return intent;
 	}
 	
-	public static Intent createIntent(Context context, long startLocation) {
+	public static Intent createIntent(Context context, long startLocation, TourTag[] tags) {
 		Intent intent = new Intent(context, CampusToursTagListActivity.class);
 		intent.putExtra(EXTRA_START_LOCATION, startLocation);
+		if (tags != null) {
+			intent.putExtra(EXTRA_INITIAL_TAGS, tags);
+		}
 		return intent;
 	}
 	
@@ -79,6 +88,15 @@ public class CampusToursTagListActivity extends Activity {
 				btnTour_clicked();
 			}
 		});
+		
+		Intent intent = getIntent();
+		if (intent.hasExtra(EXTRA_INITIAL_TAGS)) {
+			for (Parcelable p : intent.getParcelableArrayExtra(EXTRA_INITIAL_TAGS)) {
+				TourTag tag = (TourTag)p;
+				//TODO compute path
+				tagItems.add(new TagItem(tag, ""));
+			}
+		}
 		
 		tags.setAdapter(adapter);
 		updateUI();
