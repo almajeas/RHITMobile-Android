@@ -84,6 +84,7 @@ public class DirectionsLayer extends BalloonItemizedOverlay<OverlayItem> impleme
 			}
 		}
 		pathNodes[i] = directions.paths[directions.paths.length-1];
+		pathNodes[i].dir = "Arrive at destination";
 		
 		pathPaint = new Paint();
 		pathPaint.setStyle(Style.STROKE);

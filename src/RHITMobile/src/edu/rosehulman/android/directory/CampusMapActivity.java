@@ -188,11 +188,6 @@ public class CampusMapActivity extends MapActivity {
         if (savedInstanceState == null) {
         	
         	 if (ACTION_DIRECTIONS.equals(intent.getAction())) {
-        		if (!intent.hasExtra(EXTRA_WAYPOINTS) || intent.getLongArrayExtra(EXTRA_WAYPOINTS) == null) {
-            		//TODO remove
-        			intent.putExtra(EXTRA_WAYPOINTS, new long[] {1300000, 1111570});
-        		}
-        		
         		long[] ids = intent.getLongArrayExtra(EXTRA_WAYPOINTS);
 
     			LoadDirections task = new LoadDirections(ids);

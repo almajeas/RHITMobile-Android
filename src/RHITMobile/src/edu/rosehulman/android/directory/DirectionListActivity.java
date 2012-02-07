@@ -61,21 +61,16 @@ public class DirectionListActivity extends Activity {
         
         listItems = new ArrayList<ListItem>();
         
-        int iLoc;
-        if (directions.paths[0].location >= 0) {
-        	listItems.add(new GoalListItem(0, locations[0].name, locations[0]));
-        	iLoc = 1;
-        } else {
+        if (directions.paths[0].location == 0) {
         	listItems.add(new NodeListItem(0, "Starting Location"));
-        	iLoc = 0;
         }
-        
+
+        int iLoc = 0;
         int step = 0;
         for (DirectionPath path : directions.paths) {
 			if (path.flag) {
 				listItems.add(new GoalListItem(step, locations[iLoc].name, locations[iLoc]));
 				iLoc++;
-				step++;
 				if (path.hasDirection()) { 
 					listItems.add(new StepListItem(step, path));
 					step++;

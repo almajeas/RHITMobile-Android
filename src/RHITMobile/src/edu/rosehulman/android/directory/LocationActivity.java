@@ -228,7 +228,7 @@ public class LocationActivity extends Activity {
 
 							@Override
 							public void taskCompleted(Long res) {
-								Intent intent = CampusMapActivity.createDirectionsIntent(LocationActivity.this, location.id, res);
+								Intent intent = CampusMapActivity.createDirectionsIntent(LocationActivity.this, res, location.id);
 								startActivity(intent);
 							}
 

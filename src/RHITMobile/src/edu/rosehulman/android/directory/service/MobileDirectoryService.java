@@ -116,9 +116,7 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 	
 	@Override
 	public DirectionsResponse getDirections(long from, long to) throws Exception {
-		//FIXME temporary directions URL
-		String url = String.format("directions/testing/directions", from, to);
-		//String url = String.format("directions/fromloc/%d/toloc/%d", from, to);
+		String url = String.format("directions/fromloc/%d/toloc/%d", from, to);
 		return getDirectionsResponse(url);
 	}
 	
