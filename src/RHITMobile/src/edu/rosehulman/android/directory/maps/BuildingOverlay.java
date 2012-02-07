@@ -1,8 +1,5 @@
 package edu.rosehulman.android.directory.maps;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -18,8 +15,6 @@ import com.google.android.maps.Projection;
 import edu.rosehulman.android.directory.model.Location;
 import edu.rosehulman.android.directory.model.MapAreaData;
 import edu.rosehulman.android.directory.util.BoundingBox;
-import edu.rosehulman.android.directory.util.BoundingPath;
-import edu.rosehulman.android.directory.util.Point;
 
 /**
  * An overlay for an individual building
@@ -28,7 +23,6 @@ public class BuildingOverlay extends Overlay implements Overlay.Snappable {
 	
 	private Location mapArea;
 	
-	private BoundingPath path;
 	private BoundingBox bounds;
 
 	private android.graphics.Point pt;
@@ -58,12 +52,7 @@ public class BuildingOverlay extends Overlay implements Overlay.Snappable {
 		this.mapArea = mapArea;
 		MapAreaData mapData = mapArea.mapData;
 		
-		List<Point> points = new ArrayList<Point>(mapData.corners.length);
-		for (int i = 0; i < mapData.corners.length; i++) {
-			points.add(new Point(mapData.corners[i].lat, mapData.corners[i].lon));
-		}
-		path = new BoundingPath(points);
-		bounds = path.getBoundingBox();
+		bounds = mapData.getBounds();
 	}
 	
 	/**

@@ -25,6 +25,20 @@ public class TourTagItem implements Parcelable {
 		this.path = path;
 	}
 	
+	/**
+	 * Retrieves the ids from an array of tags
+	 * 
+	 * @param tags The tags
+	 * @return The ids from the tags
+	 */
+	public static long[] getIds(TourTagItem[] tags) {
+		long[] res = new long[tags.length];
+		for (int i = 0; i < res.length; i++) {
+			res[i] = tags[i].tag.id;
+		}
+		return res;
+	}
+	
 	public boolean equals(TourTagItem o) {
 		return o.tag.equals(tag) &&
 				o.path.equals(path);

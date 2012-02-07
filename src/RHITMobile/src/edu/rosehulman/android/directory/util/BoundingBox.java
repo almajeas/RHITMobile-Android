@@ -58,6 +58,21 @@ public class BoundingBox implements BoundingArea {
 	}
 	
 	/**
+	 * Computes the union of this bounding box and another
+	 * 
+	 * @param other The other bounding box
+	 * @return A new BoundingBox containing the union of the two regions
+	 */
+	public BoundingBox union(BoundingBox other) {
+		int left = Math.min(this.left, other.left);
+		int right = Math.max(this.right, other.right);
+		int bottom = Math.min(this.bottom, other.bottom);
+		int top = Math.max(this.top, other.top);
+		
+		return new BoundingBox(left, right, top, bottom);
+	}
+	
+	/**
 	 * Determine if this instance is equal to a BoundingBox
 	 *  
 	 * @param o The BoundingBox to compare to

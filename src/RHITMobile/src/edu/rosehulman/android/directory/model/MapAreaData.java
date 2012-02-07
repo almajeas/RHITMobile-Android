@@ -1,8 +1,15 @@
 package edu.rosehulman.android.directory.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import edu.rosehulman.android.directory.util.BoundingBox;
+import edu.rosehulman.android.directory.util.BoundingPath;
+import edu.rosehulman.android.directory.util.Point;
 
 public class MapAreaData {
 
@@ -23,6 +30,20 @@ public class MapAreaData {
 	 */
 	public boolean hasCorners() {
 		return corners != null;
+	}
+	
+	/**
+	 * Computes the bounding box around this map area
+	 * 
+	 * @return The BoundingBox that encapsulates all corner points
+	 */
+	public BoundingBox getBounds() {
+		List<Point> points = new ArrayList<Point>(corners.length);
+		for (LatLon corner : corners) {
+			points.add(new Point(corner.lat, corner.lon));
+		}
+		BoundingPath path = new BoundingPath(points);
+		return path.getBoundingBox();
 	}
 	
 

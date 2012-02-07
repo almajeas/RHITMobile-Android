@@ -195,7 +195,7 @@ public class CampusToursTagListActivity extends Activity {
     		startActivity(newIntent);
     	} else {
     		//off campus tour
-    		Intent newIntent = CampusToursOffCampusActivity.createIntent(this, tagIds);
+    		Intent newIntent = CampusMapActivity.createTourIntent(this, tagIds);
     		startActivity(newIntent);
     	}
     	

@@ -204,7 +204,7 @@ public class CampusToursStartupActivity extends Activity {
     	if (rdoGeneral.isChecked()) {
     		//general tours
        		if (rdoOffCampus.isChecked()) {
-    			Intent intent = CampusToursOffCampusActivity.createIntent(this, defaultTags);
+    			Intent intent = CampusMapActivity.createTourIntent(this, TourTagItem.getIds(defaultTags));
     			startActivity(intent);
     		} else {
 	    		Intent intent = CampusToursTagListActivity.createIntent(this, startLocation.id, defaultTags);

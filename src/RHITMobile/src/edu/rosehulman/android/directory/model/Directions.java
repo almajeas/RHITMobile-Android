@@ -50,16 +50,16 @@ public class Directions implements Parcelable {
 			return null;
 		
 		LatLon pos = paths[0].coord;
-		int left = pos.lon;
-		int right = pos.lon;
-		int bottom = pos.lat;
-		int top = pos.lat;
+		int left = pos.lat;
+		int right = pos.lat;
+		int bottom = pos.lon;
+		int top = pos.lon;
 		
 		for (DirectionPath path : paths) {
-			left = Math.min(left, path.coord.lon);
-			right = Math.max(right, path.coord.lon);
-			bottom = Math.min(bottom, path.coord.lat);
-			top = Math.max(top, path.coord.lat);
+			left = Math.min(left, path.coord.lat);
+			right = Math.max(right, path.coord.lat);
+			bottom = Math.min(bottom, path.coord.lon);
+			top = Math.max(top, path.coord.lon);
 			
 		}
 		return new BoundingBox(left, right, top, bottom);

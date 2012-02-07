@@ -167,6 +167,9 @@ public class LocationAdapter extends TableAdapter {
 	 * @param includeCorners True if corners should be loaded as well
 	 */
 	public void loadMapArea(Location area, boolean includeCorners) {
+		if (area.mapAreaId == -1)
+			return;
+		
 		area.mapData = areasAdapter.loadMapArea(area.mapAreaId, includeCorners);
 	}
 	
