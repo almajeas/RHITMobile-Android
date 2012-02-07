@@ -129,7 +129,7 @@ public class TourTagsAdapter extends TableAdapter {
 	 * @param id The tag id of the link to load
 	 * @return The TourTag
 	 */
-	public TourTag getTag(Long id) {
+	public TourTag getTag(long id) {
 		String projection[] = {KEY_NAME, KEY_TAG_ID, KEY_IS_DEFAULT};
 		String args[] = {String.valueOf(id)};
 		Cursor cursor;
@@ -148,6 +148,45 @@ public class TourTagsAdapter extends TableAdapter {
 		TourTag res = new TourTag(tagId, name);
 		res.isDefault = isDefault;
 		return res;
+	}
+	
+	/**
+	 * Computes the path to the given tag node
+	 * 
+	 * @param id The id of a tag
+	 * @return The path to get to that tag
+	 */
+	public String getPath(long id) {
+		Cursor cursor;
+		long pre;
+		long post;
+		{		
+			String projection[] = {KEY_PRE, KEY_POST};
+			String args[] = {String.valueOf(id)};
+			String where = KEY_ID + "=?";
+			cursor = db.query(TABLE_NAME, projection, where, args, null, null, null);
+			
+			if (cursor.getCount() != 1)
+				return null;
+			
+			cursor.moveToFirst();
+			pre = cursor.getLong(cursor.getColumnIndex(KEY_PRE));
+			post = cursor.getLong(cursor.getColumnIndex(KEY_POST));
+			cursor.close();
+		}
+		
+		String projection[] = {"group_concat(Name, '/')"};
+		String args[] = {String.valueOf(pre), String.valueOf(post)};
+		String where = "Pre<? AND Post>? AND Pre>1";
+		cursor = db.query(TABLE_NAME, projection, where, args, null, null, null);
+		
+		if (cursor.getCount() != 1)
+			return null;
+		cursor.moveToFirst();
+		String path = cursor.getString(0);
+		cursor.close();
+		
+		return path;
 	}
 	
 	/**

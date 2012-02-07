@@ -235,16 +235,16 @@ public class CampusToursStartupActivity extends Activity {
 			TourTagsAdapter tagsAdapter = new TourTagsAdapter();
 			tagsAdapter.open();
 			List<TourTag> tagList = tagsAdapter.getDefaultTags().toList();
-			tagsAdapter.close();
 			
 			TourTag[] tags = new TourTag[tagList.size()];
 			tagList.toArray(tags);
 
 			TourTagItem[] res = new TourTagItem[tags.length];
 			for (int i = 0; i < res.length; i++) {
-				//TODO compute path
-				res[i] = new TourTagItem(tags[i], "");
+				String path = tagsAdapter.getPath(tags[i].id);
+				res[i] = new TourTagItem(tags[i], path);
 			}
+			tagsAdapter.close();
 			
 			return res;
 		}
