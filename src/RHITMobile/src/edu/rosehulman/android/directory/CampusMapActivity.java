@@ -77,7 +77,7 @@ public class CampusMapActivity extends MapActivity {
 	public static final String EXTRA_TOUR_TAGS = "TOUR_TAGS";
 	public static final String EXTRA_DIRECTIONS_FOCUS_INDEX = "DIRECTIONS_FOCUS_INDEX";
 	
-	private static final int MIN_ZOOM_LEVEL = 16;
+	private static final int MIN_ZOOM_LEVEL = 17;
 	private static final int MAX_ZOOM_LEVEL = 22;
 
 	public static Intent createIntent(Context context) {
@@ -222,7 +222,7 @@ public class CampusMapActivity extends MapActivity {
 	        MapController controller = mapView.getController();
 	        GeoPoint center = new GeoPoint(39483760, -87325929);
 	        controller.setCenter(center);
-	        controller.zoomToSpan(5000, 10000);
+	        controller.setZoom(MIN_ZOOM_LEVEL+1);
 	        
 	    } else {
 	    	this.savedInstanceState = savedInstanceState;

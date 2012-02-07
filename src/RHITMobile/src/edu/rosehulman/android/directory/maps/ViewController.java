@@ -86,18 +86,18 @@ public class ViewController {
 		
 		GeoPoint destPoint = new GeoPoint(center.getLatitudeE6() - dLat, center.getLongitudeE6() - dLon);
 		
-		final int currentZoomLevel = mapView.getZoomLevel();
-		final Point p = pt;
+		//final int currentZoomLevel = mapView.getZoomLevel();
+		//final Point p = pt;
 		
 		if (animate) {
 			controller.animateTo(destPoint, new Runnable() {
 				@Override
 				public void run() {
-					if (currentZoomLevel < zoomLevel - 1) {
-						controller.zoomInFixing(p.x, p.y);
-					} else if (currentZoomLevel > zoomLevel) {
-						controller.zoomOutFixing(p.x, p.y);
-					}
+//					if (currentZoomLevel < zoomLevel - 1) {
+//						controller.zoomInFixing(p.x, p.y);
+//					} else if (currentZoomLevel > zoomLevel) {
+//						controller.zoomOutFixing(p.x, p.y);
+//					}
 				}
 			});	
 		} else {
