@@ -23,6 +23,7 @@ import edu.rosehulman.android.directory.db.LocationAdapter;
 import edu.rosehulman.android.directory.db.TourTagsAdapter;
 import edu.rosehulman.android.directory.model.Location;
 import edu.rosehulman.android.directory.model.TourTag;
+import edu.rosehulman.android.directory.model.TourTagItem;
 
 public class CampusToursStartupActivity extends Activity {
 	
@@ -42,7 +43,7 @@ public class CampusToursStartupActivity extends Activity {
 	private RadioButton rdoCustom;
 	
 	private TaskManager taskManager = new TaskManager();
-	private TourTag[] defaultTags;
+	private TourTagItem[] defaultTags;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -227,22 +228,29 @@ public class CampusToursStartupActivity extends Activity {
     			defaultTags != null));
     }
     
-    private class LoadDefaultTags extends AsyncTask<Void, Void, TourTag[]> {
+    private class LoadDefaultTags extends AsyncTask<Void, Void, TourTagItem[]> {
 
 		@Override
-		protected TourTag[] doInBackground(Void... args) {
+		protected TourTagItem[] doInBackground(Void... args) {
 			TourTagsAdapter tagsAdapter = new TourTagsAdapter();
 			tagsAdapter.open();
-			List<TourTag> tags = tagsAdapter.getDefaultTags().toList();
+			List<TourTag> tagList = tagsAdapter.getDefaultTags().toList();
 			tagsAdapter.close();
 			
-			TourTag[] res = new TourTag[tags.size()];
-			tags.toArray(res);
+			TourTag[] tags = new TourTag[tagList.size()];
+			tagList.toArray(tags);
+
+			TourTagItem[] res = new TourTagItem[tags.length];
+			for (int i = 0; i < res.length; i++) {
+				//TODO compute path
+				res[i] = new TourTagItem(tags[i], "");
+			}
+			
 			return res;
 		}
 		
 		@Override
-		protected void onPostExecute(TourTag[] res) {
+		protected void onPostExecute(TourTagItem[] res) {
 			defaultTags = res;
 			enableButton();
 		}

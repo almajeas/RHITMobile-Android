@@ -18,7 +18,7 @@ import edu.rosehulman.android.directory.LoadLocation.OnLocationLoadedListener;
 import edu.rosehulman.android.directory.db.LocationAdapter;
 import edu.rosehulman.android.directory.model.Location;
 import edu.rosehulman.android.directory.model.LocationIdsResponse;
-import edu.rosehulman.android.directory.model.TourTag;
+import edu.rosehulman.android.directory.model.TourTagItem;
 import edu.rosehulman.android.directory.service.MobileDirectoryService;
 
 public class CampusToursOffCampusActivity extends ListActivity {
@@ -34,10 +34,10 @@ public class CampusToursOffCampusActivity extends ListActivity {
 		return intent;
 	}
 	
-	public static Intent createIntent(Context context, TourTag[] tags) {
+	public static Intent createIntent(Context context, TourTagItem[] tags) {
 		long[] ids = new long[tags.length];
 		for (int i = 0; i < tags.length; i++) {
-			ids[i] = tags[i].id;
+			ids[i] = tags[i].tag.id;
 		}
 		return createIntent(context, ids);
 	}

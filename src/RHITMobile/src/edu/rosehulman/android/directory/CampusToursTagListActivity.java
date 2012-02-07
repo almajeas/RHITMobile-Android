@@ -21,6 +21,7 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import edu.rosehulman.android.directory.db.TourTagsAdapter;
+import edu.rosehulman.android.directory.model.TourTagItem;
 import edu.rosehulman.android.directory.model.TourTag;
 
 public class CampusToursTagListActivity extends Activity {
@@ -32,7 +33,7 @@ public class CampusToursTagListActivity extends Activity {
 	public static String EXTRA_TAG = "TAG";
 	public static String EXTRA_TAG_PATH = "TAG_PATH";
 	
-	public static Intent createIntent(Context context, TourTag[] tags) {
+	public static Intent createIntent(Context context, TourTagItem[] tags) {
 		Intent intent = new Intent(context, CampusToursTagListActivity.class);
 		if (tags != null) {
 			intent.putExtra(EXTRA_INITIAL_TAGS, tags);
@@ -40,7 +41,7 @@ public class CampusToursTagListActivity extends Activity {
 		return intent;
 	}
 	
-	public static Intent createIntent(Context context, long startLocation, TourTag[] tags) {
+	public static Intent createIntent(Context context, long startLocation, TourTagItem[] tags) {
 		Intent intent = new Intent(context, CampusToursTagListActivity.class);
 		intent.putExtra(EXTRA_START_LOCATION, startLocation);
 		if (tags != null) {
@@ -60,7 +61,7 @@ public class CampusToursTagListActivity extends Activity {
 	
 	private ListView tags;
 	
-	private List<TagItem> tagItems = new ArrayList<TagItem>();
+	private List<TourTagItem> tagItems = new ArrayList<TourTagItem>();
 	
 	private TagsAdapter adapter = new TagsAdapter();
 	
@@ -88,13 +89,19 @@ public class CampusToursTagListActivity extends Activity {
 				btnTour_clicked();
 			}
 		});
-		
+
 		Intent intent = getIntent();
-		if (intent.hasExtra(EXTRA_INITIAL_TAGS)) {
-			for (Parcelable p : intent.getParcelableArrayExtra(EXTRA_INITIAL_TAGS)) {
-				TourTag tag = (TourTag)p;
-				//TODO compute path
-				tagItems.add(new TagItem(tag, ""));
+		if (savedInstanceState == null) {
+			if (intent.hasExtra(EXTRA_INITIAL_TAGS)) {
+				for (Parcelable p : intent.getParcelableArrayExtra(EXTRA_INITIAL_TAGS)) {
+					TourTagItem tag = (TourTagItem)p;
+					tagItems.add(tag);
+				}
+			}	
+		} else {
+			for (Parcelable p : savedInstanceState.getParcelableArray(EXTRA_INITIAL_TAGS)) {
+				TourTagItem tag = (TourTagItem)p;
+				tagItems.add(tag);
 			}
 		}
 		
@@ -110,6 +117,12 @@ public class CampusToursTagListActivity extends Activity {
 	public void onPause() {
 		super.onPause();
 		taskManager.abortTasks();
+	}
+	
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		TourTagItem[] items = tagItems.toArray(new TourTagItem[tagItems.size()]);
+		outState.putParcelableArray(EXTRA_INITIAL_TAGS, items);
 	}
 	
     @Override
@@ -145,7 +158,7 @@ public class CampusToursTagListActivity extends Activity {
 			return;
 		
 		TourTag tag = data.getParcelableExtra(EXTRA_TAG);
-		TagItem item = new TagItem(tag, data.getStringExtra(EXTRA_TAG_PATH));
+		TourTagItem item = new TourTagItem(tag, data.getStringExtra(EXTRA_TAG_PATH));
 		if (!tagItems.contains(item))
 			tagItems.add(item);
 		updateUI();
@@ -189,29 +202,7 @@ public class CampusToursTagListActivity extends Activity {
     	//TODO implement
     }
     
-    private class TagItem {
-    	
-    	public TourTag tag;
-    	public String path;
-    	
-		public TagItem(TourTag tag, String path) {
-			this.tag = tag;
-			this.path = path;
-		}
-		
-		public boolean equals(TagItem o) {
-			return o.tag.equals(tag) &&
-					o.path.equals(path);
-		}
-		
-		@Override
-		public boolean equals(Object o) {
-			if (o instanceof TagItem)
-				return equals((TagItem)o);
-			return false;
-		}
-    }
-
+    
     private class TagsAdapter extends BaseAdapter {
 
 		@Override
@@ -239,7 +230,7 @@ public class CampusToursTagListActivity extends Activity {
 			TextView name = (TextView)v.findViewById(R.id.name);
 			TextView path = (TextView)v.findViewById(R.id.path);
 			
-			TagItem item = tagItems.get(index);
+			TourTagItem item = tagItems.get(index);
 			
 			name.setText(item.tag.name);
 			path.setText(item.path);
