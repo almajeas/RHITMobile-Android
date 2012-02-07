@@ -52,7 +52,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="On Campus (outside)" />
-        
+
         <RadioButton
             android:id="@+id/rdoOffCampus"
             android:layout_width="wrap_content"
@@ -90,6 +90,7 @@
             android:id="@+id/rdoGeneral"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:checked="true"
             android:text="General" />
 
         <RadioButton
