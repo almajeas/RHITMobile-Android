@@ -18,11 +18,10 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.ListView;
 import android.widget.TextView;
 import edu.rosehulman.android.directory.db.TourTagsAdapter;
-import edu.rosehulman.android.directory.model.TourTagItem;
 import edu.rosehulman.android.directory.model.TourTag;
+import edu.rosehulman.android.directory.model.TourTagItem;
 
 public class CampusToursTagListActivity extends Activity {
 	
@@ -59,7 +58,7 @@ public class CampusToursTagListActivity extends Activity {
 	
 	private TaskManager taskManager = new TaskManager();
 	
-	private ListView tags;
+	private TouchListView tags;
 	
 	private List<TourTagItem> tagItems = new ArrayList<TourTagItem>();
 	
@@ -72,7 +71,7 @@ public class CampusToursTagListActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.tour_tag_list);
 		
-		tags = (ListView)findViewById(R.id.tags);
+		tags = (TouchListView)findViewById(R.id.tags);
 		
 		btnTour = (Button)findViewById(R.id.btnTour);
 		
@@ -106,6 +105,9 @@ public class CampusToursTagListActivity extends Activity {
 		}
 		
 		tags.setAdapter(adapter);
+		tags.setDropListener(adapter);
+		tags.setRemoveListener(adapter);
+		
 		updateUI();
 	}
 	
@@ -198,12 +200,10 @@ public class CampusToursTagListActivity extends Activity {
     		Intent newIntent = CampusMapActivity.createTourIntent(this, tagIds);
     		startActivity(newIntent);
     	}
-    	
-    	//TODO implement
     }
     
     
-    private class TagsAdapter extends BaseAdapter {
+    private class TagsAdapter extends BaseAdapter implements TouchListView.DropListener, TouchListView.RemoveListener {
 
 		@Override
 		public int getCount() {
@@ -237,6 +237,17 @@ public class CampusToursTagListActivity extends Activity {
 			
 			return v;
 		}
+
+		@Override
+		public void remove(int which) {
+			tagItems.remove(which);
+		}
+
+		@Override
+		public void drop(int from, int to) {
+			tagItems.add(to, tagItems.remove(from));
+			tags.invalidateViews();
+		}
     	
     }
 	
@@ -258,5 +269,5 @@ public class CampusToursTagListActivity extends Activity {
 	    	startActivityForResult(intent, REQUEST_TAG);
 		}
     }
-
+    
 }
