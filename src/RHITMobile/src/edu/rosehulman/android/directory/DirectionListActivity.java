@@ -67,16 +67,18 @@ public class DirectionListActivity extends Activity {
 
         int iLoc = 0;
         int step = 0;
-        for (DirectionPath path : directions.paths) {
+        for (int i = 0; i < directions.paths.length; i++) {
+        	DirectionPath path = directions.paths[i];
+        	DirectionPath next = (i < directions.paths.length-1) ? directions.paths[i+1] : null;
 			if (path.flag) {
 				listItems.add(new GoalListItem(step, locations[iLoc].name, locations[iLoc]));
 				iLoc++;
 				if (path.hasDirection()) {
-					listItems.add(new StepListItem(step, path));
+					listItems.add(new StepListItem(step, path, next));
 					step++;
 				}
 			} else if (path.hasDirection()) {
-				listItems.add(new StepListItem(step, path));
+				listItems.add(new StepListItem(step, path, next));
 				step++;
 			}
 		}
@@ -135,10 +137,12 @@ public class DirectionListActivity extends Activity {
 	private class StepListItem extends ListItem {
 		
 		private DirectionPath path;
+		private DirectionPath next;
 		
-		public StepListItem(int step, DirectionPath path) {
+		public StepListItem(int step, DirectionPath path, DirectionPath next) {
 			super(step);
 			this.path = path;
+			this.next = next;
 		}
 
 		@Override
@@ -190,9 +194,18 @@ public class DirectionListActivity extends Activity {
 			default:
 				icon = R.drawable.turn_unknown;
 			}
+			
+			String distance;
+			if (next == null) {
+				distance = "";
+			} else {
+				double dist = path.distanceTo(next);
+				distance = String.format("%.0f ft", dist);
+			}
+			
 			((ImageView)v.findViewById(R.id.icon)).setImageDrawable(getResources().getDrawable(icon));
 			((TextView)v.findViewById(R.id.text)).setText(path.dir);
-			((TextView)v.findViewById(R.id.distance)).setText("100 ft");
+			((TextView)v.findViewById(R.id.distance)).setText(distance);
 			
 			return v;
 		}

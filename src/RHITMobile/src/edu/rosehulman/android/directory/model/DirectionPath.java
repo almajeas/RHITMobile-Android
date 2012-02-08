@@ -34,6 +34,31 @@ public class DirectionPath implements Parcelable {
 		return dir != null;
 	}
 
+	/**
+	 * Computes the distance from this path node to the next
+	 * 
+	 * @param next The next path node
+	 * @return The approximate distance to that node, in feet
+	 */
+	public double distanceTo(DirectionPath next) {
+		double R = 20902231; //radius of earth (ft)
+		double dLat = toRad(next.coord.lat - coord.lat);
+		double dLon = toRad(next.coord.lon - coord.lon);
+		double lat1 = toRad(coord.lat);
+		double lat2 = toRad(next.coord.lat);
+		
+		double a = Math.sin(dLat/2.0) * Math.sin(dLat/2.0) +
+				Math.sin(dLon/2.0) * Math.sin(dLon/2.0) * Math.cos(lat1) * Math.cos(lat2);
+		double c = 2.0 * Math.atan2(Math.sqrt(a), Math.sqrt(1.0-a));
+		double d = R * c;
+		
+		return d;
+	}
+	
+	private double toRad(int degrees) {
+		return ((degrees/(double)1E6) / 180.0) * Math.PI;
+	}
+	
 	public static DirectionPath deserialize(JSONObject root) throws JSONException {
 		DirectionPath res = new DirectionPath();
 		if (!root.isNull("Action"))

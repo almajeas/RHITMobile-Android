@@ -2,16 +2,16 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-	android:padding="5dp" >
+    android:padding="5dp" >
 
     <ImageView
         android:id="@+id/icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft ="true"
+        android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
         android:paddingRight="15dp" />
-    
+
     <TextView
         android:id="@+id/text"
         android:layout_width="wrap_content"
@@ -24,8 +24,9 @@
         android:id="@+id/distance"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@id/text"
+        android:layout_alignParentRight="true"
         android:layout_below="@+id/text"
+        android:paddingRight="10dp"
         android:text="xxx ft"
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
