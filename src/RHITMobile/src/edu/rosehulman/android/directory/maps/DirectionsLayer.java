@@ -1,19 +1,14 @@
 package edu.rosehulman.android.directory.maps;
 
-import java.io.InputStream;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Paint.Cap;
 import android.graphics.Paint.Join;
 import android.graphics.Paint.Style;
 import android.graphics.Point;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 
 import com.google.android.maps.GeoPoint;
@@ -226,20 +221,20 @@ public class DirectionsLayer extends BalloonItemizedOverlay<OverlayItem> impleme
 	private enum DirectionsBitmap {
 		START,
 		END,
-		NODE,
-		SHADOW
+		NODE
 	}
 	
-	private static Bitmap directionsBitmap;
 	private static Drawable getDirectionsDrawable(Resources resources, DirectionsBitmap type) {
-		if (directionsBitmap == null) { 
-			InputStream fin = resources.openRawResource(R.drawable.directions_map_pins);
-			directionsBitmap = BitmapFactory.decodeStream(fin);
+		switch (type) {
+		case START:
+			return resources.getDrawable(R.drawable.directions_depart);
+		case END:
+			return resources.getDrawable(R.drawable.directions_arrive);
+		case NODE:
+			return resources.getDrawable(R.drawable.directions_waypoint);
 		}
 		
-		int x = type.ordinal() * 34;
-		return new BitmapDrawable(resources, Bitmap.createBitmap(directionsBitmap,
-				x, 0, 34, 61));
+		return resources.getDrawable(R.drawable.directions_waypoint);
 	}
 	
 }
