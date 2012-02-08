@@ -71,7 +71,7 @@ public class DirectionListActivity extends Activity {
 			if (path.flag) {
 				listItems.add(new GoalListItem(step, locations[iLoc].name, locations[iLoc]));
 				iLoc++;
-				if (path.hasDirection()) { 
+				if (path.hasDirection()) {
 					listItems.add(new StepListItem(step, path));
 					step++;
 				}
@@ -80,6 +80,8 @@ public class DirectionListActivity extends Activity {
 				step++;
 			}
 		}
+        //remove the last direction ("Arrive at destination")
+        listItems.remove(listItems.size()-1);
         
         directionList.setAdapter(listAdapter);
         directionList.setOnItemClickListener(new OnItemClickListener() {
