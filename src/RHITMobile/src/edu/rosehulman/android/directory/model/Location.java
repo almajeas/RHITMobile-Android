@@ -32,6 +32,9 @@ public class Location implements Parcelable {
 	/** Relevant links associated with this location */
 	public Hyperlink[] links;
 	
+	/** Can this location be departed from */
+	public boolean isDepartable;
+	
 	/** The type of this location */
 	public LocationType type;
 	
@@ -90,6 +93,7 @@ public class Location implements Parcelable {
 			res.links[i] = Hyperlink.deserialize(links.getJSONObject(i));
 		}
 		
+		res.isDepartable = root.getBoolean("IsDepartable");
 		res.type = typeMap.get(root.getString("Type"));
 		
 		if (!root.isNull("MapArea")) {
@@ -126,6 +130,7 @@ public class Location implements Parcelable {
 		dest.writeString(description);
 		dest.writeInt(center.lat);
 		dest.writeInt(center.lon);
+		dest.writeInt(isDepartable ? 1 : 0);
 		dest.writeInt(type.ordinal());
 		
 		dest.writeStringArray(altNames);
@@ -145,6 +150,7 @@ public class Location implements Parcelable {
 			res.name = in.readString();
 			res.description = in.readString();
 			res.center = new LatLon(in.readInt(), in.readInt());
+			res.isDepartable = in.readInt() != 0;
 			res.type = LocationType.fromOrdinal(in.readInt());
 			
 			res.altNames = in.createStringArray();
