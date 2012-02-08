@@ -207,7 +207,7 @@ public class CampusToursStartupActivity extends Activity {
     			Intent intent = CampusMapActivity.createTourIntent(this, TourTagItem.getIds(defaultTags));
     			startActivity(intent);
     		} else {
-	    		Intent intent = CampusToursTagListActivity.createIntent(this, startLocation.id, defaultTags);
+	    		Intent intent = CampusMapActivity.createTourIntent(this, startLocation.id, TourTagItem.getIds(defaultTags));
 	    		startActivity(intent);
     		}
     	} else {
