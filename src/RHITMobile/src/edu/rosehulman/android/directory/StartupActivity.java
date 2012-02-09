@@ -209,7 +209,7 @@ public class StartupActivity extends Activity {
 		
 		tasks.add(
 			new Task("Campus Map",
-				android.R.drawable.ic_menu_mapmode,
+				R.drawable.homescreen_map,
 				new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -220,7 +220,7 @@ public class StartupActivity extends Activity {
 		if (loggedIn) {
 			tasks.add(
 				new Task("Directory",
-					android.R.drawable.ic_menu_send,
+					R.drawable.homescreen_directory,
 					new OnClickListener() {
 				@Override
 				public void onClick(View v) {
@@ -231,7 +231,7 @@ public class StartupActivity extends Activity {
 		
 		tasks.add(
 			new Task("Campus Services",
-				android.R.drawable.ic_menu_slideshow,
+				R.drawable.homescreen_campus_services,
 				new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -241,7 +241,7 @@ public class StartupActivity extends Activity {
 		
 		tasks.add(
 			new Task("Tours",
-				android.R.drawable.ic_menu_directions,
+				R.drawable.homescreen_tours,
 				new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -252,7 +252,7 @@ public class StartupActivity extends Activity {
 		if (loggedIn) {
 			tasks.add(
 				new Task("My Schedule",
-					android.R.drawable.ic_menu_my_calendar,
+					R.drawable.homescreen_schedule,
 					new OnClickListener() {
 				@Override
 				public void onClick(View v) {
@@ -265,7 +265,7 @@ public class StartupActivity extends Activity {
 		if (!loggedIn) {
 			tasks.add(
 				new Task("Login",
-					R.drawable.ic_menu_login,
+					R.drawable.homescreen_login,
 					new OnClickListener() {
 				@Override
 				public void onClick(View v) {
@@ -279,7 +279,7 @@ public class StartupActivity extends Activity {
         	//Add the beta channel
 			tasks.add(
 				new Task("Beta",
-        			android.R.drawable.ic_menu_manage,
+        			R.drawable.homescreen_beta,
         			new OnClickListener() {
 						@Override
 						public void onClick(View v) {
