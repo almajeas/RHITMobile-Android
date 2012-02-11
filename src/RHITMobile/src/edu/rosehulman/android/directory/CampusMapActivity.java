@@ -571,7 +571,6 @@ public class CampusMapActivity extends MapActivity {
     	overlays.clear();
     	
     	overlays.add(eventLayer);
-    	overlays.add(myLocation);
     	
     	if (buildingLayer != null) {
     		overlays.add(buildingLayer);
@@ -601,6 +600,8 @@ public class CampusMapActivity extends MapActivity {
     		overlays.add(offsiteTourLayer);
     		overlayManager.addOverlay(offsiteTourLayer);
     	}
+
+    	overlays.add(myLocation);
     	
     	//Remove any old overlays
     	overlayManager.prune(overlays);
