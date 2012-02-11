@@ -36,7 +36,11 @@ public class TaskManager {
 	 */
 	public void abortTasks() {
 		for (AsyncTask task : tasks) {
-			task.cancel(false);
+			task.cancel(true);
+
+			if (task instanceof BackgroundTask) {
+				((BackgroundTask)task).abort();
+			}
 		}
 		tasks.clear();
 	}

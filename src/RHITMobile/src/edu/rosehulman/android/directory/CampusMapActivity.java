@@ -66,7 +66,10 @@ import edu.rosehulman.android.directory.util.Point;
  */
 public class CampusMapActivity extends MapActivity {
 	
-    private static final String SELECTED_ID = "SelectedId";
+    private static final String STATE_SELECTED_ID = "SelectedId";
+    private static final String STATE_SELECTED_STEP = "SelectedStep";
+    private static final String STATE_LOCATIONS = "Locations";
+    private static final String STATE_DIRECTIONS = "Directions";
     
     public static final String ACTION_DIRECTIONS = "edu.rosehulman.android.directory.intent.action.DIRECTIONS";
     public static final String ACTION_TOUR = "edu.rosehulman.android.directory.intent.action.TOUR";
@@ -175,47 +178,9 @@ public class CampusMapActivity extends MapActivity {
         overlayManager = new OverlayManager();
         myLocation = new MyLocationOverlay(this, mapView);
         eventLayer = new EventOverlay();
-
-        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-			searchQuery = intent.getStringExtra(SearchManager.QUERY);
-			SearchLocations task = new SearchLocations();
-			taskManager.addTask(task);
-			task.execute(searchQuery);
-			setTitle("Search: " + searchQuery);
-		
-    	}
         
+        //basic initialization
         if (savedInstanceState == null) {
-        	
-        	 if (ACTION_DIRECTIONS.equals(intent.getAction())) {
-        		long[] ids = intent.getLongArrayExtra(EXTRA_WAYPOINTS);
-
-    			LoadDirections task = new LoadDirections(ids);
-    			taskManager.addTask(task);
-    			task.execute();
-    			
-    			btnListDirections.setVisibility(View.VISIBLE);
-    			btnPrev.setVisibility(View.VISIBLE);
-    			btnNext.setVisibility(View.VISIBLE);
-    		} else if (ACTION_TOUR.equals(intent.getAction())) {
-    			long startId = intent.getLongExtra(EXTRA_TOUR_START_ID, -1);
-    			long[] tagIds = intent.getLongArrayExtra(EXTRA_TOUR_TAGS);
-    			
-    			if (startId == -1) {
-    				LoadOffsiteTour task = new LoadOffsiteTour(tagIds);
-	    			taskManager.addTask(task);
-	    			task.execute();
-    			} else {
-	    			LoadTour task = new LoadTour(startId, tagIds);
-	    			taskManager.addTask(task);
-	    			task.execute();
-    			}
-    			
-    			btnListDirections.setVisibility(View.VISIBLE);
-    			btnPrev.setVisibility(View.VISIBLE);
-    			btnNext.setVisibility(View.VISIBLE);
-    		}
-
 	        mapView.setSatellite(true);
 	        
 	        //center the map
@@ -226,21 +191,81 @@ public class CampusMapActivity extends MapActivity {
 	        
 	    } else {
 	    	this.savedInstanceState = savedInstanceState;
-	    	
-	    	//restore state
-			if (ACTION_DIRECTIONS.equals(intent.getAction())) {
-				Directions directions = savedInstanceState.getParcelable("Directions");
-				Location[] locations = (Location[])savedInstanceState.getParcelableArray("Locations");
+	    }
+        mapView.setBuiltInZoomControls(true);
+
+        //intent specific initialization
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+			searchQuery = intent.getStringExtra(SearchManager.QUERY);
+			SearchLocations task = new SearchLocations();
+			taskManager.addTask(task);
+			task.execute(searchQuery);
+			setTitle("Search: " + searchQuery);
+		
+    	} else if (ACTION_DIRECTIONS.equals(intent.getAction())) {
+        	if (savedInstanceState != null && 
+        			savedInstanceState.containsKey(STATE_DIRECTIONS) &&
+        			savedInstanceState.containsKey(STATE_LOCATIONS)) {
+				Directions directions = savedInstanceState.getParcelable(STATE_DIRECTIONS);
+				Location[] locations = (Location[])savedInstanceState.getParcelableArray(STATE_LOCATIONS);
 				
 				generateDirectionsLayer(directions, locations);
+				if (savedInstanceState.containsKey(STATE_SELECTED_STEP)) {
+					directionsLayer.focus(savedInstanceState.getInt(STATE_SELECTED_STEP, -1), false);
+				}
+        	} else {
+	    		long[] ids = intent.getLongArrayExtra(EXTRA_WAYPOINTS);
+	
+				LoadDirections task = new LoadDirections(ids);
+				taskManager.addTask(task);
+				task.execute();
+        	}
+			btnListDirections.setVisibility(View.VISIBLE);
+			btnPrev.setVisibility(View.VISIBLE);
+			btnNext.setVisibility(View.VISIBLE);
+			
+		} else if (ACTION_TOUR.equals(intent.getAction())) {
+			long startId = intent.getLongExtra(EXTRA_TOUR_START_ID, -1);
+			
+			if (savedInstanceState != null && 
+        			savedInstanceState.containsKey(STATE_DIRECTIONS) &&
+        			savedInstanceState.containsKey(STATE_LOCATIONS) &&
+        			startId >= 0) {
+				//restore on-campus tour
+				Directions directions = savedInstanceState.getParcelable(STATE_DIRECTIONS);
+				Location[] locations = (Location[])savedInstanceState.getParcelableArray(STATE_LOCATIONS);
 				
-				btnListDirections.setVisibility(View.VISIBLE);
-				btnPrev.setVisibility(View.VISIBLE);
-				btnNext.setVisibility(View.VISIBLE);
-			}
-	    }
-
-        mapView.setBuiltInZoomControls(true);
+				generateDirectionsLayer(directions, locations);
+				if (savedInstanceState.containsKey(STATE_SELECTED_STEP)) {
+					directionsLayer.focus(savedInstanceState.getInt(STATE_SELECTED_STEP, -1), false);
+				}
+			} else if (savedInstanceState != null && 
+        			savedInstanceState.containsKey(STATE_LOCATIONS) &&
+        			startId == -1) {
+				//restore off-campus tour
+				Location[] locations = (Location[])savedInstanceState.getParcelableArray(STATE_LOCATIONS);
+				
+				generateOffsiteTourLayer(locations);
+				if (savedInstanceState.containsKey(STATE_SELECTED_STEP)) {
+					offsiteTourLayer.focus(savedInstanceState.getInt(STATE_SELECTED_STEP, -1), false);
+				}
+        	} else {
+				long[] tagIds = intent.getLongArrayExtra(EXTRA_TOUR_TAGS);
+				
+				if (startId == -1) {
+					LoadOffsiteTour task = new LoadOffsiteTour(tagIds);
+	    			taskManager.addTask(task);
+	    			task.execute();
+				} else {
+	    			LoadTour task = new LoadTour(startId, tagIds);
+	    			taskManager.addTask(task);
+	    			task.execute();
+				}
+        	}
+			btnListDirections.setVisibility(View.VISIBLE);
+			btnPrev.setVisibility(View.VISIBLE);
+			btnNext.setVisibility(View.VISIBLE);
+		}
         
 		btnZoomIn.setOnClickListener(new OnClickListener() {
 			@Override
@@ -326,16 +351,18 @@ public class CampusMapActivity extends MapActivity {
     	super.onSaveInstanceState(bundle);
     	
     	if (buildingLayer != null) {
-    		bundle.putLong(SELECTED_ID, getFocusedLocation());
+    		bundle.putLong(STATE_SELECTED_ID, getFocusedLocation());
     	}
     	
     	if (directionsLayer != null) {
-    		bundle.putParcelable("Directions", directionsLayer.directions);
-    		bundle.putParcelableArray("Locations", directionsLayer.locations);
+    		bundle.putParcelable(STATE_DIRECTIONS, directionsLayer.directions);
+    		bundle.putParcelableArray(STATE_LOCATIONS, directionsLayer.locations);
+    		bundle.putInt(STATE_SELECTED_STEP, directionsLayer.getLastFocusedIndex());
 		}
     	
     	if (offsiteTourLayer != null) {
-    		bundle.putParcelableArray("Locations", offsiteTourLayer.locations);
+    		bundle.putParcelableArray(STATE_LOCATIONS, offsiteTourLayer.locations);
+    		bundle.putInt(STATE_SELECTED_STEP, offsiteTourLayer.getLastFocusedIndex());
 		}
     }
     
@@ -706,11 +733,7 @@ public class CampusMapActivity extends MapActivity {
 				CampusMapActivity.this.startActivityForResult(intent, requestCode);
 			}
 		});
-		
-		BoundingBox bounds = directionsLayer.bounds;
-		Point center = bounds.getCenter();
-		GeoPoint pt = new GeoPoint(center.x, center.y);
-		new ViewController(mapView).animateTo(pt, bounds.getHeight(), bounds.getWidth(), false);
+
 	}
 	
 	private void generateOffsiteTourLayer(Location[] locations) {
@@ -730,10 +753,6 @@ public class CampusMapActivity extends MapActivity {
 			}
 		});
 		
-		BoundingBox bounds = offsiteTourLayer.bounds;
-		Point center = bounds.getCenter();
-		GeoPoint pt = new GeoPoint(center.x, center.y);
-		new ViewController(mapView).animateTo(pt, bounds.getHeight(), bounds.getWidth(), false);
 	}
 	
 	private class LoadOverlays extends AsyncTask<Void, Void, Void> {
@@ -793,7 +812,7 @@ public class CampusMapActivity extends MapActivity {
 			
 			//set a selected location
 	    	if (savedInstanceState != null) {
-	    		focusLocation(savedInstanceState.getLong(SELECTED_ID), false);
+	    		focusLocation(savedInstanceState.getLong(STATE_SELECTED_ID), false);
 	    	} else if (intent.hasExtra(EXTRA_BUILDING_ID)) {
 	    		long id = intent.getLongExtra(EXTRA_BUILDING_ID, -1);
 	    		focusLocation(id, false);
@@ -1072,6 +1091,13 @@ private class LoadDirections extends ProcessDirections {
 			
 			if (nodes != null) {
 				generateOffsiteTourLayer(nodes);
+
+				//fit the bounds of the map to the tour
+				BoundingBox bounds = offsiteTourLayer.bounds;
+				Point center = bounds.getCenter();
+				GeoPoint pt = new GeoPoint(center.x, center.y);
+				new ViewController(mapView).animateTo(pt, bounds.getHeight(), bounds.getWidth(), false);
+				
 				rebuildOverlays();
 			} else {
 				finish();
@@ -1086,7 +1112,7 @@ private class LoadDirections extends ProcessDirections {
 		
 	}
 	
-	private abstract class ProcessDirections extends AsyncTask<Void, Integer, Directions> {
+	private abstract class ProcessDirections extends BackgroundTask<Void, Integer, Directions> {
 		
 		private ProgressDialog dialog;
 		
@@ -1180,10 +1206,22 @@ private class LoadDirections extends ProcessDirections {
 			
 			if (directions != null) {
 				generateDirectionsLayer(directions, nodes);
+				
+				//fit the bounds of the map to the directions
+				BoundingBox bounds = directionsLayer.bounds;
+				Point center = bounds.getCenter();
+				GeoPoint pt = new GeoPoint(center.x, center.y);
+				new ViewController(mapView).animateTo(pt, bounds.getHeight(), bounds.getWidth(), false);
+				
 				rebuildOverlays();
 			} else {
 				finish();
 			}
+		}
+		
+		@Override
+		protected void abort() {
+			dialog.dismiss();
 		}
 		
 		@Override
