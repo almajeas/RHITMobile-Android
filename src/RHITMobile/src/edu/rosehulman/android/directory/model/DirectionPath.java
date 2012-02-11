@@ -31,7 +31,7 @@ public class DirectionPath implements Parcelable {
 	 * @return True if the user should care about this node
 	 */
 	public boolean hasDirection() {
-		return dir != null;
+		return dir != null || flag;
 	}
 
 	/**

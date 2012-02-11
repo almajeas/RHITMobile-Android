@@ -97,20 +97,19 @@ public interface IMobileDirectoryService {
 	public LocationIdsResponse getTour(long[] tagIds) throws Exception;
 	
 	/**
-	 * Start a tour generation request
-	 * 
-	 * @return A DirectionsResponse with the id of the request and possibly results
+	 * Checks the status of a directions request
+	 * @param requestId The ID of the request
+	 * @return The updated status
 	 * @throws Exception On error
 	 */
-	@Deprecated
-	public DirectionsResponse getTour() throws Exception;
+	public DirectionsResponse getDirectionsStatus(int requestId) throws Exception;
 	
 	/**
-	 * Checks the status of a directions request
-	 * @param requestId
-	 * @return
-	 * @throws Exception
+	 * Checks the status of an on-campus tour request
+	 * @param requestId The ID of the request
+	 * @return The updated status
+	 * @throws Exception On error
 	 */
-	public DirectionsResponse getDirectionsStatus(int requestId) throws Exception;
+	public DirectionsResponse getOncampusTourStatus(int requestId) throws Exception;
 
 }

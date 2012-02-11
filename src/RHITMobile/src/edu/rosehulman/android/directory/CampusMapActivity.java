@@ -922,12 +922,11 @@ private class LoadDirections extends ProcessDirections {
 			this.ids = ids;
 		}
 		
+		@Override
 		protected DirectionsResponse getDirections() {
 			assert(ids.length == 2);
 			long from = ids[0];
 			long to = ids[1];
-			
-			MobileDirectoryService service = new MobileDirectoryService();
 			
 			DirectionsResponse response = null;
 			
@@ -949,6 +948,11 @@ private class LoadDirections extends ProcessDirections {
 			
 			return response;
 		}
+
+		@Override
+		protected DirectionsResponse checkStatus(int requestId) throws Exception {
+			return service.getDirectionsStatus(requestId);
+		}
 		
 	}
 	
@@ -963,10 +967,8 @@ private class LoadDirections extends ProcessDirections {
 			this.tagIds = tagIds;
 		}
 		
+		@Override
 		protected DirectionsResponse getDirections() {
-			
-			MobileDirectoryService service = new MobileDirectoryService();
-			
 			DirectionsResponse response = null;
 			
 			do {
@@ -986,6 +988,11 @@ private class LoadDirections extends ProcessDirections {
 			} while (response == null);
 			
 			return response;
+		}
+
+		@Override
+		protected DirectionsResponse checkStatus(int requestId) throws Exception {
+			return service.getOncampusTourStatus(requestId);
 		}
 		
 	}
@@ -1087,11 +1094,14 @@ private class LoadDirections extends ProcessDirections {
 		
 		private Location[] nodes;
 		
+		protected MobileDirectoryService service = new MobileDirectoryService();
+		
 		public ProcessDirections(String message) {
 			this.message = message;
 		}
 		
 		protected abstract DirectionsResponse getDirections();
+		protected abstract DirectionsResponse checkStatus(int requestId) throws Exception;
 
 		@Override
 		protected void onPreExecute() {
@@ -1104,6 +1114,7 @@ private class LoadDirections extends ProcessDirections {
 				@Override
 				public void onCancel(DialogInterface dialog) {
 					cancel(true);
+					finish();
 				}
 			});
 			dialog.show();
@@ -1111,8 +1122,6 @@ private class LoadDirections extends ProcessDirections {
 		
 		@Override
 		protected Directions doInBackground(Void... params) {
-			
-			MobileDirectoryService service = new MobileDirectoryService();
 			
 			DirectionsResponse response = getDirections();
 			if (response == null) {
@@ -1123,7 +1132,7 @@ private class LoadDirections extends ProcessDirections {
 			while (response.done != 100) {
 				publishProgress(response.done);
 				try {
-					response = service.getDirectionsStatus(requestID);
+					response = checkStatus(requestID);
 				} catch (Exception e) {
 					Log.e(C.TAG, "Failed to download directions");
 					if (isCancelled()) {
@@ -1158,6 +1167,12 @@ private class LoadDirections extends ProcessDirections {
 
 			return response.result;
 		}
+		
+		@Override
+		protected void onProgressUpdate(Integer... args) {
+			int progress = args[0];
+			Log.i(C.TAG, "Directions status: " + progress);
+		}
 
 		@Override
 		protected void onPostExecute(Directions directions) {
@@ -1174,7 +1189,6 @@ private class LoadDirections extends ProcessDirections {
 		@Override
 		protected void onCancelled() {
 			dialog.dismiss();
-			finish();
 		}
 		
 	}

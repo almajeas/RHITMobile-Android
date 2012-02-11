@@ -121,12 +121,6 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 	}
 	
 	@Override
-	public DirectionsResponse getTour() throws Exception {
-		String url = String.format("directions/testing/tour");
-		return getDirectionsResponse(url);
-	}
-	
-	@Override
 	public DirectionsResponse getTour(long startId, long[] tagIds) throws Exception {
 		String url = String.format("tours/oncampus/fromloc/%d/%s", 
 				startId, ArrayUtil.join(tagIds, "/"));
@@ -149,6 +143,12 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 	@Override
 	public DirectionsResponse getDirectionsStatus(int requestId) throws Exception {
 		String url = String.format("directions/status/%d", requestId);
+		return getDirectionsResponse(url);
+	}
+	
+	@Override
+	public DirectionsResponse getOncampusTourStatus(int requestId) throws Exception {
+		String url = String.format("tours/oncampus/status/%d", requestId);
 		return getDirectionsResponse(url);
 	}
 	
