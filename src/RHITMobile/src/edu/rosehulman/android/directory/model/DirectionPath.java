@@ -55,6 +55,21 @@ public class DirectionPath implements Parcelable {
 		return d;
 	}
 	
+	@Override
+	public DirectionPath clone() {
+		DirectionPath res = new DirectionPath();
+		
+		res.action = action;
+		res.dir = dir;
+		res.coord = coord.clone();
+		res.altitude = altitude;
+		res.flag = flag;
+		res.outside = outside;
+		res.location = location;
+		
+		return res;
+	}
+	
 	private double toRad(int degrees) {
 		return ((degrees/(double)1E6) / 180.0) * Math.PI;
 	}

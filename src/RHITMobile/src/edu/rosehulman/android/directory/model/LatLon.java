@@ -39,6 +39,11 @@ public class LatLon implements Parcelable {
 		this.lon = (int)(lon*1E6);
 	}
 	
+	@Override
+	public LatLon clone() {
+		return new LatLon(lat, lon);
+	}
+	
 	/**
 	 * Deserialize a JSON object into a LatLon instance
 	 * 

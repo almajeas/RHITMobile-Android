@@ -1,5 +1,10 @@
 package edu.rosehulman.android.directory.maps;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -18,6 +23,7 @@ import com.google.android.maps.Projection;
 import com.readystatesoftware.mapviewballoons.BalloonItemizedOverlay;
 
 import edu.rosehulman.android.directory.DirectionListActivity;
+import edu.rosehulman.android.directory.LocationActivity;
 import edu.rosehulman.android.directory.R;
 import edu.rosehulman.android.directory.TaskManager;
 import edu.rosehulman.android.directory.model.DirectionPath;
@@ -48,7 +54,8 @@ public class DirectionsLayer extends BalloonItemizedOverlay<OverlayItem> impleme
 	public BoundingBox bounds;
 	
 	private int nodeCount;
-	private DirectionPath pathNodes[];
+	private List<DirectionPath> pathNodes = new ArrayList<DirectionPath>();
+	private Map<Long, Location> locationMap = new HashMap<Long, Location>();
 	
 	private boolean animate = true;
 
@@ -57,6 +64,12 @@ public class DirectionsLayer extends BalloonItemizedOverlay<OverlayItem> impleme
 		this.directions = directions;
 		this.locations = locations;
 		this.uiListener = uiListener;
+		
+		for (Location location : locations) {
+			if (!locationMap.containsKey(location.id)){ 
+				locationMap.put(location.id, location);
+			}
+		}
 
 		if (transparent == null) {
 			transparent = getMapView().getResources().getDrawable(android.R.color.transparent);
@@ -64,22 +77,15 @@ public class DirectionsLayer extends BalloonItemizedOverlay<OverlayItem> impleme
 		
 		bounds = directions.getBounds();
 
-		nodeCount = 1;
 		for (DirectionPath path : directions.paths) {
 			if (path.hasDirection())
-				nodeCount++;
+				pathNodes.add(path);
 		}
-		
-		pathNodes = new DirectionPath[nodeCount];
-		int i = 0;
-		for (DirectionPath path : directions.paths) {
-			if (path.hasDirection()) {
-				pathNodes[i] = path;
-				i++;
-			}
+		DirectionPath end = directions.paths[directions.paths.length-1];
+		if (!end.hasDirection()) {
+			pathNodes.add(end);
 		}
-		pathNodes[i] = directions.paths[directions.paths.length-1];
-		pathNodes[i].dir = "Arrive at destination";
+		nodeCount = pathNodes.size();
 		
 		pathPaint = new Paint();
 		pathPaint.setStyle(Style.STROKE);
@@ -96,8 +102,19 @@ public class DirectionsLayer extends BalloonItemizedOverlay<OverlayItem> impleme
 	protected OverlayItem createItem(int i) {
 		OverlayItem overlay;
 		
-		DirectionPath path = pathNodes[i];
-		overlay = new OverlayItem(path.coord.asGeoPoint(), path.dir, "");
+		DirectionPath path = pathNodes.get(i);
+		Location loc = null;
+		if (path.location >= 0) {
+			loc = locationMap.get(path.location);
+		}
+		
+		if (path.dir != null && loc == null) {
+			overlay = new OverlayItem(path.coord.asGeoPoint(), path.dir, "");
+		} else if (path.dir != null) {
+			overlay = new OverlayItem(path.coord.asGeoPoint(), path.dir, loc.name);
+		} else {
+			overlay = new OverlayItem(path.coord.asGeoPoint(), loc.name, loc.description);
+		}
 
 		if (path.flag || i == 0) {
 			DirectionsBitmap marker = (i == 0) ? DirectionsBitmap.START : DirectionsBitmap.END;
@@ -114,7 +131,16 @@ public class DirectionsLayer extends BalloonItemizedOverlay<OverlayItem> impleme
 	
 	@Override
 	protected boolean onBalloonTap(int index, OverlayItem item) {
-		showDirectionsList(index);
+		Context context = getMapView().getContext();
+		DirectionPath path = pathNodes.get(index);
+		
+		if (path.location >= 0) {
+			Intent intent = LocationActivity.createIntent(context, locationMap.get(path.location));
+			context.startActivity(intent);
+		} else {
+			showDirectionsList(index);	
+		}
+		
 		return true;
 	}
 	
@@ -169,7 +195,7 @@ public class DirectionsLayer extends BalloonItemizedOverlay<OverlayItem> impleme
 	}
 	
 	public void stepNext() {
-		int maxStep = pathNodes.length-1;
+		int maxStep = pathNodes.size()-1;
 		int currentStep = getLastFocusedIndex();
 		currentStep = Math.min(currentStep+1, maxStep);
 		if (currentStep == maxStep) {
