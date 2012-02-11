@@ -28,6 +28,7 @@ import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
@@ -973,6 +974,11 @@ private class LoadDirections extends ProcessDirections {
 		protected DirectionsResponse checkStatus(int requestId) throws Exception {
 			return service.getDirectionsStatus(requestId);
 		}
+
+		@Override
+		protected String getError() {
+			return "An error occurred while generating directions.  Try a different destination location.";
+		}
 		
 	}
 	
@@ -1013,6 +1019,11 @@ private class LoadDirections extends ProcessDirections {
 		@Override
 		protected DirectionsResponse checkStatus(int requestId) throws Exception {
 			return service.getOncampusTourStatus(requestId);
+		}
+		
+		@Override
+		protected String getError() {
+			return "An error occurred while loading your tour.  Try again later or try using different tags.";
 		}
 		
 	}
@@ -1129,6 +1140,7 @@ private class LoadDirections extends ProcessDirections {
 		
 		protected abstract DirectionsResponse getDirections();
 		protected abstract DirectionsResponse checkStatus(int requestId) throws Exception;
+		protected abstract String getError();
 
 		@Override
 		protected void onPreExecute() {
@@ -1205,19 +1217,21 @@ private class LoadDirections extends ProcessDirections {
 		protected void onPostExecute(Directions directions) {
 			dialog.dismiss();
 			
-			if (directions != null) {
-				generateDirectionsLayer(directions, nodes);
-				
-				//fit the bounds of the map to the directions
-				BoundingBox bounds = directionsLayer.bounds;
-				Point center = bounds.getCenter();
-				GeoPoint pt = new GeoPoint(center.x, center.y);
-				new ViewController(mapView).animateTo(pt, bounds.getHeight(), bounds.getWidth(), false);
-				
-				rebuildOverlays();
-			} else {
+			if (directions == null || directions.paths.length == 0) {
+				Toast.makeText(CampusMapActivity.this, getError(), Toast.LENGTH_LONG).show();
 				finish();
+				return;
 			}
+			
+			generateDirectionsLayer(directions, nodes);
+			
+			//fit the bounds of the map to the directions
+			BoundingBox bounds = directionsLayer.bounds;
+			Point center = bounds.getCenter();
+			GeoPoint pt = new GeoPoint(center.x, center.y);
+			new ViewController(mapView).animateTo(pt, bounds.getHeight(), bounds.getWidth(), false);
+			
+			rebuildOverlays();
 		}
 		
 		@Override
