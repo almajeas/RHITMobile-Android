@@ -9,6 +9,6 @@ public abstract class BackgroundTask<Params, Progress, Result> extends AsyncTask
 	 * but before the background thread has been terminated.  Useful
 	 * for doing things such as closing dialogs
 	 */
-	protected abstract void abort();
+	protected abstract void onAbort();
 	
 }

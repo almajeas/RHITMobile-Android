@@ -39,7 +39,7 @@ public class TaskManager {
 			task.cancel(true);
 
 			if (task instanceof BackgroundTask) {
-				((BackgroundTask)task).abort();
+				((BackgroundTask)task).onAbort();
 			}
 		}
 		tasks.clear();

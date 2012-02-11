@@ -1235,7 +1235,7 @@ private class LoadDirections extends ProcessDirections {
 		}
 		
 		@Override
-		protected void abort() {
+		protected void onAbort() {
 			dialog.dismiss();
 		}
 		
