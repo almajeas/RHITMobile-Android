@@ -199,6 +199,11 @@ public class DirectionsLayer extends BalloonItemizedOverlay<OverlayItem> impleme
 	 * @return True if the step was focused
 	 */
 	public boolean focus(int step, boolean animate) {
+		if (step == -1) {
+			this.setFocus(null);
+			return true;
+		}
+		
 		this.animate = animate;
 		this.setLastFocusedIndex(step);
 		this.onTap(step);

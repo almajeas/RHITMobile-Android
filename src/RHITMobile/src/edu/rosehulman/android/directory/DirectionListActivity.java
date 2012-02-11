@@ -74,11 +74,15 @@ public class DirectionListActivity extends Activity {
 				listItems.add(new GoalListItem(step, locations[iLoc].name, locations[iLoc]));
 				iLoc++;
 				if (path.hasDirection()) {
-					listItems.add(new StepListItem(step, path, next));
+					if (path.dir != null) {
+						listItems.add(new StepListItem(step, path, next));
+					}
 					step++;
 				}
 			} else if (path.hasDirection()) {
-				listItems.add(new StepListItem(step, path, next));
+				if (path.dir != null) {
+					listItems.add(new StepListItem(step, path, next));
+				}
 				step++;
 			}
 		}
