@@ -302,7 +302,7 @@ public class DataUpdateService extends Service {
 					try {
 						versions = service.getVersions();
 					} catch (Exception e) {
-						Log.e(C.TAG, "Failed to downlaod version information", e);
+						Log.e(C.TAG, "Failed to download version information", e);
 						sleep(2000);
 					}
 				} while (versions == null);
