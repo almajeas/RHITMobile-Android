@@ -1,8 +1,10 @@
 package edu.rosehulman.android.directory;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import android.content.ContentProviderOperation;
 import android.content.Context;
@@ -15,6 +17,7 @@ import android.provider.ContactsContract;
 import android.provider.ContactsContract.CommonDataKinds.StructuredName;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.RawContacts;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -61,18 +64,25 @@ public class PersonActivity extends AuthenticatedActivity {
         image = (ImageView)findViewById(R.id.image);
         detailsView = (ListView)findViewById(R.id.details);
         
-        createListItems();
+        Intent intent = getIntent();
+        String username = intent.getStringExtra(EXTRA_PERSON);
+        Log.d(C.TAG, "Person: " + username);
+        PersonInfo person;
+        if (personMap.containsKey(username)) {
+        	person = personMap.get(username);
+        } else {
+        	person = defaultPerson;
+        }
         
-        name.setText("Kevin Wells");
-        image.setImageResource(R.drawable.ic_contact_picture);
-        detailsView.setAdapter(new DetailsAdapter());
+        updateUI(person);
+        
         detailsView.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
 				detailsView_itemClicked(position);
 			}
 		});
-        
+
     }
     
     @Override
@@ -127,24 +137,62 @@ public class PersonActivity extends AuthenticatedActivity {
 
 	}
     
-    private void createListItems() {
+    private void updateUI(PersonInfo person) {
+    	name.setText(person.name);
+        image.setImageResource(R.drawable.ic_contact_picture);
+    	
     	List<ListItem> items = new LinkedList<ListItem>();
-    	items.add(new ScheduleItem("Kevin Wells"));
+    	items.add(new ScheduleItem(person.username));
     	items.add(new EmailItem("wellska1@rose-hulman.edu"));
     	items.add(new CallItem("1112223333 x1234"));
     	items.add(new LocationItem("F217"));
-    	items.add(new LabelItem("Major", "SE/CS"));
-    	items.add(new LabelItem("Class", "Senior"));
+    	if (person.major != null)
+    		items.add(new LabelItem("Major", person.major));
+    	if (person.year != null)
+    		items.add(new LabelItem("Class", person.year));
     	items.add(new LabelItem("Campus Mailbox", "1965"));
     	
     	listItems = new ListItem[items.size()];
     	listItems = items.toArray(listItems);
+    	detailsView.setAdapter(new DetailsAdapter());
     }
     
     private void detailsView_itemClicked(int position) {
     	listItems[position].onClick();
     }
     
+	private PersonInfo defaultPerson = new PersonInfo(3, "wellska1", "Kevin Wells", "SE/CS", "Senior");
+	@SuppressWarnings("serial")
+	private Map<String, PersonInfo> personMap = new HashMap<String, PersonInfo>() {
+		PersonInfo[] defaultPeople = new PersonInfo[] {
+				new PersonInfo(1, "glowskst", "Scott Glowski", "CS/SE/MA", "Senior"),
+				new PersonInfo(2, "theisje", "Jimmy Theis", "SE", "Senior"),
+				defaultPerson,
+				new PersonInfo(4, "wattsbn", "Bryan Watts", "CS/SE", "Senior"),
+				new PersonInfo(5, "hayesez", "Erik Hayes", null, null)};
+		{
+			for (PersonInfo person : defaultPeople) {
+				put(person.username, person);
+			}
+		}
+	};
+
+	public class PersonInfo {
+		public long id;
+		public String username;
+		public String name;
+		public String major;
+		public String year;
+
+		public PersonInfo(long id, String username, String name, String major, String year) {
+			this.id = id;
+			this.username = username;
+			this.name = name;
+			this.major = major;
+			this.year = year;
+		}
+	}
+
     private abstract class ListItem {
     	
 		public String name;

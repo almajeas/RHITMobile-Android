@@ -1,8 +1,12 @@
 package edu.rosehulman.android.directory;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,20 +23,22 @@ public class PersonSearchActivity extends AuthenticatedListActivity {
 	private ArrayAdapter<PersonInfo> dataSet;
 	
 	private PersonInfo[] defaultPeople = new PersonInfo[] {
-		new PersonInfo(1, "Scott Glowski", "CS/SE/MA Student"),
-		new PersonInfo(2, "Jimmy Theis", "SE Student"),
-		new PersonInfo(3, "Kevin Wells", "SE/CS Student"),
-		new PersonInfo(4, "Bryan Watts", "CS/SE Student"),
-		new PersonInfo(5, "Erik Hayes", "Assistant Dean of Student Affairs")
+		new PersonInfo(1, "glowskst", "Scott Glowski", "CS/SE/MA Student"),
+		new PersonInfo(2, "theisje", "Jimmy Theis", "SE Student"),
+		new PersonInfo(3, "wellska1", "Kevin Wells", "SE/CS Student"),
+		new PersonInfo(4, "wattsbn", "Bryan Watts", "CS/SE Student"),
+		new PersonInfo(5, "hayesez", "Erik Hayes", "Assistant Dean of Student Affairs")
 	};
 	
 	public class PersonInfo {
 		public long id;
+		public String username;
 		public String name;
 		public String description;
 		
-		public PersonInfo(long id, String name, String description) {
+		public PersonInfo(long id, String username, String name, String description) {
 			this.id = id;
+			this.username = username;
 			this.name = name;
 			this.description = description;
 		}	
@@ -42,8 +48,14 @@ public class PersonSearchActivity extends AuthenticatedListActivity {
 		searchQuery = query;
 		setTitle("Search: " + searchQuery);
 		
-		//TODO update
-		people = defaultPeople;
+		List<PersonInfo> res = new ArrayList<PersonInfo>();
+		for (PersonInfo person : defaultPeople) {
+			if (person.name.toLowerCase().contains(query.toLowerCase())) {
+				res.add(person);
+			}
+		}
+		people = new PersonInfo[res.size()];
+		res.toArray(people);
 		
 		dataSet = new ArrayAdapter<PersonInfo>(PersonSearchActivity.this,
 				R.layout.search_item, R.id.name, people) {
@@ -86,11 +98,10 @@ public class PersonSearchActivity extends AuthenticatedListActivity {
     		runSearch(intent.getStringExtra(SearchManager.QUERY));
     		
     	} else if (Intent.ACTION_VIEW.equals(intent.getAction())) {
-		    //Uri data = intent.getData();
+		    Uri data = intent.getData();
 		    
-		    //long id = Long.parseLong(data.getPath());
 		    finish();
-			Intent newIntent = PersonActivity.createIntent(this);
+			Intent newIntent = PersonActivity.createIntent(this, data.getPath());
 			newIntent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
 			startActivity(newIntent);
 			
@@ -109,11 +120,8 @@ public class PersonSearchActivity extends AuthenticatedListActivity {
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long rowId)
 	{
-		//long id = locations[position].id; 
-	    
 	    finish();
-		Intent newIntent = PersonActivity.createIntent(this);
-		newIntent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+		Intent newIntent = PersonActivity.createIntent(this, people[position].username);
 		startActivity(newIntent);
 	}
 
