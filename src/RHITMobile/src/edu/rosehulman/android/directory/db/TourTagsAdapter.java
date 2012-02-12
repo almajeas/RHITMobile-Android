@@ -102,9 +102,6 @@ public class TourTagsAdapter extends TableAdapter {
 		Cursor cursor;
 		String where = KEY_IS_DEFAULT + "='1'";
 		cursor = db.query(TABLE_NAME, projection, where, null, null, null, null);
-		
-		if (cursor.getCount() == 0)
-			return null;
 
 		final int iTagId = cursor.getColumnIndex(KEY_TAG_ID);
 		final int iName = cursor.getColumnIndex(KEY_NAME);

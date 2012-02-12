@@ -4,8 +4,10 @@ import java.util.List;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -19,6 +21,8 @@ import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
+import edu.rosehulman.android.directory.IDataUpdateService.AsyncRequest;
+import edu.rosehulman.android.directory.ServiceManager.ServiceRunnable;
 import edu.rosehulman.android.directory.db.LocationAdapter;
 import edu.rosehulman.android.directory.db.TourTagsAdapter;
 import edu.rosehulman.android.directory.model.Location;
@@ -44,6 +48,8 @@ public class CampusToursStartupActivity extends Activity {
 	
 	private TaskManager taskManager = new TaskManager();
 	private TourTagItem[] defaultTags;
+	
+	private ServiceManager<IDataUpdateService> updateService;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -103,19 +109,57 @@ public class CampusToursStartupActivity extends Activity {
 			}
 		});
 		
-		LoadDefaultTags task = new LoadDefaultTags();
-		taskManager.addTask(task);
-		task.execute();
+		updateService = new ServiceManager<IDataUpdateService>(getApplicationContext(),
+				DataUpdateService.createIntent(getApplicationContext()));
 	}
 	
 	public void onResume() {
 		super.onResume();
+
+    	updateService.run(new ServiceRunnable<IDataUpdateService>() {
+
+			@Override
+			public void run(IDataUpdateService service) {
+				
+				final ProgressDialog dialog = new ProgressDialog(CampusToursStartupActivity.this);
+				service.requestTourTags(new AsyncRequest() {
+					boolean isCancelled = false;	
+					@Override
+					public void onQueued(Runnable cancelCallback) {
+						dialog.setTitle("");
+						dialog.setMessage("Loading...");
+						dialog.setIndeterminate(true);
+						dialog.setCancelable(true);
+						dialog.setOnCancelListener(new OnCancelListener() {
+							@Override
+							public void onCancel(DialogInterface dialog) {
+								isCancelled = true;
+								finish();
+							}
+						});
+						dialog.show();
+					}
+					
+					@Override
+					public void onCompleted() {
+						dialog.dismiss();
+						if (isCancelled)
+							return;
+						
+						LoadDefaultTags task = new LoadDefaultTags();
+						taskManager.addTask(task);
+						task.execute();
+					}
+				});
+			}
+		});
 	}
 	
 	@Override
 	public void onPause() {
 		super.onPause();
 		taskManager.abortTasks();
+		updateService.cancel();
 	}
 	
 	private Location startLocation;
