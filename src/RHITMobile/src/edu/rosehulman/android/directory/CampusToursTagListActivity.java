@@ -241,6 +241,7 @@ public class CampusToursTagListActivity extends Activity {
 		@Override
 		public void remove(int which) {
 			tagItems.remove(which);
+			updateUI();
 		}
 
 		@Override
