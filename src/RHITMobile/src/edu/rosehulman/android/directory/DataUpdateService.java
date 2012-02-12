@@ -116,6 +116,13 @@ public class DataUpdateService extends Service {
 		}
 		
 		@Override
+		public void requestCampusServices(AsyncRequest listener) {
+			startUpdate();
+
+			performTask(updateTask.new CampusServicesTask(), listener);
+		}
+		
+		@Override
 		public void requestTourTags(AsyncRequest listener) {
 			startUpdate();
 

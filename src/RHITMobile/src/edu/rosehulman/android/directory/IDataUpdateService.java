@@ -13,6 +13,7 @@ public interface IDataUpdateService {
 	void requestTopLocations(AsyncRequest listener);
 	void requestInnerLocation(long id, AsyncRequest listener);
 	void requestTourTags(AsyncRequest listener);
+	void requestCampusServices(AsyncRequest listener);
 	
-	boolean isUpdating();
+	boolean isUpdating();	
 }
