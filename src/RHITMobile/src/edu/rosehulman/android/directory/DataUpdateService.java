@@ -297,15 +297,16 @@ public class DataUpdateService extends Service {
 				MobileDirectoryService service = new MobileDirectoryService();
 		    	
 				VersionResponse versions = null;
-				do {
-					
-					try {
-						versions = service.getVersions();
-					} catch (Exception e) {
-						Log.e(C.TAG, "Failed to download version information", e);
-						sleep(2000);
-					}
-				} while (versions == null);
+			
+				try {
+					versions = service.getVersions();
+				} catch (Exception e) {
+					Log.e(C.TAG, "Failed to download version information");
+					//wait a bit and try again
+					queue.addTask(this);
+					sleep(5000);
+					return;
+				}
 				
 				if (locationsVersion == null || !locationsVersion.equals(versions.locations)) {
 					queue.addTask(new TopLocationsTask());

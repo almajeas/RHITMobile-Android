@@ -36,7 +36,7 @@ public class BetaPrefs {
 	}
 	
 	/**
-	 * Enable or disble the use of mock data sources in MobileDirectory
+	 * Enable or disable the use of mock data sources in MobileDirectory
 	 * 
 	 * @param context The context to use
 	 * @param useMocks True to use mocks
@@ -44,6 +44,17 @@ public class BetaPrefs {
 	public static void setUseMocks(Context context, boolean useMocks) {
 		Editor edit = getEditor(context);
         edit.putBoolean(PREF_USE_MOCKS, useMocks);
+        edit.commit();
+	}
+
+	/**
+	 * Disable the use of mock data sources in MobileDirectory
+	 * 
+	 * @param context The context to use
+	 */
+	public static void unsetUseMocks(Context context) {
+		Editor edit = getEditor(context);
+        edit.remove(PREF_USE_MOCKS);
         edit.commit();
 	}
 	

@@ -39,7 +39,7 @@ public class MockJsonClient extends JsonClient {
 	}
 	
 	private String readFile(String path) throws Exception {
-		path = path.replace('/', '_');
+		path = "response_" + path.replace('/', '_');
 		Log.d(C.TAG, "Reading resource: " + path);
 		int res = context.getResources().getIdentifier(path, "raw", context.getPackageName());
 		InputStream stream = context.getResources().openRawResource(res);
@@ -86,7 +86,7 @@ public class MockJsonClient extends JsonClient {
 				return readJsonFile(path + "__s_" + params.get("s").toLowerCase());
 				
 			} else {
-				throw new RuntimeException("Invalid request: " + path);
+				return readJsonFile(path);
 			}
 		} catch (Exception ex) {
 			//we messed up

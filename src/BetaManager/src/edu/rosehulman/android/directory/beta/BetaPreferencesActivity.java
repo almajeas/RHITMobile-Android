@@ -13,6 +13,9 @@ public class BetaPreferencesActivity extends PreferenceActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+		//clear mock data pref
+		BetaPrefs.unsetUseMocks(this);
+		
 		getPreferenceManager().setSharedPreferencesName("PREFS_BETA");
 		getPreferenceManager().setSharedPreferencesMode(MODE_WORLD_READABLE);
 		

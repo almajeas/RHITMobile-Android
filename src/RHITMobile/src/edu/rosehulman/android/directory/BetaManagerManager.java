@@ -105,11 +105,19 @@ public class BetaManagerManager extends ContextWrapper {
      * @return True if MobileDirectory should use mock data sources
      */
     public boolean isMocking() {
+    	boolean res = getIsMocking();
+    	Log.d(C.TAG, "Using mock data: " + res);
+    	return res;
+    }
+    
+    private boolean getIsMocking() {
     	try {
     		SharedPreferences prefs = getBetaPreferences();
     		if (prefs.contains(PREF_USE_MOCKS)) {
+    			Log.d(C.TAG, "Using temp mock value");
     			return prefs.getBoolean(PREF_USE_MOCKS, false);
     		}
+			Log.d(C.TAG, "Using permanent mock value");
     		return prefs.getBoolean(PREF_ALWAYS_USE_MOCKS, false);	
     	} catch (NameNotFoundException ex) {
     		Log.d(C.TAG, "Failed to open beta shared preferences");

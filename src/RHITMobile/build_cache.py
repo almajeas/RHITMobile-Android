@@ -18,7 +18,7 @@ class Path:
             path, args = self.url, ''
             path = path.replace('/', '_')
             url = path
-        return "{0}/{1}".format(Path.DIR, url)
+        return "{0}/response_{1}".format(Path.DIR, url)
     def __str__(self):
         return '/' + self.url
     def __repr__(self):
@@ -43,27 +43,35 @@ def ids(data):
     for item in data:
         yield item['Id']
 
+def cachePath(path):
+    data = readFromServer(path)
+    res = toJson(data)
+    writeFile(path, data)
+    print("{0}".format(path))
+    return res
+
+#get root
+cachePath(Path(''))
+
+#get tour tags
+cachePath(Path('tours/tags'))
+
+#get campus services
+cachePath(Path('services'))
+
 #get the top locations
-topPath = Path('locations/data/top')
-topData = readFromServer(topPath)
-topJson = toJson(topData)
-writeFile(topPath, topData)
+topJson = cachePath(Path('locations/data/top'))
 
 #get the inner locations
 for id in ids(topJson['Locations']):
-    path = Path('locations/data/within/{0}'.format(id))
-    data = readFromServer(path)
-    writeFile(path, data)
-    print("Wrote: {0}".format(id))
+    cachePath(Path('locations/data/within/{0}'.format(id)))
 
 #run some searches
 def runSearch(query):
     query = query.lower()
-    path = Path('locations/names?s={0}'.format(query))
-    data = readFromServer(path)
-    writeFile(path, data)
-    print("Searched: {0}".format(query))
-
+    cachePath(Path('locations/names?s={0}'.format(query)))
 runSearch('Hall')
+runSearch('Olin')
+runSearch('Union')
 
 
