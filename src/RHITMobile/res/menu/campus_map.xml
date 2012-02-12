@@ -5,6 +5,9 @@
 	          android:icon="@android:drawable/ic_menu_mylocation"
 	          android:title="My Location" />
     </group>
+    <item android:id="@+id/goto_campus"
+          android:icon="@drawable/ic_menu_home"
+          android:title="Goto Campus" />
     <item android:id="@+id/top_level"
           android:icon="@android:drawable/ic_menu_directions"
           android:title="Top Locations" />

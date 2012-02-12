@@ -185,10 +185,7 @@ public class CampusMapActivity extends MapActivity {
 	        mapView.setSatellite(true);
 	        
 	        //center the map
-	        MapController controller = mapView.getController();
-	        GeoPoint center = new GeoPoint(39483760, -87325929);
-	        controller.setCenter(center);
-	        controller.setZoom(MIN_ZOOM_LEVEL+1);
+	        moveToCampus(false);
 	        
 	    } else {
 	    	this.savedInstanceState = savedInstanceState;
@@ -370,7 +367,7 @@ public class CampusMapActivity extends MapActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.main, menu);
+        inflater.inflate(R.menu.campus_map, menu);
         return true;
     }
     
@@ -466,6 +463,18 @@ public class CampusMapActivity extends MapActivity {
 		}
 	}
     
+    private void moveToCampus(boolean animate) {
+        MapController controller = mapView.getController();
+        controller.setZoom(MIN_ZOOM_LEVEL+1);
+        
+        GeoPoint center = new GeoPoint(39483760, -87325929);
+        if (animate) {
+        	controller.animateTo(center);
+        } else {
+        	controller.setCenter(center);
+        }
+    }
+    
     private void updateZoomControls() {
     	int zoomLevel = mapView.getZoomLevel();
     	
@@ -551,6 +560,9 @@ public class CampusMapActivity extends MapActivity {
         	return true;
         case R.id.search:
         	onSearchRequested();
+        	return true;
+        case R.id.goto_campus:
+        	moveToCampus(true);
         	return true;
         default:
             return super.onOptionsItemSelected(item);
