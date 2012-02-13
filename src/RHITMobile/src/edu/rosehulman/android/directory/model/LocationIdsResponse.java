@@ -34,7 +34,7 @@ public class LocationIdsResponse {
 	public static LocationIdsResponse deserialize(JSONObject root) throws JSONException {
 		LocationIdsResponse res = new LocationIdsResponse();
 		
-		res.ids = deserializeIds(root.getJSONArray("Locations"));
+		res.ids = deserializeIds(root.getJSONArray("LocationIds"));
 		
 		return res;
 	}

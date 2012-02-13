@@ -25,7 +25,7 @@ public class CampusServicesResponse {
 		CampusServicesResponse res = new CampusServicesResponse();
 		
 		res.version = root.getString("Version");
-		res.root = CampusServicesCategory.deserialize(root.getJSONObject("Root"));
+		res.root = CampusServicesCategory.deserialize(root.getJSONObject("ServicesRoot"));
 				
 		return res;
 	}

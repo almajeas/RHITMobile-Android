@@ -25,7 +25,7 @@ public class TourTagsResponse {
 		TourTagsResponse res = new TourTagsResponse();
 		
 		res.version = root.getString("Version");
-		res.root = TourTagsGroup.deserialize(root.getJSONObject("Root"));
+		res.root = TourTagsGroup.deserialize(root.getJSONObject("TagsRoot"));
 		
 		return res;
 	}
