@@ -7,6 +7,7 @@ import android.text.SpannableString;
 import android.text.style.ClickableSpan;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 import edu.rosehulman.android.directory.LoadLocation.OnLocationLoadedListener;
 import edu.rosehulman.android.directory.model.Location;
 
@@ -33,6 +34,10 @@ public class ClickableLocationSpan extends ClickableSpan {
 	    	    		new LoadLocation(name, new OnLocationLoadedListener() {
 	    	    			@Override
 	    	    			public void onLocationLoaded(Location location) {
+	    	    				if (location == null) {
+	    	    					Toast.makeText(context, "Location info not found", Toast.LENGTH_SHORT).show();
+	    	    					return;
+	    	    				}
 	    	    				Intent intent = LocationActivity.createIntent(context, location);
 	    	    				context.startActivity(intent);
 	    	    			}

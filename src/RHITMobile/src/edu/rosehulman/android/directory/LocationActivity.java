@@ -218,7 +218,7 @@ public class LocationActivity extends Activity {
 								LocationAdapter locationAdapter = new LocationAdapter();
 								locationAdapter.open();
 								
-								long id = locationAdapter.findBuilding(name);
+								long id = locationAdapter.findLocation(name);
 								
 								locationAdapter.close();
 								

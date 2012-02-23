@@ -209,7 +209,7 @@ public class CampusToursStartupActivity extends Activity {
 				locationAdapter.open();
 				
 				try {
-					long id = locationAdapter.findBuilding(name);
+					long id = locationAdapter.findLocation(name);
 					if (id < 0)
 						return;
 					

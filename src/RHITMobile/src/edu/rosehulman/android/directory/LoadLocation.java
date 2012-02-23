@@ -57,10 +57,20 @@ public class LoadLocation extends AsyncTask<Void, Void, Location> {
 		locationAdapter.open();
 
 		if (name != null) {
-			id = locationAdapter.findBuilding(name);
+			id = locationAdapter.findExactLocation(name, false);
+		}
+		
+		if (id == -1) {
+			//location not found
+			return null;
 		}
 		
 		Location loc = locationAdapter.getLocation(id);
+		if (loc == null) {
+			//invalid id
+			return null;
+		}
+		
 		locationAdapter.loadHyperlinks(loc);
 		locationAdapter.loadAlternateNames(loc);
 		locationAdapter.close();

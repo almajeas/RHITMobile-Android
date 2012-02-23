@@ -274,32 +274,23 @@ public class LocationAdapter extends TableAdapter {
 	 * Finds a building with the given name and is departable
 	 * 
 	 * @param name The name of the building
-	 * @return The id of the building, or -1 if 0 or multiple matches exist
+	 * @return The id of the building, or -1 if 0 no matches exist
 	 */
-	public long findBuilding(String name) {
+	public long findLocation(String name) {
 		//you have to at least try
 		if (name.length() < 2)
 			return -1;
 		
-		Cursor cursor;
-		
-		String sql = "SELECT _Id FROM Locations WHERE UPPER(Name)=UPPER(?) AND IsDepartable" + 
-				" UNION " +
-				"SELECT AltNames.LocationId AS _Id " + 
-				"FROM AltNames INNER JOIN Locations " + 
-				"ON LocationId=Locations._Id " + 
-				"WHERE IsDepartable AND UPPER(AltNames.Name)=UPPER(?)";
-		
-		cursor = db.rawQuery(sql, new String[] {name, name});
-		if (cursor.getCount() == 1) {
-			cursor.moveToFirst();
-			long id = cursor.getLong(0); 
-			cursor.close();
+		//try for an exact match first
+		long id;
+		id = findExactLocation(name, true);
+		if (id >= 0) {
 			return id;
 		}
-		cursor.close();
+
+		Cursor cursor;
 		
-		sql = "SELECT _Id FROM " +
+		String sql = "SELECT _Id FROM " +
 				"(SELECT _Id, Name FROM Locations WHERE IsDepartable AND Name LIKE ?" + 
 				" UNION " +
 				"SELECT AltNames.LocationId AS _Id, AltNames.Name as Name " + 
@@ -314,7 +305,39 @@ public class LocationAdapter extends TableAdapter {
 		}
 		
 		cursor.moveToFirst();
-		long id = cursor.getLong(0); 
+		id = cursor.getLong(0); 
+		cursor.close();
+		return id;
+	}
+	
+	/**
+	 * Finds a location with the given name exactly
+	 * 
+	 * @param name The exact name of the location
+	 * @param requireDepartable Should the location be departable
+	 * @return The ID of the found location, or -1 if not found
+	 */
+	public long findExactLocation(String name, boolean requireDepartable) {
+		//you have to at least try
+		if (name.length() < 2)
+			return -1;
+		
+		Cursor cursor;
+		
+		String departable = requireDepartable ? " AND IsDepartable" : "";
+		String sql = "SELECT _Id FROM Locations WHERE UPPER(Name)=UPPER(?)" + departable +
+				" UNION " +
+				"SELECT AltNames.LocationId AS _Id " + 
+				"FROM AltNames INNER JOIN Locations " + 
+				"ON LocationId=Locations._Id " + 
+				"WHERE UPPER(AltNames.Name)=UPPER(?)" + departable;
+		
+		cursor = db.rawQuery(sql, new String[] {name, name});
+		long id = -1;
+		if (cursor.getCount() == 1) {
+			cursor.moveToFirst();
+			id = cursor.getLong(0);
+		}
 		cursor.close();
 		return id;
 	}
