@@ -45,6 +45,7 @@ public class CampusServicesAdapter extends TableAdapter {
 	 * Adds a category, and all of its links, to the database
 	 * 
 	 * @param category The category to add
+	 * @param pre The DFS pre number to start with
 	 * @return the post number for the parent
 	 */
 	private int addCategory(CampusServicesCategory category, int pre) {

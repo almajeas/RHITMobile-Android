@@ -26,7 +26,7 @@ public class TourTagsAdapter extends TableAdapter {
 	/**
 	 * Replace all data with the given categories
 	 * 
-	 * @param categories The new category data to use
+	 * @param root The new category data to use
 	 */
 	public void replaceData(TourTagsGroup root) {
 		db.beginTransaction();
@@ -48,6 +48,7 @@ public class TourTagsAdapter extends TableAdapter {
 	 * Adds a category, and all of its links, to the database
 	 * 
 	 * @param category The category to add
+	 * @param pre The DFS pre number to start with
 	 * @return the post number for the parent
 	 */
 	private int addCategory(TourTagsGroup category, int pre) {

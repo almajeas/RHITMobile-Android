@@ -33,6 +33,7 @@ public class TourTagsGroup {
 	 * 
 	 * @param name The name of the category
 	 * @param tags The array of entries
+	 * @param children The array of children groups
 	 */
 	public TourTagsGroup(String name, TourTag[] tags, TourTagsGroup[] children) {
 		this.id = -1;

@@ -40,6 +40,7 @@ public class User {
 	/**
 	 * Set the user's authentication token
 	 * 
+	 * @param username The user's name
 	 * @param token The authentication token that can be used in web requests
 	 */
 	public static void setCookie(String username, String token) {
