@@ -1,22 +1,14 @@
 package edu.rosehulman.android.directory;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import android.content.ContentProviderOperation;
 import android.content.Context;
 import android.content.Intent;
-import android.content.OperationApplicationException;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.RemoteException;
-import android.provider.ContactsContract;
-import android.provider.ContactsContract.CommonDataKinds.StructuredName;
-import android.provider.ContactsContract.Data;
-import android.provider.ContactsContract.RawContacts;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -109,7 +101,7 @@ public class PersonActivity extends AuthenticatedActivity {
             return super.onOptionsItemSelected(item);
         }
     }
-    
+    /*
 	private void createContact() {
 		ArrayList<ContentProviderOperation> ops =
 				new ArrayList<ContentProviderOperation>();
@@ -136,6 +128,7 @@ public class PersonActivity extends AuthenticatedActivity {
 		}
 
 	}
+	*/
     
     private void updateUI(PersonInfo person) {
     	name.setText(person.name);
