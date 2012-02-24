@@ -1,9 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ExpandableListView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/tree"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent" >
 
-    
+    <ExpandableListView
+        android:id="@android:id/list"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_alignParentTop="true" >
+    </ExpandableListView>
 
-</ExpandableListView>
+    <TextView
+        android:id="@android:id/empty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:paddingLeft="5dip"
+        android:paddingRight="5dip"
+        android:text="No Results :&apos;("
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+</RelativeLayout>

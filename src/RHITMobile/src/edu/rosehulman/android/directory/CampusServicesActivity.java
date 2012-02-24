@@ -1,6 +1,5 @@
 package edu.rosehulman.android.directory;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.Context;
@@ -10,9 +9,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -20,6 +16,12 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.ExpandableListView.OnChildClickListener;
 import android.widget.TextView;
+
+import com.actionbarsherlock.app.SherlockListActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
+
 import edu.rosehulman.android.directory.IDataUpdateService.AsyncRequest;
 import edu.rosehulman.android.directory.LoadCampusServiceHyperlink.OnHyperlinkLoadedListener;
 import edu.rosehulman.android.directory.ServiceManager.ServiceRunnable;
@@ -27,7 +29,7 @@ import edu.rosehulman.android.directory.db.CampusServicesAdapter;
 import edu.rosehulman.android.directory.model.CampusServicesCategory;
 import edu.rosehulman.android.directory.model.Hyperlink;
 
-public class CampusServicesActivity extends Activity {
+public class CampusServicesActivity extends SherlockListActivity {
 	
 	public static Intent createIntent(Context context) {
 		return new Intent(context, CampusServicesActivity.class);
@@ -47,7 +49,7 @@ public class CampusServicesActivity extends Activity {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.campus_services);
 		
-		tree = (ExpandableListView)findViewById(R.id.tree);
+		tree = (ExpandableListView)findViewById(android.R.id.list);
 		
 		tree.setOnChildClickListener(new OnChildClickListener() {
 			@Override
@@ -135,7 +137,7 @@ public class CampusServicesActivity extends Activity {
 		loadServices.execute();
 		
 		if (!"".equals(query)) {
-			setTitle("Search: " + query);
+			getSupportActionBar().setSubtitle(query);
 		}
 	}
 	
@@ -152,7 +154,7 @@ public class CampusServicesActivity extends Activity {
 	
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
+        MenuInflater inflater = getSupportMenuInflater();
         inflater.inflate(R.menu.campus_services, menu);
         return true;
     }
