@@ -253,7 +253,7 @@ public class DataUpdateService extends Service {
 		}
 		
 		private void createNotification() {
-	        Intent appIntent = StartupActivity.createIntent(DataUpdateService.this);
+	        Intent appIntent = StartupActivity.createIntent(DataUpdateService.this, false);
 	        startupIntent = PendingIntent.getActivity(DataUpdateService.this, 0, appIntent, 0);
 	        appIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 	        appIntent.addFlags(Intent.FLAG_FROM_BACKGROUND);

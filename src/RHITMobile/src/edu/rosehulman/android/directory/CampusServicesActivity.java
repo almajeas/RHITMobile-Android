@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.ExpandableListView.OnChildClickListener;
@@ -46,8 +45,8 @@ public class CampusServicesActivity extends SherlockListActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.campus_services);
+		getSupportActionBar().setHomeButtonEnabled(true);
 		
 		tree = (ExpandableListView)findViewById(android.R.id.list);
 		
@@ -171,6 +170,8 @@ public class CampusServicesActivity extends SherlockListActivity {
         case R.id.search:
         	onSearchRequested();
         	return true;
+        case android.R.id.home:
+        	startActivity(StartupActivity.createIntent(this, true));
         default:
             return super.onOptionsItemSelected(item);
         }

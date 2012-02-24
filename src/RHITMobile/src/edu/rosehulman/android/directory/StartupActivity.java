@@ -28,8 +28,11 @@ import edu.rosehulman.android.directory.ServiceManager.ServiceRunnable;
 
 public class StartupActivity extends SherlockActivity {
 	
-	public static Intent createIntent(Context context) {
+	public static Intent createIntent(Context context, boolean clearTop) {
 		Intent intent = new Intent(context, StartupActivity.class);
+		if (clearTop) {
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		}
 		return intent;
 	}
 	
