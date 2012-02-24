@@ -118,8 +118,9 @@
         </activity>
         
         <activity
-            android:label="@string/app_name"
-            android:name=".PersonActivity" >
+            android:label="Person"
+            android:name=".PersonActivity" 
+            android:theme="@style/Theme.Sherlock" >
         </activity>
         
         <activity
