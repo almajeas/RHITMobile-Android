@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,11 +15,17 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
-import android.widget.TabHost;
 import android.widget.TextView;
+
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.ActionBar.Tab;
+import com.actionbarsherlock.app.ActionBar.TabListener;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.MenuItem;
+
 import edu.rosehulman.android.directory.util.Ordinal;
 
-public class SchedulePersonActivity extends AuthenticatedActivity {
+public class SchedulePersonActivity extends SherlockFragmentActivity implements TabListener {
 	
 	public static final String EXTRA_PERSON = "PERSON";
 	
@@ -38,18 +45,20 @@ public class SchedulePersonActivity extends AuthenticatedActivity {
 	
 	private TaskManager taskManager = new TaskManager();
 	
-	private TabHost tabHost;
-	
 	private PersonScheduleWeek schedule;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.schedule_person);
-		
-		tabHost = (TabHost)findViewById(android.R.id.tabhost);
-		tabHost.setup();
-		
+
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setHomeButtonEnabled(true);
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+        
+		getSupportFragmentManager().beginTransaction().add(new AuthenticatedFragment(), "auth").commit();
+        
 		Intent intent = getIntent();
 		if (!intent.hasExtra(EXTRA_PERSON)) {
 			finish();
@@ -61,32 +70,62 @@ public class SchedulePersonActivity extends AuthenticatedActivity {
 		taskManager.addTask(task);
 		task.execute();
 	}
+    
+	@Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+			case android.R.id.home:
+				finish();
+				break;
+			default:
+				return super.onOptionsItemSelected(item); 
+		}
+		return true;
+	}
 	
 	private void createTab(String tag, String label) {
-		String header = createTabHeader(tabHost.getContext(), label);
-		tabHost.addTab(tabHost.newTabSpec(tag).setIndicator(header).setContent(tabFactory));
+		ActionBar actionBar = getSupportActionBar();
+		PersonScheduleFragment frag = new PersonScheduleFragment(tag, schedule.getDay(tag));
+		Tab tab = actionBar.newTab().setText(label).setTabListener(this).setTag(frag);
+		actionBar.addTab(tab);
+		//TODO set selected day to today
 	}
-	
-	private static String createTabHeader(Context context, String label) {
-		return label;
-	}
-	
-//	private static View createTabHeader(Context context, String label) {
-//		View v = LayoutInflater.from(context).inflate(R.layout.schedule_tab, null);
-//		TextView name = (TextView)v.findViewById(R.id.name);
-//		name.setText(label);
-//		return v;
-//	}
 
-	TabHost.TabContentFactory tabFactory = new TabHost.TabContentFactory() {
+	@Override
+	public void onTabSelected(Tab tab) {
+		PersonScheduleFragment frag = (PersonScheduleFragment)tab.getTag();
+		getSupportFragmentManager().beginTransaction().add(R.id.fragment_content, frag, frag.getDay()).commit();
+	}
+
+	@Override
+	public void onTabUnselected(Tab tab) {
+		PersonScheduleFragment frag = (PersonScheduleFragment)tab.getTag();
+		getSupportFragmentManager().beginTransaction().remove(frag).commit();
+	}
+
+	@Override
+	public void onTabReselected(Tab tab) {
+	}
+	
+	private class PersonScheduleFragment extends Fragment {
 		
+		private String tag;
+		private PersonScheduleDay day;
+		
+        public PersonScheduleFragment(String tag, PersonScheduleDay day) {
+        	this.tag = tag;
+			this.day = day;
+		}
+
+        public String getDay() {
+        	return tag;
+        }
+        
 		@Override
-		public View createTabContent(final String tag) {
-			LayoutInflater inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			View root = inflater.inflate(R.layout.schedule_list, null);
+        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        	View root = inflater.inflate(R.layout.schedule_list, null);
 			ListView list = (ListView)root.findViewById(R.id.list);
 			
-			PersonScheduleDay day = schedule.getDay(tag);
 			list.setAdapter(new ScheduleAdapter(day.items));
 			
 			list.setOnItemClickListener(new OnItemClickListener() {
@@ -105,8 +144,73 @@ public class SchedulePersonActivity extends AuthenticatedActivity {
 			});
 			
 			return root;
-		}
-	};
+
+        }
+        
+        private class ScheduleAdapter extends BaseAdapter {
+    		
+    		private PersonScheduleItem[] items;
+    		
+    		public ScheduleAdapter(PersonScheduleItem[] items) {
+    			this.items = items;
+    		}
+
+    		@Override
+    		public int getCount() {
+    			return items.length;
+    		}
+
+    		@Override
+    		public Object getItem(int position) {
+    			return items[position];
+    		}
+
+    		@Override
+    		public long getItemId(int position) {
+    			return position;
+    		}
+
+    		@Override
+    		public View getView(int position, View convertView, ViewGroup parent) {
+    			LayoutInflater inflater = LayoutInflater.from(SchedulePersonActivity.this);
+    			View v = convertView;
+    			if (v == null) {
+    				v = inflater.inflate(R.layout.schedule_person_list_item, null);
+    			}
+    			
+    			PersonScheduleItem item = items[position];
+    			
+    			TextView course = (TextView)v.findViewById(R.id.course);
+    			TextView time = (TextView)v.findViewById(R.id.time);
+    			TextView room = (TextView)v.findViewById(R.id.room);
+    			
+    			String hour;
+    			if (item.hourStart == item.hourEnd) {
+    				hour = String.format("%s - %s (%s hour)", 
+    						HOURS[item.hourStart], HOURS[item.hourEnd+1], 
+    						Ordinal.convert(item.hourStart));
+    			} else {
+    				hour = String.format("%s - %s (%s - %s hour)", 
+    						HOURS[item.hourStart], HOURS[item.hourEnd+1], 
+    						Ordinal.convert(item.hourStart),
+    						Ordinal.convert(item.hourEnd+1));
+    			}
+    			
+    			course.setText(String.format("%s-%02d %s", item.course, item.section, item.courseName));
+    			
+    			time.setText(hour);
+    			
+    			ClickableLocationSpan.linkify(room, item.room);
+    			
+    			room.setMovementMethod(LinkMovementMethod.getInstance());
+    			room.setFocusable(false);
+    			room.setFocusableInTouchMode(false);
+    			
+    			return v;
+    		}
+    	}
+
+    }
 	
 	private class LoadSchedule extends AsyncTask<Void, Void, PersonScheduleWeek> {
 
@@ -153,73 +257,12 @@ public class SchedulePersonActivity extends AuthenticatedActivity {
 			for (String day : res.tags) {
 				createTab(day, day);
 			}
-			setTitle(String.format("Schedule: %s", person));
+			getSupportActionBar().setSubtitle(person);
 		}
 		
 	}
 	
-	private class ScheduleAdapter extends BaseAdapter {
-		
-		private PersonScheduleItem[] items;
-		
-		public ScheduleAdapter(PersonScheduleItem[] items) {
-			this.items = items;
-		}
-
-		@Override
-		public int getCount() {
-			return items.length;
-		}
-
-		@Override
-		public Object getItem(int position) {
-			return items[position];
-		}
-
-		@Override
-		public long getItemId(int position) {
-			return position;
-		}
-
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-			LayoutInflater inflater = LayoutInflater.from(SchedulePersonActivity.this);
-			View v = convertView;
-			if (v == null) {
-				v = inflater.inflate(R.layout.schedule_person_list_item, null);
-			}
-			
-			PersonScheduleItem item = items[position];
-			
-			TextView course = (TextView)v.findViewById(R.id.course);
-			TextView time = (TextView)v.findViewById(R.id.time);
-			TextView room = (TextView)v.findViewById(R.id.room);
-			
-			String hour;
-			if (item.hourStart == item.hourEnd) {
-				hour = String.format("%s - %s (%s hour)", 
-						HOURS[item.hourStart], HOURS[item.hourEnd+1], 
-						Ordinal.convert(item.hourStart));
-			} else {
-				hour = String.format("%s - %s (%s - %s hour)", 
-						HOURS[item.hourStart], HOURS[item.hourEnd+1], 
-						Ordinal.convert(item.hourStart),
-						Ordinal.convert(item.hourEnd+1));
-			}
-			
-			course.setText(String.format("%s-%02d %s", item.course, item.section, item.courseName));
-			
-			time.setText(hour);
-			
-			ClickableLocationSpan.linkify(room, item.room);
-			
-			room.setMovementMethod(LinkMovementMethod.getInstance());
-			room.setFocusable(false);
-			room.setFocusableInTouchMode(false);
-			
-			return v;
-		}
-	}
+	
 	
 	private class PersonScheduleItem {
 		public String course;
@@ -262,4 +305,5 @@ public class SchedulePersonActivity extends AuthenticatedActivity {
 			return days[Arrays.asList(tags).indexOf(tag)];
 		}
 	}
+
 }
