@@ -15,7 +15,11 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class ScheduleCourseActivity extends AuthenticatedActivity {
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.MenuItem;
+
+public class ScheduleCourseActivity extends SherlockFragmentActivity {
 
 	public static final String EXTRA_COURSE = "PERSON";
 	public static final String EXTRA_SECTION = "SECTION";
@@ -38,6 +42,10 @@ public class ScheduleCourseActivity extends AuthenticatedActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.schedule_course);
+
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setHomeButtonEnabled(true);
+        actionBar.setDisplayHomeAsUpEnabled(true);
         
         detailsView = (ListView)findViewById(R.id.details);
         
@@ -48,10 +56,12 @@ public class ScheduleCourseActivity extends AuthenticatedActivity {
 		}
 		course = intent.getStringExtra(EXTRA_COURSE);
 		section = intent.getIntExtra(EXTRA_SECTION, 0);
+		
+		getSupportFragmentManager().beginTransaction().add(new AuthenticatedFragment(), "auth").commit();
         
         createListItems();
         
-        setTitle(String.format("Course: %s-%02d", course, section));
+        setTitle(String.format("%s-%02d", course, section));
         
         detailsView.setAdapter(new DetailsAdapter());
         detailsView.setOnItemClickListener(new OnItemClickListener() {
@@ -60,9 +70,19 @@ public class ScheduleCourseActivity extends AuthenticatedActivity {
 				detailsView_itemClicked(position);
 			}
 		});
-        
-        
     }
+    
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+			case android.R.id.home:
+				finish();
+				break;
+			default:
+				return super.onOptionsItemSelected(item); 
+		}
+		return true;
+	}
     
     private void createListItems() {
     	List<ListItem> items = new LinkedList<ListItem>();
