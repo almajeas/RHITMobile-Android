@@ -160,11 +160,11 @@
         </activity>
         
         <activity
-            android:label="@string/app_name"
+            android:label="Directory"
             android:name=".PersonSearchActivity"
             android:launchMode="singleTop"
             android:configChanges="keyboardHidden|orientation"
-            android:theme="@android:style/Theme.Light" >
+            android:theme="@style/Theme.Sherlock" >
             
             <intent-filter >
                 <action android:name="android.intent.action.SEARCH" />

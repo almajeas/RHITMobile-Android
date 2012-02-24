@@ -169,12 +169,14 @@ public class CampusServicesActivity extends SherlockListActivity {
         switch (item.getItemId()) {
         case R.id.search:
         	onSearchRequested();
-        	return true;
+        	break;
         case android.R.id.home:
         	startActivity(StartupActivity.createIntent(this, true));
+        	break;
         default:
             return super.onOptionsItemSelected(item);
         }
+        return true;
     }
 	
 	private void tree_childClicked(Hyperlink child) {
