@@ -3,27 +3,28 @@ package edu.rosehulman.android.directory;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.TextView;
+
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.MenuItem;
+
 import edu.rosehulman.android.directory.db.TourTagsAdapter;
 import edu.rosehulman.android.directory.model.TourTag;
 import edu.rosehulman.android.directory.model.TourTagItem;
 
-public class CampusToursTagListActivity extends Activity {
+public class CampusToursTagListActivity extends SherlockActivity {
 	
     private static int REQUEST_TAG = 10;
     
@@ -70,6 +71,9 @@ public class CampusToursTagListActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.tour_tag_list);
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setHomeButtonEnabled(true);
+        actionBar.setDisplayHomeAsUpEnabled(true);
 		
 		tags = (TouchListView)findViewById(R.id.tags);
 		
@@ -128,23 +132,14 @@ public class CampusToursTagListActivity extends Activity {
 	}
 	
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.campus_services, menu);
-        return true;
-    }
-    
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        return true;
-    }
-    
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         //handle item selection
         switch (item.getItemId()) {
         case R.id.search:
         	onSearchRequested();
+        	return true;
+        case android.R.id.home:
+        	finish();
         	return true;
         default:
             return super.onOptionsItemSelected(item);

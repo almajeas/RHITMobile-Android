@@ -1,14 +1,10 @@
 package edu.rosehulman.android.directory;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -16,11 +12,18 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
+
 import edu.rosehulman.android.directory.db.TourTagsAdapter;
 import edu.rosehulman.android.directory.model.TourTag;
 import edu.rosehulman.android.directory.model.TourTagsGroup;
 
-public class CampusToursTagSelectActivity extends Activity {
+public class CampusToursTagSelectActivity extends SherlockActivity {
 	
 	public static final String EXTRA_PATH = "PATH";
 	public static final String EXTRA_ROOT_ID = "ROOT_ID";
@@ -46,6 +49,9 @@ public class CampusToursTagSelectActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.tour_tag_select_list);
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setHomeButtonEnabled(true);
+        actionBar.setDisplayHomeAsUpEnabled(true);
 		
 		tags = (ListView)findViewById(R.id.tags);
 		
@@ -124,9 +130,8 @@ public class CampusToursTagSelectActivity extends Activity {
 		taskManager.addTask(loadServices);
 		loadServices.execute();
 		
-		//TODO set to something more useful
 		if (!"".equals(query)) {
-			setTitle("Search: " + query);
+			getSupportActionBar().setSubtitle(query);
 		}
 	}
 	
@@ -143,8 +148,8 @@ public class CampusToursTagSelectActivity extends Activity {
 	
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.campus_services, menu);
+        MenuInflater inflater = getSupportMenuInflater();
+        inflater.inflate(R.menu.tour_tag_select, menu);
         return true;
     }
     
@@ -159,6 +164,9 @@ public class CampusToursTagSelectActivity extends Activity {
         switch (item.getItemId()) {
         case R.id.search:
         	onSearchRequested();
+        	return true;
+        case android.R.id.home:
+        	finish();
         	return true;
         default:
             return super.onOptionsItemSelected(item);

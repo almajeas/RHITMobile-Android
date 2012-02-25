@@ -1,6 +1,5 @@
 package edu.rosehulman.android.directory;
 
-import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,11 +10,16 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockListActivity;
+import com.actionbarsherlock.view.MenuItem;
+
 import edu.rosehulman.android.directory.LoadLocation.OnLocationLoadedListener;
 import edu.rosehulman.android.directory.model.Location;
 import edu.rosehulman.android.directory.util.ArrayUtil;
 
-public class CampusToursOffCampusActivity extends ListActivity {
+public class CampusToursOffCampusActivity extends SherlockListActivity {
 	
     public static final String ACTION_TOUR = "edu.rosehulman.android.directory.intent.action.TOUR";
 
@@ -37,6 +41,9 @@ public class CampusToursOffCampusActivity extends ListActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.tour_off_campus);
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setHomeButtonEnabled(true);
+        actionBar.setDisplayHomeAsUpEnabled(true);
 		
 		taskManager = new TaskManager();
 
@@ -66,6 +73,18 @@ public class CampusToursOffCampusActivity extends ListActivity {
 	    //stop any tasks we were running
 	    taskManager.abortTasks();
 	}
+	
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        //handle item selection
+        switch (item.getItemId()) {
+        case android.R.id.home:
+        	finish();
+        	return true;
+        default:
+            return super.onOptionsItemSelected(item);
+        }
+    }
 	
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long rowId)

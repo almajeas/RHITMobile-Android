@@ -2,7 +2,6 @@ package edu.rosehulman.android.directory;
 
 import java.util.List;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -21,6 +20,11 @@ import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
+
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.MenuItem;
+
 import edu.rosehulman.android.directory.IDataUpdateService.AsyncRequest;
 import edu.rosehulman.android.directory.ServiceManager.ServiceRunnable;
 import edu.rosehulman.android.directory.db.LocationAdapter;
@@ -29,7 +33,7 @@ import edu.rosehulman.android.directory.model.Location;
 import edu.rosehulman.android.directory.model.TourTag;
 import edu.rosehulman.android.directory.model.TourTagItem;
 
-public class CampusToursStartupActivity extends Activity {
+public class CampusToursStartupActivity extends SherlockActivity {
 	
 	public static Intent createIntent(Context context) {
 		return new Intent(context, CampusToursStartupActivity.class);
@@ -55,6 +59,8 @@ public class CampusToursStartupActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.tour_startup);
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setHomeButtonEnabled(true);
 		
 		groupLocation = (RadioGroup)findViewById(R.id.groupLocation);
 		rdoOnCampusInside = (RadioButton)findViewById(R.id.rdoOnCampusInside);
@@ -161,6 +167,18 @@ public class CampusToursStartupActivity extends Activity {
 		taskManager.abortTasks();
 		updateService.cancel();
 	}
+	
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        //handle item selection
+        switch (item.getItemId()) {
+        case android.R.id.home:
+        	finish();
+        	return true;
+        default:
+            return super.onOptionsItemSelected(item);
+        }
+    }
 	
 	private Location startLocation;
 

@@ -87,27 +87,31 @@
         </activity>
         
         <activity
-            android:label="Tour of Campus"
+            android:label="Campus Tours"
             android:name=".CampusToursStartupActivity" 
             android:configChanges="keyboardHidden|orientation" 
+            android:theme="@style/Theme.Sherlock"
             android:exported="true" >
         </activity>
                 
         <activity
             android:label="Tour Interest Selection"
-            android:name=".CampusToursTagListActivity" 
+            android:name=".CampusToursTagListActivity"  
+            android:theme="@style/Theme.Sherlock"
             android:configChanges="keyboardHidden|orientation" >
         </activity>
         
         <activity
             android:label="Tour Interests"
-            android:name=".CampusToursTagSelectActivity" 
+            android:name=".CampusToursTagSelectActivity"  
+            android:theme="@style/Theme.Sherlock"
             android:configChanges="keyboardHidden|orientation" >
         </activity>
         
         <activity
             android:label="Off Campus Tour"
-            android:name=".CampusToursOffCampusActivity" 
+            android:name=".CampusToursOffCampusActivity"  
+            android:theme="@style/Theme.Sherlock"
             android:configChanges="keyboardHidden|orientation" >
         </activity>
 
