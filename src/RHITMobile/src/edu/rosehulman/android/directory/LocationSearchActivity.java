@@ -1,6 +1,5 @@
 package edu.rosehulman.android.directory;
 
-import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.Context;
@@ -11,12 +10,17 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockListActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
+
 import edu.rosehulman.android.directory.LoadLocation.OnLocationLoadedListener;
 import edu.rosehulman.android.directory.db.LocationAdapter;
 import edu.rosehulman.android.directory.db.VersionsAdapter;
@@ -26,15 +30,13 @@ import edu.rosehulman.android.directory.model.LocationNamesCollection;
 import edu.rosehulman.android.directory.model.VersionType;
 import edu.rosehulman.android.directory.service.MobileDirectoryService;
 
-public class LocationSearchActivity extends ListActivity {
+public class LocationSearchActivity extends SherlockListActivity {
 	
 	private String searchQuery;
 	private TaskManager taskManager;
 
 	private LocationInfo[] locations;
 	private ArrayAdapter<LocationInfo> dataSet;
-	
-	private Button btnShowOnMap;
 	
 	private class LocationInfo {
 		public long id;
@@ -52,7 +54,7 @@ public class LocationSearchActivity extends ListActivity {
 		SearchLocations task = new SearchLocations();
 		taskManager.addTask(task);
 		task.execute(searchQuery);
-		setTitle("Search: " + searchQuery);
+		getSupportActionBar().setSubtitle(searchQuery);
 	}
 	
 	@Override
@@ -70,17 +72,13 @@ public class LocationSearchActivity extends ListActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.location_search);
 		
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setHomeButtonEnabled(true);
+		actionBar.setDisplayHomeAsUpEnabled(true);
+		
 		taskManager = new TaskManager();
 
     	Intent intent = getIntent();
-    	
-    	btnShowOnMap = (Button)findViewById(R.id.btnShowOnMap);
-    	btnShowOnMap.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				btnShowOnMap_clicked();
-			}
-		});
     	
     	if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
     		runSearch(intent.getStringExtra(SearchManager.QUERY));
@@ -132,10 +130,41 @@ public class LocationSearchActivity extends ListActivity {
 	    task.execute();
 	}
 	
-	private void btnShowOnMap_clicked() {
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getSupportMenuInflater();
+        inflater.inflate(R.menu.location_search, menu);
+        return true;
+    }
+    
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+    	menu.setGroupEnabled(R.id.results, locations != null && locations.length > 0);
+        return true;
+    }
+    
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        //handle item selection
+        switch (item.getItemId()) {
+        case R.id.search:
+        	onSearchRequested();
+        	break;
+        case R.id.map:
+        	showOnMap_clicked();
+        	break;
+        case android.R.id.home:
+        	startActivity(StartupActivity.createIntent(this, true));
+        	break;
+        default:
+            return super.onOptionsItemSelected(item);
+        }
+        return true;
+    }
+	
+	private void showOnMap_clicked() {
 		Intent intent = CampusMapActivity.createIntent(this, searchQuery);
 		startActivity(intent);
-		finish();
 	}
 	
 	private class SearchLocations extends AsyncTask<String, Void, LocationInfo[]> {
@@ -202,8 +231,7 @@ public class LocationSearchActivity extends ListActivity {
 			}
 			
 			locations = res;
-			
-			btnShowOnMap.setEnabled(res.length > 0);
+			invalidateOptionsMenu();
 			
 			dataSet = new ArrayAdapter<LocationInfo>(LocationSearchActivity.this,
 					R.layout.search_item, R.id.name, res) {

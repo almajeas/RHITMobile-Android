@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <group
+        android:id="@+id/results"
+        android:enabled="false" >
+
+        <item
+            android:id="@+id/map"
+            android:icon="@android:drawable/ic_menu_mapmode"
+            android:showAsAction="always"
+            android:title="Show on Map"/>
+    </group>
+
+    <item
+        android:id="@+id/search"
+        android:icon="@android:drawable/ic_menu_search"
+        android:showAsAction="always"
+        android:title="Search"/>
+
+</menu>

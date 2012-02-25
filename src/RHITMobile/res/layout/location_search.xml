@@ -3,43 +3,24 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical" >
-    
+
     <ListView
         android:id="@android:id/list"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:layout_alignParentTop="true"
         android:layout_above="@id/btnShowOnMap"
+        android:layout_alignParentTop="true"
+        android:layout_weight="1"
         android:drawSelectorOnTop="false" />
 
     <TextView
         android:id="@android:id/empty"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingLeft="5dip" 
-    	android:paddingRight="5dip" 
         android:layout_centerInParent="true"
-        android:text="No Results :'("
+        android:paddingLeft="5dip"
+        android:paddingRight="5dip"
+        android:text="No Results :&apos;("
         android:textAppearance="?android:attr/textAppearanceMedium" />
-    
-    <View
-        android:id="@+id/btnBottom"
-    	android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-       	android:layout_alignParentBottom="true"
-       	android:layout_alignTop="@id/btnShowOnMap"
-        android:background="#000000" />
-    
-    <Button
-        android:id="@+id/btnShowOnMap"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-		android:drawableTop="@android:drawable/ic_menu_mapmode"
-		android:enabled="false"
-		android:text="Show On Map" />
-
 
 </RelativeLayout>
