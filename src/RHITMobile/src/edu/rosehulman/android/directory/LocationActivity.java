@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -14,11 +13,8 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
@@ -26,13 +22,19 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
+
 import edu.rosehulman.android.directory.db.DbIterator;
 import edu.rosehulman.android.directory.db.LocationAdapter;
 import edu.rosehulman.android.directory.model.Hyperlink;
 import edu.rosehulman.android.directory.model.LightLocation;
 import edu.rosehulman.android.directory.model.Location;
 
-public class LocationActivity extends Activity {
+public class LocationActivity extends SherlockActivity {
 
 	public static final String EXTRA_LOCATION = "LOCATION";
 	
@@ -40,7 +42,6 @@ public class LocationActivity extends Activity {
     
     private Location location;
     
-    private TextView name;
     private TextView description;
     
     private View linksGroup;
@@ -60,12 +61,14 @@ public class LocationActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.location);
+        
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setHomeButtonEnabled(true);
+        actionBar.setDisplayHomeAsUpEnabled(true);
         
         taskManager = new TaskManager();
         
-        name = (TextView)findViewById(R.id.name);
         description = (TextView)findViewById(R.id.description);
         linksList = (ListView)findViewById(R.id.links);
         childrenList = (ListView)findViewById(R.id.children);
@@ -162,7 +165,9 @@ public class LocationActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         //handle item selection
         switch (item.getItemId()) {
-        
+        case android.R.id.home:
+        	finish();
+        	return true;
         default:
             return super.onOptionsItemSelected(item);
         }
@@ -285,7 +290,7 @@ public class LocationActivity extends Activity {
     }
     
     private void updateLocation() {
-    	name.setText(location.name);
+    	setTitle(location.name);
     	description.setText(location.description);
     	
     	updateLinks();
