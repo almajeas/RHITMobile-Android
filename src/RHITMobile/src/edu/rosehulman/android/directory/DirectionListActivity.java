@@ -3,7 +3,6 @@ package edu.rosehulman.android.directory;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,7 +10,6 @@ import android.os.Parcelable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
@@ -19,12 +17,15 @@ import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import com.actionbarsherlock.app.SherlockActivity;
+
 import edu.rosehulman.android.directory.model.DirectionPath;
 import edu.rosehulman.android.directory.model.Directions;
 import edu.rosehulman.android.directory.model.Location;
 import edu.rosehulman.android.directory.util.ArrayUtil;
 
-public class DirectionListActivity extends Activity {
+public class DirectionListActivity extends SherlockActivity {
 	
 	public static final String EXTRA_DIRECTIONS = "DIRECTIONS";
 	public static final String EXTRA_LOCATIONS = "LOCATIONS";
@@ -46,7 +47,6 @@ public class DirectionListActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.direction_list);
         
         Intent intent = getIntent();
