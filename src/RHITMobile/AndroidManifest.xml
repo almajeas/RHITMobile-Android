@@ -36,8 +36,10 @@
         </activity>
         
         <activity
+            android:label="Preferences"
             android:name=".PreferencesActivity"  
-            android:exported="true" >
+            android:exported="true" 
+            android:theme="@style/Theme.Sherlock" >
         </activity>
         
         <activity

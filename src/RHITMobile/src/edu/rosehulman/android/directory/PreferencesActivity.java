@@ -6,13 +6,14 @@ import android.os.Bundle;
 import android.os.Process;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceClickListener;
-import android.preference.PreferenceActivity;
 import android.widget.Toast;
+
+import com.actionbarsherlock.app.SherlockPreferenceActivity;
 
 /**
  * An activity for managing preferences related to the app
  */
-public class PreferencesActivity extends PreferenceActivity {
+public class PreferencesActivity extends SherlockPreferenceActivity {
 
 	public static Intent createIntent(Context context) {
 		return new Intent(context, PreferencesActivity.class);
