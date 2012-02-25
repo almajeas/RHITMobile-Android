@@ -1,26 +1,19 @@
 package edu.rosehulman.android.directory;
 
-import java.util.Arrays;
-
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.BaseAdapter;
-import android.widget.ListView;
-import android.widget.TextView;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.ActionBar.Tab;
 import com.actionbarsherlock.app.ActionBar.TabListener;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.MenuItem;
+
+import edu.rosehulman.android.directory.model.RoomScheduleDay;
+import edu.rosehulman.android.directory.model.RoomScheduleItem;
+import edu.rosehulman.android.directory.model.RoomScheduleWeek;
 
 public class ScheduleRoomActivity extends SherlockFragmentActivity implements TabListener {
 	
@@ -31,12 +24,6 @@ public class ScheduleRoomActivity extends SherlockFragmentActivity implements Ta
 		intent.putExtra(EXTRA_ROOM, room);
 		return intent;
 	}
-	
-	private static final String[] HOURS = new String[] {"",
-			"8:05am", "9:00am", "9:55am",
-			"10:50am", "11:45am", "12:40pm",
-			"1:35pm", "2:30pm", "3:25pm",
-			"4:20pm"};
 
 	private String room;
 	
@@ -63,11 +50,34 @@ public class ScheduleRoomActivity extends SherlockFragmentActivity implements Ta
 		}
 		room = intent.getStringExtra(EXTRA_ROOM);
 		
-		LoadSchedule task = new LoadSchedule();
-		taskManager.addTask(task);
-		task.execute();
+		if (savedInstanceState != null &&
+				savedInstanceState.containsKey("Schedule")) {
+			processSchedule((RoomScheduleWeek)savedInstanceState.getParcelable("Schedule"));
+			getSupportActionBar().setSelectedNavigationItem(savedInstanceState.getInt("Selected"));
+		} else {
+			LoadSchedule task = new LoadSchedule();
+			taskManager.addTask(task);
+			task.execute();
+		}
 	}
-
+	
+	@Override
+	public void onSaveInstanceState(Bundle state) {
+		super.onSaveInstanceState(state);
+		
+		if (schedule != null) {
+			state.putParcelable("Schedule", schedule);
+		}
+		
+		state.putInt("Selected", getSupportActionBar().getSelectedNavigationIndex());
+		
+		//TODO restore selected state information
+		RoomScheduleFragment frag = (RoomScheduleFragment)getSupportActionBar().getSelectedTab().getTag();
+		Bundle selectedState = new Bundle();
+		frag.onSaveInstanceState(selectedState);
+		state.putBundle("SelectedState", selectedState);
+	}
+	
 	@Override
     public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
@@ -103,91 +113,14 @@ public class ScheduleRoomActivity extends SherlockFragmentActivity implements Ta
 	@Override
 	public void onTabReselected(Tab tab) {
 	}
-
-	private class RoomScheduleFragment extends Fragment {
-		
-		private String tag;
-		private RoomScheduleDay day;
-		
-        public RoomScheduleFragment(String tag, RoomScheduleDay day) {
-        	this.tag = tag;
-			this.day = day;
+	
+	private void processSchedule(RoomScheduleWeek res) {
+		schedule = res;
+		for (String day : res.tags) {
+			createTab(day, day);
 		}
-
-        public String getDay() {
-        	return tag;
-        }
-        
-		@Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        	View root = inflater.inflate(R.layout.schedule_list, null);
-			ListView list = (ListView)root.findViewById(R.id.list);
-			
-			list.setAdapter(new ScheduleAdapter(day.items));
-			
-			list.setOnItemClickListener(new OnItemClickListener() {
-
-				@Override
-				public void onItemClick(AdapterView<?> adapter, View v, int position, long id) {
-					if (adapter == null)
-						return;
-
-					RoomScheduleItem item = schedule.getDay(tag).items[position];
-					
-					Intent intent = ScheduleCourseActivity.createIntent(ScheduleRoomActivity.this, item.course, item.section);
-					startActivity(intent);
-				}
-				
-			});
-			
-			return root;
-
-        }
-
-		private class ScheduleAdapter extends BaseAdapter {
-			
-			private RoomScheduleItem[] items;
-			
-			public ScheduleAdapter(RoomScheduleItem[] items) {
-				this.items = items;
-			}
-
-			@Override
-			public int getCount() {
-				return items.length;
-			}
-
-			@Override
-			public Object getItem(int position) {
-				return items[position];
-			}
-
-			@Override
-			public long getItemId(int position) {
-				return position;
-			}
-
-			@Override
-			public View getView(int position, View convertView, ViewGroup parent) {
-				LayoutInflater inflater = LayoutInflater.from(ScheduleRoomActivity.this);
-				View v = convertView;
-				if (v == null) {
-					v = inflater.inflate(R.layout.schedule_room_list_item, null);
-				}
-				
-				RoomScheduleItem item = items[position];
-				
-				TextView course = (TextView)v.findViewById(R.id.course);
-				TextView time = (TextView)v.findViewById(R.id.time);
-				
-				course.setText(String.format("%s-%02d %s", item.course, item.section, item.courseName));
-				time.setText(String.format("%s - %s", HOURS[item.hourStart], HOURS[item.hourEnd]));
-				
-				return v;
-			}
-		}
-
-    }
+		getSupportActionBar().setSubtitle(room);
+	}
 	
 	private class LoadSchedule extends AsyncTask<Void, Void, RoomScheduleWeek> {
 
@@ -230,53 +163,9 @@ public class ScheduleRoomActivity extends SherlockFragmentActivity implements Ta
 		
 		@Override
 		protected void onPostExecute(RoomScheduleWeek res) {
-			schedule = res;
-			for (String day : res.tags) {
-				createTab(day, day);
-			}
-			
-			getSupportActionBar().setSubtitle(room);
+			processSchedule(res);
 		}
 		
 	}
 	
-	private class RoomScheduleItem {
-		public String course;
-		public String courseName;
-		public int section;
-		public int hourStart;
-		public int hourEnd;
-		
-		public RoomScheduleItem(String course, String courseName, int section, int hourStart, int hourEnd) {
-			this.course = course;
-			this.courseName = courseName;
-			this.section = section;
-			this.hourStart = hourStart;
-			this.hourEnd = hourEnd;
-		}
-	}
-	
-	private class RoomScheduleDay {
-		
-		public RoomScheduleItem[] items;
-
-		public RoomScheduleDay(RoomScheduleItem[] items) {
-			this.items = items;
-		}
-	}
-	
-	private class RoomScheduleWeek {
-		
-		private String[] tags;
-		private RoomScheduleDay[] days;
-		
-		public RoomScheduleWeek(String[] tags, RoomScheduleDay[] days) {
-			this.tags = tags;
-			this.days = days;
-		}
-		
-		public RoomScheduleDay getDay(String tag) {
-			return days[Arrays.asList(tags).indexOf(tag)];
-		}
-	}
 }
