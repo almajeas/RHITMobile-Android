@@ -7,7 +7,6 @@ import android.os.Bundle;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.ActionBar.Tab;
-import com.actionbarsherlock.app.ActionBar.TabListener;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.MenuItem;
 
@@ -15,7 +14,7 @@ import edu.rosehulman.android.directory.model.RoomScheduleDay;
 import edu.rosehulman.android.directory.model.RoomScheduleItem;
 import edu.rosehulman.android.directory.model.RoomScheduleWeek;
 
-public class ScheduleRoomActivity extends SherlockFragmentActivity implements TabListener {
+public class ScheduleRoomActivity extends SherlockFragmentActivity {
 	
 	public static final String EXTRA_ROOM = "ROOM";
 	
@@ -70,12 +69,6 @@ public class ScheduleRoomActivity extends SherlockFragmentActivity implements Ta
 		}
 		
 		state.putInt("Selected", getSupportActionBar().getSelectedNavigationIndex());
-		
-		//TODO restore selected state information
-		RoomScheduleFragment frag = (RoomScheduleFragment)getSupportActionBar().getSelectedTab().getTag();
-		Bundle selectedState = new Bundle();
-		frag.onSaveInstanceState(selectedState);
-		state.putBundle("SelectedState", selectedState);
 	}
 	
 	@Override
@@ -92,26 +85,13 @@ public class ScheduleRoomActivity extends SherlockFragmentActivity implements Ta
 	
 	private void createTab(String tag, String label) {
 		ActionBar actionBar = getSupportActionBar();
-		RoomScheduleFragment frag = new RoomScheduleFragment(tag, schedule.getDay(tag));
-		Tab tab = actionBar.newTab().setText(label).setTabListener(this).setTag(frag);
+		Bundle args = RoomScheduleFragment.buildArguments(tag, schedule.getDay(tag));
+		TabListener<RoomScheduleFragment> l = new TabListener<RoomScheduleFragment>(this, tag, RoomScheduleFragment.class, args);
+		Tab tab = actionBar.newTab()
+				.setText(label)
+				.setTabListener(l);
 		actionBar.addTab(tab);
 		//TODO set selected day to today
-	}
-
-	@Override
-	public void onTabSelected(Tab tab) {
-		RoomScheduleFragment frag = (RoomScheduleFragment)tab.getTag();
-		getSupportFragmentManager().beginTransaction().add(R.id.fragment_content, frag, frag.getDay()).commit();
-	}
-
-	@Override
-	public void onTabUnselected(Tab tab) {
-		RoomScheduleFragment frag = (RoomScheduleFragment)tab.getTag();
-		getSupportFragmentManager().beginTransaction().remove(frag).commit();
-	}
-
-	@Override
-	public void onTabReselected(Tab tab) {
 	}
 	
 	private void processSchedule(RoomScheduleWeek res) {

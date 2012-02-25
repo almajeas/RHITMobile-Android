@@ -4,10 +4,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.widget.FrameLayout;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.ActionBar.Tab;
-import com.actionbarsherlock.app.ActionBar.TabListener;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.MenuItem;
 
@@ -15,7 +15,7 @@ import edu.rosehulman.android.directory.model.PersonScheduleDay;
 import edu.rosehulman.android.directory.model.PersonScheduleItem;
 import edu.rosehulman.android.directory.model.PersonScheduleWeek;
 
-public class SchedulePersonActivity extends SherlockFragmentActivity implements TabListener {
+public class SchedulePersonActivity extends SherlockFragmentActivity {
 	
 	public static final String EXTRA_PERSON = "PERSON";
 	
@@ -50,6 +50,8 @@ public class SchedulePersonActivity extends SherlockFragmentActivity implements 
 		}
 		person = intent.getStringExtra(EXTRA_PERSON);
 		
+		((FrameLayout)findViewById(R.id.fragment_content)).removeAllViews();
+		
 		if (savedInstanceState != null &&
 				savedInstanceState.containsKey("Schedule")) {
 			processSchedule((PersonScheduleWeek)savedInstanceState.getParcelable("Schedule"));
@@ -70,12 +72,6 @@ public class SchedulePersonActivity extends SherlockFragmentActivity implements 
 		}
 		
 		state.putInt("Selected", getSupportActionBar().getSelectedNavigationIndex());
-		
-		//TODO restore selected state information
-		PersonScheduleFragment frag = (PersonScheduleFragment)getSupportActionBar().getSelectedTab().getTag();
-		Bundle selectedState = new Bundle();
-		frag.onSaveInstanceState(selectedState);
-		state.putBundle("SelectedState", selectedState);
 	}
     
 	@Override
@@ -92,26 +88,13 @@ public class SchedulePersonActivity extends SherlockFragmentActivity implements 
 	
 	private void createTab(String tag, String label) {
 		ActionBar actionBar = getSupportActionBar();
-		PersonScheduleFragment frag = new PersonScheduleFragment(tag, schedule.getDay(tag));
-		Tab tab = actionBar.newTab().setText(label).setTabListener(this).setTag(frag);
+		Bundle args = PersonScheduleFragment.buildArguments(tag, schedule.getDay(tag));
+		TabListener<PersonScheduleFragment> l = new TabListener<PersonScheduleFragment>(this, tag, PersonScheduleFragment.class, args);
+		Tab tab = actionBar.newTab()
+				.setText(label)
+				.setTabListener(l);
 		actionBar.addTab(tab);
 		//TODO set selected day to today
-	}
-
-	@Override
-	public void onTabSelected(Tab tab) {
-		PersonScheduleFragment frag = (PersonScheduleFragment)tab.getTag();
-		getSupportFragmentManager().beginTransaction().add(R.id.fragment_content, frag, frag.getDay()).commit();
-	}
-
-	@Override
-	public void onTabUnselected(Tab tab) {
-		PersonScheduleFragment frag = (PersonScheduleFragment)tab.getTag();
-		getSupportFragmentManager().beginTransaction().remove(frag).commit();
-	}
-
-	@Override
-	public void onTabReselected(Tab tab) {
 	}
 	
 	private void processSchedule(PersonScheduleWeek res) {
@@ -167,5 +150,4 @@ public class SchedulePersonActivity extends SherlockFragmentActivity implements 
 		}
 		
 	}
-
 }

@@ -28,14 +28,18 @@ public class PersonScheduleFragment extends Fragment {
 	private String tag;
 	private PersonScheduleDay day;
 	
+	public static Bundle buildArguments(String tag, PersonScheduleDay day) {
+		Bundle args = new Bundle();
+    	args.putString("Day", tag);
+    	args.putParcelable("Schedule", day);
+    	return args;
+	}
+	
 	public PersonScheduleFragment() {
 	}
 	
     public PersonScheduleFragment(String tag, PersonScheduleDay day) {
-    	Bundle args = new Bundle();
-    	args.putString("Day", tag);
-    	args.putParcelable("Schedule", day);
-    	setArguments(args);
+    	setArguments(buildArguments(tag, day));
 	}
 
     public String getDay() {
