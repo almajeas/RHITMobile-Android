@@ -7,11 +7,14 @@
     </group>
     <item android:id="@+id/goto_campus"
           android:icon="@drawable/ic_menu_home"
-          android:title="Goto Campus" />
+          android:title="Goto Campus" 
+          android:showAsAction="always" />
     <item android:id="@+id/top_level"
           android:icon="@android:drawable/ic_menu_directions"
-          android:title="Top Locations" />
+          android:title="Top Locations" 
+          android:showAsAction="ifRoom" />
     <item android:id="@+id/search"
           android:icon="@android:drawable/ic_menu_search"
-          android:title="Search" />
+          android:title="Search" 
+          android:showAsAction="always" />
 </menu>

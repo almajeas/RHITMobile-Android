@@ -19,19 +19,19 @@ import android.location.LocationProvider;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
-import android.view.Window;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockMapActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
 import com.google.android.maps.GeoPoint;
-import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
@@ -65,7 +65,7 @@ import edu.rosehulman.android.directory.util.Point;
 /**
  * Main entry point into MobileDirectory
  */
-public class CampusMapActivity extends MapActivity {
+public class CampusMapActivity extends SherlockMapActivity {
 	
     private static final String STATE_SELECTED_ID = "SelectedId";
     private static final String STATE_SELECTED_STEP = "SelectedStep";
@@ -128,6 +128,10 @@ public class CampusMapActivity extends MapActivity {
 		intent.putExtra(EXTRA_DIRECTIONS_FOCUS_INDEX, directionsFocusIndex);
 		return intent;
 	}
+	
+	public CampusMapActivity() {
+		super();
+	}
 
 	private Intent intent;
     private MapView mapView;
@@ -162,8 +166,10 @@ public class CampusMapActivity extends MapActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.campus_map);
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setHomeButtonEnabled(true);
+        actionBar.setDisplayHomeAsUpEnabled(true);
         
         intent = getIntent();
         
@@ -198,9 +204,11 @@ public class CampusMapActivity extends MapActivity {
 			SearchLocations task = new SearchLocations();
 			taskManager.addTask(task);
 			task.execute(searchQuery);
-			setTitle("Search: " + searchQuery);
+			actionBar.setSubtitle(searchQuery);
 		
     	} else if (ACTION_DIRECTIONS.equals(intent.getAction())) {
+			setTitle("Directions");
+			
         	if (savedInstanceState != null && 
         			savedInstanceState.containsKey(STATE_DIRECTIONS) &&
         			savedInstanceState.containsKey(STATE_LOCATIONS)) {
@@ -224,6 +232,8 @@ public class CampusMapActivity extends MapActivity {
 			
 		} else if (ACTION_TOUR.equals(intent.getAction())) {
 			long startId = intent.getLongExtra(EXTRA_TOUR_START_ID, -1);
+			
+			setTitle("Campus Tour");
 			
 			if (savedInstanceState != null && 
         			savedInstanceState.containsKey(STATE_DIRECTIONS) &&
@@ -366,7 +376,7 @@ public class CampusMapActivity extends MapActivity {
     
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
+        MenuInflater inflater = getSupportMenuInflater();
         inflater.inflate(R.menu.campus_map, menu);
         return true;
     }
@@ -563,6 +573,9 @@ public class CampusMapActivity extends MapActivity {
         	return true;
         case R.id.goto_campus:
         	moveToCampus(true);
+        	return true;
+        case android.R.id.home:
+        	finish();
         	return true;
         default:
             return super.onOptionsItemSelected(item);
