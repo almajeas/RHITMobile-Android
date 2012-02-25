@@ -11,10 +11,12 @@ import android.view.View.OnClickListener;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.actionbarsherlock.app.SherlockActivity;
+
 /**
  * Activity used to register users for the beta program
  */
-public class LoginActivity extends Activity {
+public class LoginActivity extends SherlockActivity {
 
 	public static Intent createIntent(Context context) {
 		return new Intent(context, LoginActivity.class);

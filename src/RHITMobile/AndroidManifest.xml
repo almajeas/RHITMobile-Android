@@ -47,7 +47,8 @@
             android:name=".LoginActivity"  
             android:exported="true" 
             android:configChanges="keyboardHidden|orientation" 
-            android:windowSoftInputMode="stateUnchanged" >
+            android:windowSoftInputMode="stateUnchanged" 
+            android:theme="@style/Theme.Sherlock" >
         </activity>
         
         <activity
