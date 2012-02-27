@@ -39,9 +39,18 @@ public class TourTagItem implements Parcelable {
 		return res;
 	}
 	
+	private boolean equal(String a, String b) {
+		if (a == null && b == null)
+			return true;
+		else if (a == null)
+			return false;
+		else
+			return a.equals(b);
+	}
+	
 	public boolean equals(TourTagItem o) {
 		return o.tag.equals(tag) &&
-				o.path.equals(path);
+				equal(o.path, path);
 	}
 	
 	@Override

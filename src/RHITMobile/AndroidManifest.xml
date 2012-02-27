@@ -110,7 +110,19 @@
             android:label="Tour Interests"
             android:name=".CampusToursTagSelectActivity"  
             android:theme="@style/Theme.Sherlock"
-            android:configChanges="keyboardHidden|orientation" >
+            android:configChanges="keyboardHidden|orientation"
+            android:launchMode="singleTop" >
+                        
+            <intent-filter >
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+            <intent-filter >
+                <action android:name="android.intent.action.VIEW" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable_tour_tag" />
         </activity>
         
         <activity
@@ -201,6 +213,10 @@
         <provider
             android:name=".providers.CampusServicesSearchSuggestions" 
             android:authorities="edu.rosehulman.android.directory.providers.CampusServicesSearchSuggestions"/>
+        
+        <provider
+            android:name=".providers.TourTagsSearchSuggestions" 
+            android:authorities="edu.rosehulman.android.directory.providers.TourTagsSearchSuggestions"/>
         
 		<service android:enabled="true" android:name=".DataUpdateService" />        
         

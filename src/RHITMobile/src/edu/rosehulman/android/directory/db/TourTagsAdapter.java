@@ -161,7 +161,7 @@ public class TourTagsAdapter extends TableAdapter {
 		{		
 			String projection[] = {KEY_PRE, KEY_POST};
 			String args[] = {String.valueOf(id)};
-			String where = KEY_ID + "=?";
+			String where = KEY_TAG_ID + "=?";
 			cursor = db.query(TABLE_NAME, projection, where, args, null, null, null);
 			
 			if (cursor.getCount() != 1)
@@ -217,6 +217,10 @@ public class TourTagsAdapter extends TableAdapter {
 	 * @return The tag group and all matching children
 	 */
 	public TourTagsGroup getGroup(Long id, String query) {
+		if (id == -1) {
+			id = getRootId();
+		}
+		
 		Cursor cursor;
 		long pre;
 		long post;

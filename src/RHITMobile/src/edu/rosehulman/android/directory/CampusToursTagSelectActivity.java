@@ -1,7 +1,9 @@
 package edu.rosehulman.android.directory;
 
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -19,6 +21,7 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 
+import edu.rosehulman.android.directory.LoadTourTag.OnTourTagLoadedListener;
 import edu.rosehulman.android.directory.db.TourTagsAdapter;
 import edu.rosehulman.android.directory.model.TourTag;
 import edu.rosehulman.android.directory.model.TourTagsGroup;
@@ -33,9 +36,18 @@ public class CampusToursTagSelectActivity extends SherlockActivity {
 	}
 	
 	private static Intent createIntent(Context context, long rootId, String path) {
+		return createIntent(context, rootId, path, null);
+	}
+	
+	private static Intent createIntent(Context context, long rootId, String path, String query) {
 		Intent intent = new Intent(context, CampusToursTagSelectActivity.class);
 		intent.putExtra(EXTRA_ROOT_ID, rootId);
 		intent.putExtra(EXTRA_PATH, path);
+		if (query != null) {
+			intent.setAction(Intent.ACTION_SEARCH);
+			intent.putExtra(SearchManager.QUERY, query);
+		}
+		intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 		return intent;
 	}
 	
@@ -66,11 +78,13 @@ public class CampusToursTagSelectActivity extends SherlockActivity {
 				String path = intent.getStringExtra(EXTRA_PATH);
 				if (position < root.children.length){
 					TourTagsGroup child = root.children[position];
-					if ("".equals(path))
+					if (path == null || "".equals(path))
 						path = child.name;
 					else
 						path += "/" + child.name;
-					startActivityForResult(createIntent(CampusToursTagSelectActivity.this, child.id, path), 1);
+					String query = intent.getStringExtra(SearchManager.QUERY);
+					Intent newIntent = createIntent(CampusToursTagSelectActivity.this, child.id, path, query);
+					startActivityForResult(newIntent, 1);
 				} else {
 					TourTag tag = root.tags[position-root.children.length];
 					Intent data = CampusToursTagListActivity.createResultIntent(tag, path);
@@ -85,44 +99,41 @@ public class CampusToursTagSelectActivity extends SherlockActivity {
 	
 	@Override
 	protected void onNewIntent(Intent intent) {
+		setIntent(intent);
 		tags.setAdapter(null);
 		handleIntent(intent);
 	}
 	
 	private void handleIntent(Intent intent) {
-		/* TODO search
+		
+		long parentId = intent.getLongExtra(EXTRA_ROOT_ID, -1);
+
 		if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-    		runSearch(intent.getStringExtra(SearchManager.QUERY));
+    		runSearch(parentId, intent.getStringExtra(SearchManager.QUERY));
     		
     	} else if (Intent.ACTION_VIEW.equals(intent.getAction())) {
 		    Uri data = intent.getData();
 		    
 		    long id = Long.parseLong(data.getPath());
-		    LoadCampusServiceHyperlink task = new LoadCampusServiceHyperlink(new OnHyperlinkLoadedListener() {
+		    LoadTourTag task = new LoadTourTag(new OnTourTagLoadedListener() {
 				
 				@Override
-				public void onLinkLoaded(Hyperlink link) {
+				public void onTagLoaded(TourTag tag, String path) {
+					Intent data = CampusToursTagListActivity.createResultIntent(tag, path);
+					setResult(RESULT_OK, data);
 					finish();
-					Intent newIntent = new Intent(Intent.ACTION_VIEW);
-					newIntent.setData(Uri.parse(link.url));
-					startActivity(newIntent);
 				}
 			}); 
 		    taskManager.addTask(task);
 		    task.execute(id);
+		    
     	} else {
-    		runSearch("");	
+
+    		if (parentId == -1)
+    			return;
+    		
+    		runSearch(parentId, "");
     	}
-    	*/
-		
-		if (!intent.hasExtra(EXTRA_ROOT_ID))
-			return;
-		
-		long id = intent.getLongExtra(EXTRA_ROOT_ID, -1);
-		if (id == -1)
-			return;
-		
-		runSearch(id, "");
 	}
 
 	private void runSearch(long parent, String query) {
