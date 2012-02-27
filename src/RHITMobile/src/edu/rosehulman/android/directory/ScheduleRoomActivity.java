@@ -4,17 +4,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.ActionBar.Tab;
-import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.MenuItem;
 
 import edu.rosehulman.android.directory.model.RoomScheduleDay;
 import edu.rosehulman.android.directory.model.RoomScheduleItem;
 import edu.rosehulman.android.directory.model.RoomScheduleWeek;
 
-public class ScheduleRoomActivity extends SherlockFragmentActivity {
+public class ScheduleRoomActivity extends FragmentActivity {
 	
 	public static final String EXTRA_ROOM = "ROOM";
 	

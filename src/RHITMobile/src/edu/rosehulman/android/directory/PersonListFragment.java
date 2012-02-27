@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Intent;
 import android.net.Uri;
+import android.support.v4.app.ListFragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,9 +15,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.actionbarsherlock.app.SherlockListFragment;
-
-public class PersonListFragment extends SherlockListFragment {
+public class PersonListFragment extends ListFragment {
 	
 	private String searchQuery;
 
@@ -73,7 +72,7 @@ public class PersonListFragment extends SherlockListFragment {
 
 	public void runSearch(String query) {
 		searchQuery = query;
-		getSherlockActivity().getSupportActionBar().setSubtitle(searchQuery);
+		getActivity().getSupportActionBar().setSubtitle(searchQuery);
 
 		List<PersonInfo> res = new ArrayList<PersonInfo>();
 		Log.d(C.TAG, "Query: " + query);
