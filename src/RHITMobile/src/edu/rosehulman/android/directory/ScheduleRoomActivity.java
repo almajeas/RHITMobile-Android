@@ -85,8 +85,8 @@ public class ScheduleRoomActivity extends FragmentActivity {
 	
 	private void createTab(String tag, String label) {
 		ActionBar actionBar = getSupportActionBar();
-		Bundle args = RoomScheduleFragment.buildArguments(tag, schedule.getDay(tag));
-		TabListener<RoomScheduleFragment> l = new TabListener<RoomScheduleFragment>(this, tag, RoomScheduleFragment.class, args);
+		Bundle args = ScheduleRoomFragment.buildArguments(tag, schedule.getDay(tag));
+		TabListener<ScheduleRoomFragment> l = new TabListener<ScheduleRoomFragment>(this, tag, ScheduleRoomFragment.class, args);
 		Tab tab = actionBar.newTab()
 				.setText(label)
 				.setTabListener(l);
