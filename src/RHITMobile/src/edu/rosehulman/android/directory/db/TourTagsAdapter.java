@@ -58,7 +58,7 @@ public class TourTagsAdapter extends TableAdapter {
 		for (TourTag link : category.tags) {
 			ContentValues values = new ContentValues();
 			values.put(KEY_NAME, link.name);
-			values.put(KEY_TAG_ID, link.id);
+			values.put(KEY_TAG_ID, link.tagId);
 			values.put(KEY_IS_DEFAULT, link.isDefault);
 			values.put(KEY_PRE, i);
 			values.put(KEY_POST, i+1);
@@ -112,7 +112,7 @@ public class TourTagsAdapter extends TableAdapter {
 			protected TourTag convertRow(Cursor cursor) {
 				TourTag res = new TourTag();
 				
-				res.id = cursor.getLong(iTagId);
+				res.tagId = cursor.getLong(iTagId);
 				res.name = cursor.getString(iName);
 				res.isDefault = true;
 				
@@ -151,17 +151,32 @@ public class TourTagsAdapter extends TableAdapter {
 	/**
 	 * Computes the path to the given tag node
 	 * 
-	 * @param id The id of a tag
+	 * @param tagId The tag id of a tag
 	 * @return The path to get to that tag
 	 */
-	public String getPath(long id) {
+	public String getTagPath(long tagId) {
+		long id = getRowId(tagId);
+		return getPath(id, false);
+	}
+	
+	/**
+	 * Computes the path to the given tag node
+	 * 
+	 * @param id The id of a tag
+	 * @param includeNode Should the given node be included
+	 * @return The path to get to that tag
+	 */
+	public String getPath(long id, boolean includeNode) {
+		if (id < 0)
+			return "";
+		
 		Cursor cursor;
 		long pre;
 		long post;
 		{		
 			String projection[] = {KEY_PRE, KEY_POST};
 			String args[] = {String.valueOf(id)};
-			String where = KEY_TAG_ID + "=?";
+			String where = KEY_ID + "=?";
 			cursor = db.query(TABLE_NAME, projection, where, args, null, null, null);
 			
 			if (cursor.getCount() != 1)
@@ -173,10 +188,20 @@ public class TourTagsAdapter extends TableAdapter {
 			cursor.close();
 		}
 		
-		String projection[] = {"group_concat(Name, '/')"};
+		String where;
+		if (includeNode) {
+			where = "Pre<=? AND Post>=? AND Pre>1 ";
+		} else {
+			where = "Pre<? AND Post>? AND Pre>1 ";
+		}
+		String query = 
+		"SELECT group_concat(Name, '/') AS Path " +
+		"FROM (SELECT Name " + 
+		"  FROM TourTags " +
+		"  WHERE " + where +
+		"  ORDER BY Pre)";
 		String args[] = {String.valueOf(pre), String.valueOf(post)};
-		String where = "Pre<? AND Post>? AND Pre>1";
-		cursor = db.query(TABLE_NAME, projection, where, args, null, null, null);
+		cursor = db.rawQuery(query, args);
 		
 		if (cursor.getCount() != 1)
 			return null;
@@ -197,6 +222,28 @@ public class TourTagsAdapter extends TableAdapter {
 		Cursor cursor;
 		String where = KEY_PRE + "='1'";
 		cursor = db.query(TABLE_NAME, projection, where, null, null, null, null);
+		
+		if (cursor.getCount() != 1)
+			return -1;
+		cursor.moveToFirst();
+		long id = cursor.getLong(cursor.getColumnIndex(KEY_ID));
+		cursor.close();
+		
+		return id;
+	}
+	
+	/**
+	 * Retrieves the id of given tag node
+	 * 
+	 * @param tagId the tag id of the tag node
+	 * @return the id of the tag node
+	 */
+	public long getRowId(long tagId) {
+		String projection[] = {KEY_ID};
+		Cursor cursor;
+		String where = KEY_TAG_ID + "=?";
+		String[] args = new String[] {String.valueOf(tagId)};
+		cursor = db.query(TABLE_NAME, projection, where, args, null, null, null);
 		
 		if (cursor.getCount() != 1)
 			return -1;
@@ -274,7 +321,7 @@ public class TourTagsAdapter extends TableAdapter {
 				"FROM (SELECT c1.TagId as _Id, c1.Name AS Name, c2.Name AS Path FROM TourTags c1 " +
 				"INNER JOIN TourTags c2 " +
 				"ON c2.Pre < c1.Pre AND c2.Post > c1.Post " +
-				"WHERE c1.TagId IS NOT NULL AND c1.Pre + 1 = c1.Post AND c1.Name LIKE ? " +
+				"WHERE c1.TagId IS NOT NULL AND c1.Pre + 1 = c1.Post AND c1.Name LIKE ? AND c2.Pre > 1 " +
 				"ORDER BY c1.Name, c2.Name) " +
 				"GROUP BY Name " +
 				"LIMIT 10 ";

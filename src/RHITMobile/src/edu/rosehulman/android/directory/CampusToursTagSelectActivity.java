@@ -197,6 +197,7 @@ public class CampusToursTagSelectActivity extends SherlockActivity {
 		
 		private long rootId;
 		private String query;
+		private String path;
 		
 		public LoadServices(long rootId, String query) {
 			this.rootId = rootId;
@@ -209,6 +210,7 @@ public class CampusToursTagSelectActivity extends SherlockActivity {
 			TourTagsAdapter tagsAdapter = new TourTagsAdapter();
 			tagsAdapter.open();
 			TourTagsGroup res = tagsAdapter.getGroup(rootId, query);
+			path = tagsAdapter.getPath(rootId, true);
 			tagsAdapter.close();
 			
 			return res;
@@ -219,7 +221,9 @@ public class CampusToursTagSelectActivity extends SherlockActivity {
 			root = res;
 			tags.setAdapter(new TagGroupAdapter(res));
 			
-			//TODO expand groups (if only one category and no tags match, dive into it)
+			if (!"".equals(path)) {
+				getSupportActionBar().setSubtitle(path);
+			}
 		}
 		
 	}

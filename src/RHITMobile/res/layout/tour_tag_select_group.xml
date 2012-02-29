@@ -12,8 +12,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:paddingLeft="30dp"
-        android:text="Medium Text"
+        android:paddingLeft="5dp"
+        android:text="@string/sample_text"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textStyle="bold" />
 

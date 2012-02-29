@@ -44,7 +44,7 @@ public class LoadTourTag extends AsyncTask<Long, Void, Void> {
 		TourTagsAdapter adapter = new TourTagsAdapter();
 		adapter.open();
 		tag = adapter.getTag(id);
-		path = adapter.getPath(id);
+		path = adapter.getTagPath(id);
 		adapter.close();
 		
 		return null;

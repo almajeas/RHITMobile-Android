@@ -12,9 +12,9 @@ import android.os.Parcelable;
 public class TourTag implements Parcelable {
 
 	/**
-	 * The id of the tag
+	 * The tag id (understandable by the server)
 	 */
-	public long id;
+	public long tagId;
 	
 	/**
 	 * The name of the tag
@@ -39,7 +39,7 @@ public class TourTag implements Parcelable {
 	 * @param name The name to use
 	 */
 	public TourTag(long id, String name) {
-		this.id = id;
+		this.tagId = id;
 		this.name = name;
 	}
 	
@@ -53,7 +53,7 @@ public class TourTag implements Parcelable {
 	public static TourTag deserialize(JSONObject root) throws JSONException {
 		TourTag res = new TourTag();
 		
-		res.id = root.getLong("Id");
+		res.tagId = root.getLong("Id");
 		res.name = root.getString("Name");
 		res.isDefault = root.getBoolean("IsDefault");
 		
@@ -61,7 +61,7 @@ public class TourTag implements Parcelable {
 	}
 
 	public boolean equals(TourTag o) {
-		return o.id == id &&
+		return o.tagId == tagId &&
 				o.name.equals(name);
 	}
 	
@@ -79,7 +79,7 @@ public class TourTag implements Parcelable {
 
 	@Override
 	public void writeToParcel(Parcel out, int flags) {
-		out.writeLong(id);
+		out.writeLong(tagId);
 		out.writeString(name);
 		out.writeInt(isDefault ? 1 : 0);
 	}
@@ -90,7 +90,7 @@ public class TourTag implements Parcelable {
 		public TourTag createFromParcel(Parcel in) {
 			TourTag res = new TourTag();
 			
-			res.id = in.readLong();
+			res.tagId = in.readLong();
 			res.name = in.readString();
 			res.isDefault = in.readInt() == 0 ? false : true;
 			

@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:paddingLeft="15dp"
-        android:text="Medium Text" />
+        android:paddingLeft="5dp"
+        android:text="@string/sample_text" />
 
 </RelativeLayout>

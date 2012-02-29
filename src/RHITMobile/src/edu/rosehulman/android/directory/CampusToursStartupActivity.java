@@ -303,7 +303,7 @@ public class CampusToursStartupActivity extends SherlockActivity {
 
 			TourTagItem[] res = new TourTagItem[tags.length];
 			for (int i = 0; i < res.length; i++) {
-				String path = tagsAdapter.getPath(tags[i].id);
+				String path = tagsAdapter.getTagPath(tags[i].tagId);
 				res[i] = new TourTagItem(tags[i], path);
 			}
 			tagsAdapter.close();

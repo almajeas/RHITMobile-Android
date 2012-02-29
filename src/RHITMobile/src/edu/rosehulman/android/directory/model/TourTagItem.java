@@ -34,7 +34,7 @@ public class TourTagItem implements Parcelable {
 	public static long[] getIds(TourTagItem[] tags) {
 		long[] res = new long[tags.length];
 		for (int i = 0; i < res.length; i++) {
-			res[i] = tags[i].tag.id;
+			res[i] = tags[i].tag.tagId;
 		}
 		return res;
 	}

@@ -282,7 +282,7 @@ public class CampusServicesAdapter extends TableAdapter {
 		"FROM (SELECT Name " + 
 		"  FROM CampusServices " +
 		"  WHERE Pre<=? AND Post>=? AND Pre>1 " +
-		"  ORDER BY Name)";
+		"  ORDER BY Pre)";
 		String args[] = {String.valueOf(pre), String.valueOf(post)};
 		cursor = db.rawQuery(query, args);
 		

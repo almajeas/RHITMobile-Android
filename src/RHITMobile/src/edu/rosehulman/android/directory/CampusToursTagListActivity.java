@@ -177,7 +177,7 @@ public class CampusToursTagListActivity extends SherlockActivity {
 
 		long[] tagIds = new long[tagItems.size()];
 		for (int i = 0; i < tagItems.size(); i++) {
-			tagIds[i] = tagItems.get(i).tag.id;
+			tagIds[i] = tagItems.get(i).tag.tagId;
 		}
 		
     	if (intent.hasExtra(EXTRA_START_LOCATION)) {
@@ -212,7 +212,7 @@ public class CampusToursTagListActivity extends SherlockActivity {
 
 		@Override
 		public long getItemId(int index) {
-			return tagItems.get(index).tag.id;
+			return tagItems.get(index).tag.tagId;
 		}
 
 		@Override
