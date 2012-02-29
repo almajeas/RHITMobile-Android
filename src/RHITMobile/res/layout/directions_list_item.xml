@@ -10,6 +10,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
+        android:contentDescription="@string/direction_icon"
         android:paddingRight="15dp" />
 
     <TextView
@@ -17,7 +18,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_toRightOf="@id/icon"
-        android:text="Direction"
+        android:text="@string/sample_text"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <TextView
@@ -27,7 +28,7 @@
         android:layout_alignParentRight="true"
         android:layout_below="@+id/text"
         android:paddingRight="10dp"
-        android:text="xxx ft"
+        android:text="@string/sample_text"
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
 </RelativeLayout>

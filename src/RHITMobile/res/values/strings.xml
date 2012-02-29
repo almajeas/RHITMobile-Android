@@ -1,10 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <string name="app_name">RHIT Mobile</string>
     <string name="search_hint">Search locations</string>
     <string name="people_search_hint">Search people</string>
     <string name="services_search_hint">Search services</string>
     <string name="tour_tags_search_hint">Search interests</string>
     <string name="no_results">No Results :\'(</string>
+    <string name="no_results_more_tags">No Results :\'(\nTry selecting more tags</string>
     <string name="sample_text">Sample Text</string>
+    <string name="on_campus_inside">On Campus (inside)</string>
+    <string name="on_campus_outside">On Campus (outside)</string>
+    <string name="off_campus">Off Campus</string>
+    <string name="select_tour_type">Select Tour Type:</string>
+    <string name="general">General</string>
+    <string name="interest_based">Interest based</string>
+    <string name="take_tour">Take Tour</string>
+    <string name="where_are_you">Where are you?</string>
+    <string name="tour_startup_message">Want to see campus before coming all the way out to see it in person?  At campus and need a quick overview of what Rose-Hulman has to offer?  Grab a quick tour here.  For more info, visit http://bit.ly/yMC495</string>
+    <string name="direction_icon">Direction Icon</string>
+    <string name="source_destination">Source/Destination</string>
+    <string name="map">Map</string>
+    <string name="directions">Directions</string>
+    <string name="schedule">Schedule</string>
+    <string name="links">Links</string>
+    <string name="whats_inside">What\'s Inside</string>
+    <string name="login_message">Have a Kerberos login?  Sign in to access features exclusive to members of Rose-Hulman.</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="back">Back</string>
+    <string name="login">Login</string>
+
 </resources>

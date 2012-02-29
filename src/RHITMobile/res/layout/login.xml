@@ -8,7 +8,7 @@
 
     <ScrollView
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_weight="1.0"
         android:fillViewport="true"
         android:padding="5dp" >
@@ -21,16 +21,16 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingBottom="20px"
-                android:paddingTop="5px"
-                android:text="Have a Kerberos login?  Sign in to access features exclusive to members of Rose-Hulman."
+                android:paddingBottom="20dp"
+                android:paddingTop="5dp"
+                android:text="@string/login_message"
                 android:textAppearance="?android:attr/textAppearanceMedium" >
             </TextView>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Username"
+                android:text="@string/username"
                 android:textAppearance="?android:attr/textAppearanceSmall" >
             </TextView>
 
@@ -38,14 +38,14 @@
                 android:id="@+id/username"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:hint="Username"
+                android:hint="@string/username"
                 android:inputType="text" >
             </EditText>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Password"
+                android:text="@string/password"
                 android:textAppearance="?android:attr/textAppearanceSmall" >
             </TextView>
 
@@ -53,15 +53,15 @@
                 android:id="@+id/password"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:hint="Password"
+                android:hint="@string/password"
                 android:inputType="textPassword" >
             </EditText>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingBottom="20px"
-                android:paddingTop="5px"
+                android:paddingBottom="20dp"
+                android:paddingTop="5dp"
                 android:text="Note: This feature is still in development. Any credentials will be accepted." >
             </TextView>
         </LinearLayout>
@@ -78,14 +78,14 @@
             android:layout_width="6dip"
             android:layout_height="wrap_content"
             android:layout_weight="1.0"
-            android:text="Back" />
+            android:text="@string/back" />
 
         <Button
             android:id="@+id/login"
             android:layout_width="6dip"
             android:layout_height="wrap_content"
             android:layout_weight="1.0"
-            android:text="Login" />
+            android:text="@string/login" />
     </LinearLayout>
 
 </LinearLayout>

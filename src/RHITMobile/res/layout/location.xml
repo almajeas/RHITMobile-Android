@@ -9,7 +9,7 @@
         android:id="@+id/description"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Description" />
+        android:text="@string/sample_text" />
 
     <LinearLayout
         android:id="@+id/linearLayout1"
@@ -24,7 +24,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1.0"
             android:drawableTop="@android:drawable/ic_menu_mapmode"
-            android:text="Map" />
+            android:text="@string/map" />
 
         <Button
             android:id="@+id/btnDirections"
@@ -32,7 +32,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1.0"
             android:drawableTop="@android:drawable/ic_menu_directions"
-            android:text="Directions" />
+            android:text="@string/directions" />
 
         <Button
             android:id="@+id/btnSchedule"
@@ -40,7 +40,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1.0"
             android:drawableTop="@android:drawable/ic_menu_my_calendar"
-            android:text="Schedule"
+            android:text="@string/schedule"
             android:visibility="gone" />
     </LinearLayout>
 
@@ -52,10 +52,9 @@
         android:paddingTop="5dip" >
 
         <TextView
-            android:id="@+id/name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Links"
+            android:text="@string/links"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <ListView
@@ -73,10 +72,9 @@
         android:visibility="gone" >
 
         <TextView
-            android:id="@+id/name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="What&apos;s Inside"
+            android:text="@string/whats_inside"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <ListView

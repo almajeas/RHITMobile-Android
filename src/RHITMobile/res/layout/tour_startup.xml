@@ -5,7 +5,7 @@
 
     <LinearLayout
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical" >
 
         <TextView
@@ -17,7 +17,7 @@
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
             android:paddingTop="5dp"
-            android:text="Want to see campus before coming all the way out to see it in person?  At campus and need a quick overview of what Rose-Hulman has to offer?  Grab a quick tour here.  For more info, visit http://bit.ly/yMC495" />
+            android:text="@string/tour_startup_message" />
 
         <ImageView
             android:layout_width="fill_parent"
@@ -30,12 +30,11 @@
             android:src="@android:drawable/divider_horizontal_dark" />
 
         <TextView
-            android:id="@+id/textView2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
-            android:text="Where are you?"
+            android:text="@string/where_are_you"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <RadioGroup
@@ -49,19 +48,19 @@
                 android:id="@+id/rdoOnCampusInside"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="On Campus (inside)" />
+                android:text="@string/on_campus_inside" />
 
             <RadioButton
                 android:id="@+id/rdoOnCampusOutside"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="On Campus (outside)" />
+                android:text="@string/on_campus_outside" />
 
             <RadioButton
                 android:id="@+id/rdoOffCampus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Off Campus" />
+                android:text="@string/off_campus" />
         </RadioGroup>
 
         <ImageView
@@ -75,12 +74,11 @@
             android:src="@android:drawable/divider_horizontal_dark" />
 
         <TextView
-            android:id="@+id/textView2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
-            android:text="Select Tour Type:"
+            android:text="@string/select_tour_type"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <RadioGroup
@@ -95,13 +93,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checked="true"
-                android:text="General" />
+                android:text="@string/general" />
 
             <RadioButton
                 android:id="@+id/rdoCustom"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Interest based" />
+                android:text="@string/interest_based" />
         </RadioGroup>
 
         <ImageView
@@ -120,7 +118,7 @@
             android:layout_height="wrap_content"
             android:enabled="false"
             android:padding="5dp"
-            android:text="Take Tour" />
+            android:text="@string/take_tour" />
     </LinearLayout>
 
 </ScrollView>
