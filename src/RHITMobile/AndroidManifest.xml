@@ -76,6 +76,17 @@
             android:label="Campus Services"
             android:name=".CampusServicesActivity"
             android:exported="true" 
+            android:theme="@style/Theme.Sherlock" >
+
+            <meta-data
+            	android:name="android.app.default_searchable"
+                android:value=".CampusServicesSearchActivity" />
+        </activity>
+        
+        <activity
+            android:label="Campus Services"
+            android:name=".CampusServicesSearchActivity"
+            android:exported="true" 
             android:theme="@style/Theme.Sherlock"
             android:launchMode="singleTop" >
                         

@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
 
     <ListView
         android:id="@android:id/list"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_alignParentTop="true" >
-    </ListView>
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:drawSelectorOnTop="false" />
 
     <TextView
         android:id="@android:id/empty"
@@ -17,7 +18,7 @@
         android:layout_centerInParent="true"
         android:paddingLeft="5dip"
         android:paddingRight="5dip"
-        android:text="No Results :&apos;("
+        android:text="@string/no_results"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
 </RelativeLayout>

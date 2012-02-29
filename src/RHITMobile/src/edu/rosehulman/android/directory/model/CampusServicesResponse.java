@@ -26,7 +26,15 @@ public class CampusServicesResponse {
 		
 		res.version = root.getString("Version");
 		res.root = CampusServicesCategory.deserialize(root.getJSONObject("ServicesRoot"));
-				
+
+		res.root.children[0].children = new CampusServicesCategory[] {
+				new CampusServicesCategory("Majors", new Hyperlink[] {
+						new Hyperlink("Computer Science and Software Engineering", "http://csse.rose-hulman.edu/"),
+						new Hyperlink("Mathematics", "http://www.rose-hulman.edu/math.aspx")
+				})
+		};
+		res.root.children[0].children[0].children = new CampusServicesCategory[] {};
+		
 		return res;
 	}
 }

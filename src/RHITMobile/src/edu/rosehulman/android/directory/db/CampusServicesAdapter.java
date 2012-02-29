@@ -6,6 +6,7 @@ import java.util.List;
 import android.app.SearchManager;
 import android.content.ContentValues;
 import android.database.Cursor;
+import edu.rosehulman.android.directory.model.CampusServiceItem;
 import edu.rosehulman.android.directory.model.CampusServicesCategory;
 import edu.rosehulman.android.directory.model.Hyperlink;
 
@@ -17,6 +18,7 @@ public class CampusServicesAdapter extends TableAdapter {
 	public static final String TABLE_NAME = "CampusServices";
 	
 	public static final String KEY_ID = "_Id";
+	public static final String KEY_PARENT = "Parent";
 	public static final String KEY_NAME = "Name";
 	public static final String KEY_URL = "Url";
 	public static final String KEY_PRE = "Pre";
@@ -36,6 +38,9 @@ public class CampusServicesAdapter extends TableAdapter {
 		//add each record to the database
 		root.name = null;
 		addCategory(root, 1);
+		
+		//update parent ids
+		updateParents(root);
 		
 		db.setTransactionSuccessful();
 		db.endTransaction();
@@ -72,9 +77,59 @@ public class CampusServicesAdapter extends TableAdapter {
 		values.put(KEY_NAME, category.name);
 		values.put(KEY_PRE, pre);
 		values.put(KEY_POST, i);
-		db.insertOrThrow(TABLE_NAME, null, values);
+		category.id = db.insertOrThrow(TABLE_NAME, null, values);
 		
 		return i+1;
+	}
+	
+	private void updateParents(CampusServicesCategory root) {
+		Cursor cursor;
+		long pre;
+		long post;
+		{		
+			String projection[] = {KEY_PRE, KEY_POST};
+			String args[] = {String.valueOf(root.id)};
+			String where = KEY_ID + "=?";
+			cursor = db.query(TABLE_NAME, projection, where, args, null, null, null);
+			
+			assert(cursor.getCount() == 1);
+			cursor.moveToFirst();
+			pre = cursor.getLong(cursor.getColumnIndex(KEY_PRE));
+			post = cursor.getLong(cursor.getColumnIndex(KEY_POST));
+			cursor.close();
+		}
+		
+		//update this category
+		String where = KEY_PRE + ">? AND " + KEY_POST + "<?";
+		String args[] = new String[] {String.valueOf(pre), String.valueOf(post)};
+		ContentValues values = new ContentValues();
+		values.put(KEY_PARENT, root.id);
+		db.update(TABLE_NAME, values, where, args);
+
+		//update the children
+		for (CampusServicesCategory child : root.children) {
+			updateParents(child);
+		}
+	}
+	
+	/**
+	 * Retrieves the id of the root category
+	 * 
+	 * @return the id of the root category
+	 */
+	public long getRootId() {
+		String projection[] = {KEY_ID};
+		Cursor cursor;
+		String where = KEY_PRE + "='1'";
+		cursor = db.query(TABLE_NAME, projection, where, null, null, null, null);
+		
+		if (cursor.getCount() != 1)
+			return -1;
+		cursor.moveToFirst();
+		long id = cursor.getLong(cursor.getColumnIndex(KEY_ID));
+		cursor.close();
+		
+		return id;
 	}
 	
 	/**
@@ -100,6 +155,31 @@ public class CampusServicesAdapter extends TableAdapter {
 		
 		return new Hyperlink(name, url);
 	}
+
+	/**
+	 * Provides search suggestions to the corresponding provider
+	 * 
+	 * @param path The search filter
+	 * @return A cursor suitable for the provider
+	 */
+	public DbIterator<CampusServiceItem> search(String path) {
+		if (path.length() == 0) {
+			return null;
+		}
+		
+		String query = 
+				"SELECT Name, Url, group_concat(Node, '/') AS Path " + 
+				"FROM (SELECT c1.Name AS Name, c2.Name AS Node, c1.Url as Url " + 
+				"  FROM CampusServices c1 " + 
+				"  INNER JOIN CampusServices c2 " + 
+				"  ON c2.Pre < c1.Pre AND c2.Post > c1.Post " + 
+				"  WHERE c1.Url IS NOT NULL AND c1.Pre + 1 = c1.Post AND c1.Name LIKE ? " + 
+				"  ORDER BY c1.Name, c2.Name) " + 
+				"GROUP BY Name " ;
+
+		String[] args = new String[] {"%" + path + "%"};
+		return new SearchIterator(db.rawQuery(query, args));
+	}	
 	
 	/**
 	 * Provides search suggestions to the corresponding provider
@@ -137,29 +217,134 @@ public class CampusServicesAdapter extends TableAdapter {
 	 * @return An array of categories matching either criteria
 	 */
 	public CampusServicesCategory[] getCategories(String filter) {
-		String query = "SELECT Pre, Post, Name, Url FROM CampusServices " +
+		String query = "SELECT _Id, Pre, Post, Name, Url FROM CampusServices " +
 			"WHERE Name IS NOT NULL AND ((Url IS NOT NULL AND Pre + 1 = Post AND Name LIKE ?) OR (Url IS NULL)) " +
 			"ORDER BY Pre";
 		String args[] = {"%" + filter + "%"};
 		Cursor cursor = db.rawQuery(query, args);
 		cursor.moveToFirst();
 		
-		return new SearchParser(cursor).convert();
+		return new SearchParser(cursor, true).convert();
+	}
+	
+	/**
+	 * Retrieves a single level of a single category
+	 *  
+	 * @param id The id of the category to retrieve (or -1 for root)
+	 * @return The requested category
+	 */
+	public CampusServicesCategory getCategory(long id) {
+		if (id < 0) {
+			id = getRootId();
+		}
+		
+		String query = "SELECT _Id, Pre, Post, Name, Url FROM CampusServices " +
+				"WHERE _Id=? OR Parent=?" +
+				"ORDER BY Pre";
+		String args[] = {String.valueOf(id), String.valueOf(id)};
+		Cursor cursor = db.rawQuery(query, args);
+
+		return new SearchParser(cursor, false).convertCategory();
+	}
+	
+
+	/**
+	 * Computes the path to the given node
+	 * 
+	 * @param id The id of a node
+	 * @return The path to get to that node
+	 */
+	public String getCategoryPath(long id) {
+		if (id < 0) {
+			return "";
+		}
+		
+		Cursor cursor;
+		long pre;
+		long post;
+		{		
+			String projection[] = {KEY_PRE, KEY_POST};
+			String args[] = {String.valueOf(id)};
+			String where = KEY_ID + "=?";
+			cursor = db.query(TABLE_NAME, projection, where, args, null, null, null);
+			
+			if (cursor.getCount() != 1)
+				return null;
+			
+			cursor.moveToFirst();
+			pre = cursor.getLong(cursor.getColumnIndex(KEY_PRE));
+			post = cursor.getLong(cursor.getColumnIndex(KEY_POST));
+			cursor.close();
+		}
+		
+		String query = 
+		"SELECT group_concat(Name, '/') AS Path " +
+		"FROM (SELECT Name " + 
+		"  FROM CampusServices " +
+		"  WHERE Pre<=? AND Post>=? AND Pre>1 " +
+		"  ORDER BY Name)";
+		String args[] = {String.valueOf(pre), String.valueOf(post)};
+		cursor = db.rawQuery(query, args);
+		
+		if (cursor.getCount() != 1)
+			return null;
+		cursor.moveToFirst();
+		String path = cursor.getString(0);
+		cursor.close();
+		
+		return path;
+	}
+	
+	private class SearchIterator extends DbIterator<CampusServiceItem> {
+		
+		private int iName;
+		private int iUrl;
+		private int iPath;
+
+		public SearchIterator(Cursor cursor) {
+			super(cursor);
+			iName = cursor.getColumnIndex(KEY_NAME);
+			iUrl = cursor.getColumnIndex(KEY_URL);
+			iPath = cursor.getColumnIndex("Path");
+		}
+
+		@Override
+		protected CampusServiceItem convertRow(Cursor cursor) {
+			String name = cursor.getString(iName);
+			String url = cursor.getString(iUrl);
+			String path = cursor.getString(iPath);
+			
+			return new CampusServiceItem(new Hyperlink(name, url), path);
+		}
+		
 	}
 	
 	private class SearchParser {
 		private Cursor cursor;
+		private int iId;
 		private int iPre;
 		private int iPost;
 		private int iName;
 		private int iUrl;
+		private boolean trim;
 		
-		public SearchParser(Cursor cursor) {
+		public SearchParser(Cursor cursor, boolean trim) {
 			this.cursor = cursor;
+			this.trim = trim;
+			iId = cursor.getColumnIndex(KEY_ID);
 			iPre = cursor.getColumnIndex(KEY_PRE);
 			iPost = cursor.getColumnIndex(KEY_POST);
 			iName = cursor.getColumnIndex(KEY_NAME);
 			iUrl = cursor.getColumnIndex(KEY_URL);
+		}
+		
+		public CampusServicesCategory convertCategory() {
+			cursor.moveToFirst();
+			
+			CampusServicesCategory res;
+			res = getCategory(1, Integer.MAX_VALUE);
+			cursor.close();
+			return res;
 		}
 		
 		public CampusServicesCategory[] convert() {
@@ -209,7 +394,7 @@ public class CampusServicesAdapter extends TableAdapter {
 		
 			CampusServicesCategory child;
 			while ((child = getCategory(pre, post)) != null) {
-				if (child.entries.length > 0 || child.children.length > 0)
+				if (!trim || child.entries.length > 0 || child.children.length > 0)
 					children.add(child);
 			}
 			
@@ -228,6 +413,7 @@ public class CampusServicesAdapter extends TableAdapter {
 				return null;
 			
 			CampusServicesCategory category = new CampusServicesCategory();
+			category.id = cursor.getLong(iId);
 			category.name = cursor.getString(iName);
 			cursor.moveToNext();
 			

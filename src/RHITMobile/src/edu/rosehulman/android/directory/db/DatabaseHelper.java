@@ -43,7 +43,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		return instance;
 	}
 
-	private static final int DATABASE_VERSION = 23;
+	private static final int DATABASE_VERSION = 24;
 	
 	private static final String TABLE_CAMPUS_SERVICES = "CampusServices";
 	private static final String CREATE_TABLE_CAMPUS_SERVICES =
@@ -51,6 +51,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 				"( _Id INTEGER PRIMARY KEY AUTOINCREMENT" +
 				", Pre INTEGER NOT NULL" +
 				", Post INTEGER NOT NULL" +
+				", Parent INTEGER NULL" +
 				", Name TEXT NULL" +
 				", Url TEXT NULL" +
 				");";

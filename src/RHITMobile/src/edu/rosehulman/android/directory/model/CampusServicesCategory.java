@@ -9,6 +9,9 @@ import org.json.JSONObject;
  */
 public class CampusServicesCategory {
 	
+	/** The internal id of this category (-1 if not known) */
+	public long id;
+	
 	/** The name of the category */
 	public String name;
 	
@@ -22,7 +25,7 @@ public class CampusServicesCategory {
 	 * Creates a new, empty CampusServicesCategory
 	 */
 	public CampusServicesCategory() {
-		
+		this.id = -1;
 	}
 	
 	/**
@@ -32,6 +35,7 @@ public class CampusServicesCategory {
 	 * @param entries The array of entries
 	 */
 	public CampusServicesCategory(String name, Hyperlink[] entries) {
+		this.id = -1;
 		this.name = name;
 		this.entries = entries;
 	}
