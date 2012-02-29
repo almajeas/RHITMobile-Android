@@ -7,6 +7,7 @@ import android.app.SearchManager;
 import android.content.ContentValues;
 import android.database.Cursor;
 import edu.rosehulman.android.directory.model.TourTag;
+import edu.rosehulman.android.directory.model.TourTagItem;
 import edu.rosehulman.android.directory.model.TourTagsGroup;
 
 /**
@@ -255,16 +256,15 @@ public class TourTagsAdapter extends TableAdapter {
 	}
 	
 	/**
-	 * Retrieves a filtered subset of a single tag group.
+	 * Retrieves a single tag group.
 	 * 
 	 * isDefault attribute is not loaded.
 	 * 
 	 * @param id The id of the group
-	 * @param query The search terms to use
 	 * @return The tag group and all matching children
 	 */
-	public TourTagsGroup getGroup(Long id, String query) {
-		if (id == -1) {
+	public TourTagsGroup getGroup(Long id) {
+		if (id < 0) {
 			id = getRootId();
 		}
 		
@@ -287,12 +287,10 @@ public class TourTagsAdapter extends TableAdapter {
 		}
 		
 		String projection[] = {KEY_ID, KEY_NAME, KEY_TAG_ID, KEY_PRE, KEY_POST};
-		String args[] = {String.valueOf(pre), String.valueOf(post), "%" + query + "%"};
+		String args[] = {String.valueOf(pre), String.valueOf(post)};
 		String where = 
 			KEY_PRE  + ">=? AND " +
-			KEY_POST + "<=? AND " +
-			"((Pre+1=Post AND Name LIKE ?) OR (Pre+1!=Post))"
-			;
+			KEY_POST + "<=?";
 		cursor = db.query(TABLE_NAME, projection, where, args, null, null, KEY_PRE);
 		cursor.moveToFirst();
 		
@@ -313,16 +311,16 @@ public class TourTagsAdapter extends TableAdapter {
 		}
 		
 		String query = "SELECT " + columns(
-				columnAlias(KEY_ID, "_id"),
-				columnAlias(KEY_ID, SearchManager.SUGGEST_COLUMN_INTENT_DATA),
+				columnAlias(KEY_TAG_ID, "_id"),
+				columnAlias(KEY_TAG_ID, SearchManager.SUGGEST_COLUMN_INTENT_DATA),
 				columnAlias(KEY_NAME, SearchManager.SUGGEST_COLUMN_TEXT_1),
 				columnAlias("group_concat(Path, '/')", SearchManager.SUGGEST_COLUMN_TEXT_2)
 				) + 
-				"FROM (SELECT c1.TagId as _Id, c1.Name AS Name, c2.Name AS Path FROM TourTags c1 " +
+				"FROM (SELECT c1.TagId as TagId, c1.Name AS Name, c2.Name AS Path FROM TourTags c1 " +
 				"INNER JOIN TourTags c2 " +
 				"ON c2.Pre < c1.Pre AND c2.Post > c1.Post " +
 				"WHERE c1.TagId IS NOT NULL AND c1.Pre + 1 = c1.Post AND c1.Name LIKE ? AND c2.Pre > 1 " +
-				"ORDER BY c1.Name, c2.Name) " +
+				"ORDER BY c1.Name, c2.Pre) " +
 				"GROUP BY Name " +
 				"LIMIT 10 ";
 
@@ -331,22 +329,51 @@ public class TourTagsAdapter extends TableAdapter {
 	}
 	
 	/**
-	 * Retrieves a group for a given filter
+	 * Searches for the given string
 	 * 
-	 * isDefault attribute is not loaded.
-	 * 
-	 * @param filter The string used to filter the category or name
-	 * @return A group matching either criteria
+	 * @param filter The search filter
+	 * @return An iterator over the search results
 	 */
-	public TourTagsGroup getGroup(String filter) {
-		String query = "SELECT _Id, Pre, Post, Name, Url FROM TourTags " +
-			"WHERE (TagId IS NOT NULL AND Pre + 1 = Post AND Name LIKE ?) OR (TagId IS NULL) " +
-			"ORDER BY Pre";
-		String args[] = {"%" + filter + "%"};
-		Cursor cursor = db.rawQuery(query, args);
-		cursor.moveToFirst();
+	public DbIterator<TourTagItem> search(String filter) {
+		if (filter.length() == 0) {
+			return null;
+		}
 		
-		return new SearchParser(cursor).convert();
+		String query = 
+				"SELECT Name, TagId, group_concat(Node, '/') AS Path " + 
+				"FROM (SELECT c1.Name AS Name, c2.Name AS Node, c1.TagId as TagId " + 
+				"  FROM TourTags c1 " + 
+				"  INNER JOIN TourTags c2 " + 
+				"  ON c2.Pre < c1.Pre AND c2.Post > c1.Post " + 
+				"  WHERE c1.Pre + 1 = c1.Post AND c1.Name LIKE ? AND c2.Pre > 1 " + 
+				"  ORDER BY c1.Name, c2.Pre) " + 
+				"GROUP BY Name " ;
+		String[] args = new String[] {"%" + filter + "%"};
+		return new SearchIterator(db.rawQuery(query, args));
+	}
+	
+	private class SearchIterator extends DbIterator<TourTagItem> {
+		
+		private int iTagId;
+		private int iName;
+		private int iPath;
+
+		public SearchIterator(Cursor cursor) {
+			super(cursor);
+			iTagId = cursor.getColumnIndex(KEY_TAG_ID);
+			iName = cursor.getColumnIndex(KEY_NAME);
+			iPath = cursor.getColumnIndex("Path");
+		}
+
+		@Override
+		protected TourTagItem convertRow(Cursor cursor) {
+			long tagId = cursor.getLong(iTagId);
+			String name = cursor.getString(iName);
+			String path = cursor.getString(iPath);
+			
+			return new TourTagItem(new TourTag(tagId, name), path);
+		}
+		
 	}
 	
 	private class SearchParser {

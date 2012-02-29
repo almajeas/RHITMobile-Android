@@ -26,12 +26,12 @@ import edu.rosehulman.android.directory.model.TourTagItem;
 
 public class CampusToursTagListActivity extends SherlockActivity {
 	
-    private static int REQUEST_TAG = 10;
-    
     public static String EXTRA_START_LOCATION = "START_LOCATION";
     public static String EXTRA_INITIAL_TAGS = "INITIAL_TAGS";
 	public static String EXTRA_TAG = "TAG";
 	public static String EXTRA_TAG_PATH = "TAG_PATH";
+	
+	public static final String ACTION_ADD_TAG = "AddTag";
 	
 	public static Intent createIntent(Context context, TourTagItem[] tags) {
 		Intent intent = new Intent(context, CampusToursTagListActivity.class);
@@ -50,10 +50,12 @@ public class CampusToursTagListActivity extends SherlockActivity {
 		return intent;
 	}
 	
-	public static Intent createResultIntent(TourTag tag, String path) {
-		Intent intent = new Intent();
+	public static Intent createIntent(Context context, TourTag tag, String path) {
+		Intent intent = new Intent(context, CampusToursTagListActivity.class);
+		intent.setAction(ACTION_ADD_TAG);
 		intent.putExtra(EXTRA_TAG, tag);
 		intent.putExtra(EXTRA_TAG_PATH, path);
+		intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		return intent;
 	}
 	
@@ -115,6 +117,18 @@ public class CampusToursTagListActivity extends SherlockActivity {
 		updateUI();
 	}
 	
+	@Override
+	public void onNewIntent(Intent intent) {
+		if (!ACTION_ADD_TAG.equals(intent.getAction()))
+			return;
+		
+		TourTag tag = intent.getParcelableExtra(EXTRA_TAG);
+		TourTagItem item = new TourTagItem(tag, intent.getStringExtra(EXTRA_TAG_PATH));
+		if (!tagItems.contains(item))
+			tagItems.add(item);
+		updateUI();
+	}
+	
 	public void onResume() {
 		super.onResume();
 	}
@@ -145,21 +159,6 @@ public class CampusToursTagListActivity extends SherlockActivity {
             return super.onOptionsItemSelected(item);
         }
     }
-    
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (requestCode != REQUEST_TAG)
-			return;
-		
-		if (resultCode != RESULT_OK)
-			return;
-		
-		TourTag tag = data.getParcelableExtra(EXTRA_TAG);
-		TourTagItem item = new TourTagItem(tag, data.getStringExtra(EXTRA_TAG_PATH));
-		if (!tagItems.contains(item))
-			tagItems.add(item);
-		updateUI();
-	}
     
     private void updateUI() {
 		tags.requestLayout();
@@ -262,7 +261,7 @@ public class CampusToursTagListActivity extends SherlockActivity {
 		@Override
 		protected void onPostExecute(Long res) {
 			Intent intent = CampusToursTagSelectActivity.createIntent(CampusToursTagListActivity.this, res);
-	    	startActivityForResult(intent, REQUEST_TAG);
+	    	startActivity(intent);
 		}
     }
     

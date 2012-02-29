@@ -157,13 +157,13 @@ public class CampusServicesAdapter extends TableAdapter {
 	}
 
 	/**
-	 * Provides search suggestions to the corresponding provider
+	 * Searches for the given string
 	 * 
-	 * @param path The search filter
-	 * @return A cursor suitable for the provider
+	 * @param filter The search filter
+	 * @return An iterator of search results
 	 */
-	public DbIterator<CampusServiceItem> search(String path) {
-		if (path.length() == 0) {
+	public DbIterator<CampusServiceItem> search(String filter) {
+		if (filter.length() == 0) {
 			return null;
 		}
 		
@@ -174,10 +174,10 @@ public class CampusServicesAdapter extends TableAdapter {
 				"  INNER JOIN CampusServices c2 " + 
 				"  ON c2.Pre < c1.Pre AND c2.Post > c1.Post " + 
 				"  WHERE c1.Url IS NOT NULL AND c1.Pre + 1 = c1.Post AND c1.Name LIKE ? " + 
-				"  ORDER BY c1.Name, c2.Name) " + 
+				"  ORDER BY c1.Name, c2.Pre) " + 
 				"GROUP BY Name " ;
 
-		String[] args = new String[] {"%" + path + "%"};
+		String[] args = new String[] {"%" + filter + "%"};
 		return new SearchIterator(db.rawQuery(query, args));
 	}	
 	
@@ -202,7 +202,7 @@ public class CampusServicesAdapter extends TableAdapter {
 				"INNER JOIN CampusServices c2 " +
 				"ON c2.Pre < c1.Pre AND c2.Post > c1.Post " +
 				"WHERE c1.Url IS NOT NULL AND c1.Pre + 1 = c1.Post AND c1.Name LIKE ? " +
-				"ORDER BY c1.Name, c2.Name) " +
+				"ORDER BY c1.Name, c2.Pre) " +
 				"GROUP BY Name " +
 				"LIMIT 10 ";
 

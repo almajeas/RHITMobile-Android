@@ -121,6 +121,17 @@
             android:label="Tour Interests"
             android:name=".CampusToursTagSelectActivity"  
             android:theme="@style/Theme.Sherlock"
+            android:configChanges="keyboardHidden|orientation" >
+            
+            <meta-data
+            	android:name="android.app.default_searchable"
+                android:value=".CampusToursTagSelectSearchActivity" />
+        </activity>
+        
+        <activity
+            android:label="Tour Interests"
+            android:name=".CampusToursTagSelectSearchActivity"  
+            android:theme="@style/Theme.Sherlock"
             android:configChanges="keyboardHidden|orientation"
             android:launchMode="singleTop" >
                         

@@ -30,9 +30,9 @@ public class TourTagsResponse {
 		//TODO remove
 		res.root.children[2].children = new TourTagsGroup[] {
 				new TourTagsGroup("Clubs", new TourTag[] {
-						new TourTag(100, "Fencing"),
-						new TourTag(101, "Parkore"),
-						new TourTag(102, "Running")
+						new TourTag(400, "Fencing"),
+						new TourTag(401, "Parkore"),
+						new TourTag(402, "Running")
 				}, new TourTagsGroup[] {})};
 
 		return res;

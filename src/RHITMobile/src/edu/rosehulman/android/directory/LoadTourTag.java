@@ -39,7 +39,7 @@ public class LoadTourTag extends AsyncTask<Long, Void, Void> {
 
 	@Override
 	protected Void doInBackground(Long... params) {
-		Long id = params[0];
+		long id = params[0];
 		
 		TourTagsAdapter adapter = new TourTagsAdapter();
 		adapter.open();
