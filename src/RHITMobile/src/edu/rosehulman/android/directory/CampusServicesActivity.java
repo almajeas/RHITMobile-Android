@@ -254,7 +254,7 @@ public class CampusServicesActivity extends SherlockListActivity {
 			CampusServicesAdapter adapter = new CampusServicesAdapter();
 			adapter.open();
 			CampusServicesCategory category = adapter.getCategory(rootId);
-			path = adapter.getCategoryPath(rootId);
+			path = adapter.getPath(rootId, true);
 			adapter.close();
 			
 			return category;

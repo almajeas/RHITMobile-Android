@@ -211,23 +211,6 @@ public class CampusServicesAdapter extends TableAdapter {
 	}
 	
 	/**
-	 * Retrieves an array of categories for a given filter
-	 * 
-	 * @param filter The string used to filter the category or hyperlink name
-	 * @return An array of categories matching either criteria
-	 */
-	public CampusServicesCategory[] getCategories(String filter) {
-		String query = "SELECT _Id, Pre, Post, Name, Url FROM CampusServices " +
-			"WHERE Name IS NOT NULL AND ((Url IS NOT NULL AND Pre + 1 = Post AND Name LIKE ?) OR (Url IS NULL)) " +
-			"ORDER BY Pre";
-		String args[] = {"%" + filter + "%"};
-		Cursor cursor = db.rawQuery(query, args);
-		cursor.moveToFirst();
-		
-		return new SearchParser(cursor, true).convert();
-	}
-	
-	/**
 	 * Retrieves a single level of a single category
 	 *  
 	 * @param id The id of the category to retrieve (or -1 for root)
@@ -244,7 +227,7 @@ public class CampusServicesAdapter extends TableAdapter {
 		String args[] = {String.valueOf(id), String.valueOf(id)};
 		Cursor cursor = db.rawQuery(query, args);
 
-		return new SearchParser(cursor, false).convertCategory();
+		return new SearchParser(cursor, false).convert();
 	}
 	
 
@@ -252,9 +235,10 @@ public class CampusServicesAdapter extends TableAdapter {
 	 * Computes the path to the given node
 	 * 
 	 * @param id The id of a node
+	 * @param includeNode Should the given node be included
 	 * @return The path to get to that node
 	 */
-	public String getCategoryPath(long id) {
+	public String getPath(long id, boolean includeNode) {
 		if (id < 0) {
 			return "";
 		}
@@ -277,11 +261,17 @@ public class CampusServicesAdapter extends TableAdapter {
 			cursor.close();
 		}
 		
+		String where;
+		if (includeNode) {
+			where = "Pre<=? AND Post>=? AND Pre>1 ";
+		} else {
+			where = "Pre<? AND Post>? AND Pre>1 ";
+		}
 		String query = 
 		"SELECT group_concat(Name, '/') AS Path " +
 		"FROM (SELECT Name " + 
 		"  FROM CampusServices " +
-		"  WHERE Pre<=? AND Post>=? AND Pre>1 " +
+		"  WHERE " + where +
 		"  ORDER BY Pre)";
 		String args[] = {String.valueOf(pre), String.valueOf(post)};
 		cursor = db.rawQuery(query, args);
@@ -338,20 +328,11 @@ public class CampusServicesAdapter extends TableAdapter {
 			iUrl = cursor.getColumnIndex(KEY_URL);
 		}
 		
-		public CampusServicesCategory convertCategory() {
+		public CampusServicesCategory convert() {
 			cursor.moveToFirst();
 			
 			CampusServicesCategory res;
 			res = getCategory(1, Integer.MAX_VALUE);
-			cursor.close();
-			return res;
-		}
-		
-		public CampusServicesCategory[] convert() {
-			cursor.moveToFirst();
-			
-			CampusServicesCategory[] res;
-			res = getCategories(1, Integer.MAX_VALUE);
 			cursor.close();
 			return res;
 		}
