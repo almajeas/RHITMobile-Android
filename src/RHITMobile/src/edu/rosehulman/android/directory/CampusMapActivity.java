@@ -1131,9 +1131,11 @@ private class LoadDirections extends ProcessDirections {
 
 				//fit the bounds of the map to the tour
 				BoundingBox bounds = offsiteTourLayer.bounds;
-				Point center = bounds.getCenter();
-				GeoPoint pt = new GeoPoint(center.x, center.y);
-				new ViewController(mapView).animateTo(pt, bounds.getHeight(), bounds.getWidth(), false);
+				if (bounds != null) {
+					Point center = bounds.getCenter();
+					GeoPoint pt = new GeoPoint(center.x, center.y);
+					new ViewController(mapView).animateTo(pt, bounds.getHeight(), bounds.getWidth(), false);
+				}
 				
 				rebuildOverlays();
 			} else {
