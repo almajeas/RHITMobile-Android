@@ -18,6 +18,7 @@ import com.actionbarsherlock.app.SherlockListActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.view.Window;
 
 import edu.rosehulman.android.directory.IDataUpdateService.AsyncRequest;
 import edu.rosehulman.android.directory.ServiceManager.ServiceRunnable;
@@ -48,6 +49,7 @@ public class CampusServicesActivity extends SherlockListActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);  
 		setContentView(R.layout.campus_services);
 		getSupportActionBar().setHomeButtonEnabled(true);
 		
@@ -225,7 +227,6 @@ public class CampusServicesActivity extends SherlockListActivity {
 	
 	private class LoadServices extends BackgroundTask<Void, Void, CampusServicesCategory> {
 		
-		private ProgressDialog dialog;
 		private long rootId;
 		private String path;
 		
@@ -235,18 +236,7 @@ public class CampusServicesActivity extends SherlockListActivity {
 
 		@Override
 		protected void onPreExecute() {
-			dialog = new ProgressDialog(CampusServicesActivity.this);
-			dialog.setTitle(null);
-			dialog.setMessage("Loading...");
-			dialog.setIndeterminate(true);
-			dialog.setCancelable(true);
-			dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-				@Override
-				public void onCancel(DialogInterface dialog) {
-					cancel(true);
-				}
-			});
-			dialog.show();
+			setSupportProgressBarIndeterminateVisibility(true);
 		}
 
 		@Override
@@ -262,17 +252,17 @@ public class CampusServicesActivity extends SherlockListActivity {
 
 		@Override
 		protected void onAbort() {
-			dialog.dismiss();
+			setSupportProgressBarIndeterminateVisibility(false);
 		}
 		
 		@Override
 		protected void onCancelled() {
-			dialog.dismiss();
+			setSupportProgressBarIndeterminateVisibility(false);
 		}
 		
 		@Override
 		protected void onPostExecute(CampusServicesCategory res) {
-			dialog.dismiss();
+			setSupportProgressBarIndeterminateVisibility(false);
 			
 			if (res == null) {
 				finish();

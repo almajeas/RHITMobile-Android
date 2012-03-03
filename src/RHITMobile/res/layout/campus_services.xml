@@ -17,7 +17,7 @@
         android:layout_centerInParent="true"
         android:paddingLeft="5dip"
         android:paddingRight="5dip"
-        android:text="@string/no_results"
+        android:text=""
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
 </RelativeLayout>
