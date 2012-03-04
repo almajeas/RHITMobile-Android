@@ -12,6 +12,7 @@ import com.actionbarsherlock.app.ActionBar.Tab;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.view.Window;
 
 import edu.rosehulman.android.directory.TermCodeProvider.OnTermSetListener;
 import edu.rosehulman.android.directory.model.RoomScheduleDay;
@@ -47,8 +48,9 @@ public class ScheduleRoomActivity extends FragmentActivity implements OnTermSetL
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		setContentView(R.layout.schedule_room);
-		
+
         ActionBar actionBar = getSupportActionBar();
         actionBar.setHomeButtonEnabled(true);
         actionBar.setDisplayHomeAsUpEnabled(true);
@@ -89,7 +91,13 @@ public class ScheduleRoomActivity extends FragmentActivity implements OnTermSetL
 		
 		state.putInt("Selected", getSupportActionBar().getSelectedNavigationIndex());
 	}
-	
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		taskManager.abortTasks();
+	}
+    
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getSupportMenuInflater();
@@ -141,6 +149,11 @@ public class ScheduleRoomActivity extends FragmentActivity implements OnTermSetL
 	}
 	
 	private class LoadSchedule extends AsyncTask<Void, Void, RoomScheduleWeek> {
+		
+		@Override
+		protected void onPreExecute() {
+			setSupportProgressBarIndeterminateVisibility(true);
+		}
 
 		@Override
 		protected RoomScheduleWeek doInBackground(Void... params) {
@@ -181,6 +194,7 @@ public class ScheduleRoomActivity extends FragmentActivity implements OnTermSetL
 		
 		@Override
 		protected void onPostExecute(RoomScheduleWeek res) {
+			setSupportProgressBarIndeterminateVisibility(false);
 			processSchedule(res);
 		}
 		

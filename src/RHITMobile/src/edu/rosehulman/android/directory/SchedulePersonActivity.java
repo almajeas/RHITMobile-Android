@@ -13,6 +13,7 @@ import com.actionbarsherlock.app.ActionBar.Tab;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.view.Window;
 
 import edu.rosehulman.android.directory.model.PersonScheduleDay;
 import edu.rosehulman.android.directory.model.PersonScheduleItem;
@@ -47,6 +48,7 @@ public class SchedulePersonActivity extends FragmentActivity implements TermCode
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		setContentView(R.layout.schedule_person);
 
         ActionBar actionBar = getSupportActionBar();
@@ -90,6 +92,12 @@ public class SchedulePersonActivity extends FragmentActivity implements TermCode
 		}
 		
 		state.putInt("Selected", getSupportActionBar().getSelectedNavigationIndex());
+	}
+	
+	@Override
+	protected void onPause() {
+		super.onPause();
+		taskManager.abortTasks();
 	}
     
 	@Override
@@ -143,6 +151,11 @@ public class SchedulePersonActivity extends FragmentActivity implements TermCode
 	}
 	
 	private class LoadSchedule extends AsyncTask<Void, Void, PersonScheduleWeek> {
+		
+		@Override
+		protected void onPreExecute() {
+			setSupportProgressBarIndeterminateVisibility(true);
+		}
 
 		@Override
 		protected PersonScheduleWeek doInBackground(Void... params) {
@@ -159,7 +172,7 @@ public class SchedulePersonActivity extends FragmentActivity implements TermCode
 					new PersonScheduleItem("CSSE404", "Compiler Construction", 1, 6, 6, "O267");
 			PersonScheduleItem csse499Wed = 
 					new PersonScheduleItem("CSSE499", "Senior Project III", 1, 7, 9, "O201");
-			
+
 			return new PersonScheduleWeek(
 					new String[] {"Mon", "Tue", "Wed", "Thu", "Fri"}, 
 					new PersonScheduleDay[] {
@@ -179,10 +192,12 @@ public class SchedulePersonActivity extends FragmentActivity implements TermCode
 									csse432, csse304
 							})
 					});
+			
 		}
 		
 		@Override
 		protected void onPostExecute(PersonScheduleWeek res) {
+			setSupportProgressBarIndeterminateVisibility(false);
 			processSchedule(res);
 		}
 		
