@@ -5,19 +5,13 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemSelectedListener;
-import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
-import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.ActionBar.Tab;
-import com.actionbarsherlock.view.ActionProvider;
 import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 
 import edu.rosehulman.android.directory.model.PersonScheduleDay;
@@ -25,7 +19,7 @@ import edu.rosehulman.android.directory.model.PersonScheduleItem;
 import edu.rosehulman.android.directory.model.PersonScheduleWeek;
 import edu.rosehulman.android.directory.model.TermCode;
 
-public class SchedulePersonActivity extends FragmentActivity {
+public class SchedulePersonActivity extends FragmentActivity implements TermCodeProvider.OnTermSetListener {
 	
 	public static final String EXTRA_PERSON = "PERSON";
 	
@@ -86,10 +80,9 @@ public class SchedulePersonActivity extends FragmentActivity {
     
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		menu.add("Term")
-			.setActionProvider(new TermCodeProvider(this))
-			.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS |
-					MenuItem.SHOW_AS_ACTION_WITH_TEXT);
+		MenuInflater inflater = getSupportMenuInflater();
+		inflater.inflate(R.menu.schedule_person, menu);
+		menu.findItem(R.id.term).setActionProvider(new TermCodeProvider(this));
         return true;
 	}
 
@@ -103,6 +96,12 @@ public class SchedulePersonActivity extends FragmentActivity {
 				return super.onOptionsItemSelected(item); 
 		}
 		return true;
+	}
+
+	@Override
+	public void onTermSet(TermCode newTerm) {
+		String text = newTerm.code + " selected";
+		Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
 	}
 	
 	private void createTab(String tag, String label) {
@@ -166,59 +165,6 @@ public class SchedulePersonActivity extends FragmentActivity {
 		@Override
 		protected void onPostExecute(PersonScheduleWeek res) {
 			processSchedule(res);
-		}
-		
-	}
-	
-	private class TermCodeProvider extends ActionProvider {
-	
-		private TermCode[] TERMS = new TermCode[] {
-			new TermCode("201230", "Spring 2012"),
-			new TermCode("201220", "Winter 2011"),
-			new TermCode("201210", "Fall 2011"),
-			new TermCode("201130", "Spring 2011"),
-			new TermCode("201120", "Winter 2010"),
-			new TermCode("201110", "Fall 2010"),
-			new TermCode("201030", "Spring 2010"),
-			new TermCode("201020", "Winter 2009"),
-			new TermCode("201010", "Fall 2009"),
-			new TermCode("200930", "Spring 2009"),
-			new TermCode("200920", "Winter 2008"),
-			new TermCode("200910", "Fall 2008")
-		};
-		
-		private Context mContext;
-
-		public TermCodeProvider(Context context) {
-			super(context);
-			mContext = context;
-		}
-
-		@Override
-		public boolean onPerformDefaultAction() {
-			return super.onPerformDefaultAction();
-		}
-
-		@Override
-		public View onCreateActionView() {
-			LayoutInflater inflater = LayoutInflater.from(mContext);
-			Spinner terms = (Spinner)inflater.inflate(R.layout.schedule_term_selector, null);
-			
-			ArrayAdapter<TermCode> termAdapter = new ArrayAdapter<TermCode>(mContext, R.layout.sherlock_spinner_item_light_dark, TERMS);
-	        termAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-	        terms.setAdapter(termAdapter);
-	        terms.setOnItemSelectedListener(new OnItemSelectedListener() {
-				@Override
-				public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
-					String text = TERMS[position].code + " selected";
-					Toast.makeText(mContext, text, Toast.LENGTH_SHORT).show();
-				}
-
-				@Override
-				public void onNothingSelected(AdapterView<?> adapterView) {}
-			});
-			
-			return terms;
 		}
 		
 	}

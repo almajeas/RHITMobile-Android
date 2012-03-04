@@ -5,16 +5,21 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.ActionBar.Tab;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 
+import edu.rosehulman.android.directory.TermCodeProvider.OnTermSetListener;
 import edu.rosehulman.android.directory.model.RoomScheduleDay;
 import edu.rosehulman.android.directory.model.RoomScheduleItem;
 import edu.rosehulman.android.directory.model.RoomScheduleWeek;
+import edu.rosehulman.android.directory.model.TermCode;
 
-public class ScheduleRoomActivity extends FragmentActivity {
+public class ScheduleRoomActivity extends FragmentActivity implements OnTermSetListener {
 	
 	public static final String EXTRA_ROOM = "ROOM";
 	
@@ -72,6 +77,14 @@ public class ScheduleRoomActivity extends FragmentActivity {
 	}
 	
 	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getSupportMenuInflater();
+		inflater.inflate(R.menu.schedule_room, menu);
+		menu.findItem(R.id.term).setActionProvider(new TermCodeProvider(this));
+        return true;
+	}
+	
+	@Override
     public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 			case android.R.id.home:
@@ -81,6 +94,12 @@ public class ScheduleRoomActivity extends FragmentActivity {
 				return super.onOptionsItemSelected(item); 
 		}
 		return true;
+	}
+	
+	@Override
+	public void onTermSet(TermCode newTerm) {
+		String text = newTerm.code + " selected";
+		Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
 	}
 	
 	private void createTab(String tag, String label) {
