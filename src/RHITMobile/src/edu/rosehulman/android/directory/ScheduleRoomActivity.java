@@ -22,6 +22,7 @@ import edu.rosehulman.android.directory.model.TermCode;
 public class ScheduleRoomActivity extends FragmentActivity implements OnTermSetListener {
 	
 	public static final String EXTRA_ROOM = "ROOM";
+	public static final String EXTRA_TERM_CODE = "TermCode";
 	
 	public static Intent createIntent(Context context, String room) {
 		Intent intent = new Intent(context, ScheduleRoomActivity.class);
@@ -29,7 +30,15 @@ public class ScheduleRoomActivity extends FragmentActivity implements OnTermSetL
 		return intent;
 	}
 
+	public static Intent createIntent(Context context, String room, TermCode term) {
+		Intent intent = new Intent(context, SchedulePersonActivity.class);
+		intent.putExtra(EXTRA_ROOM, room);
+		intent.putExtra(EXTRA_TERM_CODE, term);
+		return intent;
+	}
+
 	private String room;
+	private TermCode term;
 	
 	private TaskManager taskManager = new TaskManager();
 	
@@ -53,6 +62,11 @@ public class ScheduleRoomActivity extends FragmentActivity implements OnTermSetL
 			return;
 		}
 		room = intent.getStringExtra(EXTRA_ROOM);
+		
+		term = (TermCode)intent.getParcelableExtra(EXTRA_TERM_CODE);
+		if (term == null) {
+			term = User.getTerm();
+		}
 		
 		if (savedInstanceState != null &&
 				savedInstanceState.containsKey("Schedule")) {
@@ -80,7 +94,7 @@ public class ScheduleRoomActivity extends FragmentActivity implements OnTermSetL
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getSupportMenuInflater();
 		inflater.inflate(R.menu.schedule_room, menu);
-		menu.findItem(R.id.term).setActionProvider(new TermCodeProvider(this));
+		menu.findItem(R.id.term).setActionProvider(new TermCodeProvider(this, term));
         return true;
 	}
 	
@@ -98,8 +112,13 @@ public class ScheduleRoomActivity extends FragmentActivity implements OnTermSetL
 	
 	@Override
 	public void onTermSet(TermCode newTerm) {
+		if (newTerm.equals(term))
+			return;
+		
+		term = newTerm;
 		String text = newTerm.code + " selected";
 		Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
+		User.setTerm(term);
 	}
 	
 	private void createTab(String tag, String label) {

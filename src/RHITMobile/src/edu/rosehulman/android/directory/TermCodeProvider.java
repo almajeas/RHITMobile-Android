@@ -12,6 +12,7 @@ import android.widget.Spinner;
 import com.actionbarsherlock.view.ActionProvider;
 
 import edu.rosehulman.android.directory.model.TermCode;
+import edu.rosehulman.android.directory.util.ArrayUtil;
 
 /**
  * Provides a term code spinner for menu items
@@ -35,16 +36,19 @@ public class TermCodeProvider extends ActionProvider {
 	private Context mContext;
 	
 	private TermCode[] mTerms;
+	private TermCode mDefaultTerm;
 
 	/**
 	 * Creates a new instance
 	 * 
 	 * @param context The creating Activity.  Must implement OnTermSetListener.
+	 * @param term The term to initially select
 	 */
-	public TermCodeProvider(Context context) {
+	public TermCodeProvider(Context context, TermCode term) {
 		super(context);
 		mContext = context;
 		mTerms = TermCodes.generateTerms();
+		mDefaultTerm = term;
 	}
 
 	@Override
@@ -55,6 +59,12 @@ public class TermCodeProvider extends ActionProvider {
 		ArrayAdapter<TermCode> termAdapter = new ArrayAdapter<TermCode>(mContext, R.layout.sherlock_spinner_item_light_dark, mTerms);
         termAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         terms.setAdapter(termAdapter);
+        
+        int index = ArrayUtil.indexOf(mTerms, mDefaultTerm);
+        if (index >= 0) {
+        	terms.setSelection(index);
+        }
+        
         terms.setOnItemSelectedListener(new OnItemSelectedListener() {
 			@Override
 			public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {

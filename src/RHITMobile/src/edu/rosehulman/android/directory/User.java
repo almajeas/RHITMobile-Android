@@ -1,5 +1,6 @@
 package edu.rosehulman.android.directory;
 
+import edu.rosehulman.android.directory.model.TermCode;
 import android.content.SharedPreferences;
 
 /**
@@ -9,6 +10,8 @@ public class User {
 	
 	private static final String PREF_USERNAME = "Username";
 	private static final String PREF_COOKIE = "AuthCookie";
+	private static final String PREF_TERM_CODE = "TermCode";
+	private static final String PREF_TERM_NAME = "TermName";
 	
 	/**
 	 * Retrieve the user's authentication token
@@ -55,6 +58,37 @@ public class User {
 	 */
 	public static void clearLogin() {
 		getPrefs().edit().remove(PREF_USERNAME).remove(PREF_COOKIE).commit();
+	}
+
+	/**
+	 * Gets the user's current TermCode
+	 * 
+	 * @return The current TermCode, or the most recent one if none is set
+	 */
+	public static TermCode getTerm() {
+		String code = getPrefs().getString(PREF_TERM_CODE, null);
+		String name = getPrefs().getString(PREF_TERM_NAME, null);
+		
+		if (code == null || name == null) {
+			return TermCodes.generateTerms()[0];
+		}
+		
+		return new TermCode(code, name);
+	}
+	
+	/**
+	 * Set the user's preferred term code
+	 * 
+	 * @param term The new term code to use
+	 */
+	public static void setTerm(TermCode term) {
+		if (getTerm().equals(term))
+			return;
+		
+		getPrefs().edit()
+		.putString(PREF_TERM_CODE, term.code)
+		.putString(PREF_TERM_NAME, term.name)
+		.commit();
 	}
 	
 	private static SharedPreferences getPrefs() {

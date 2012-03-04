@@ -21,7 +21,8 @@ import edu.rosehulman.android.directory.model.TermCode;
 
 public class SchedulePersonActivity extends FragmentActivity implements TermCodeProvider.OnTermSetListener {
 	
-	public static final String EXTRA_PERSON = "PERSON";
+	public static final String EXTRA_PERSON = "Person";
+	public static final String EXTRA_TERM_CODE = "TermCode";
 	
 	public static Intent createIntent(Context context, String person) {
 		Intent intent = new Intent(context, SchedulePersonActivity.class);
@@ -29,7 +30,15 @@ public class SchedulePersonActivity extends FragmentActivity implements TermCode
 		return intent;
 	}
 
+	public static Intent createIntent(Context context, String person, TermCode term) {
+		Intent intent = new Intent(context, SchedulePersonActivity.class);
+		intent.putExtra(EXTRA_PERSON, person);
+		intent.putExtra(EXTRA_TERM_CODE, term);
+		return intent;
+	}
+	
 	private String person;
+	private TermCode term;
 	
 	private TaskManager taskManager = new TaskManager();
 	
@@ -53,6 +62,11 @@ public class SchedulePersonActivity extends FragmentActivity implements TermCode
 			return;
 		}
 		person = intent.getStringExtra(EXTRA_PERSON);
+		
+		term = (TermCode)intent.getParcelableExtra(EXTRA_TERM_CODE);
+		if (term == null) {
+			term = User.getTerm();
+		}
 		
 		((FrameLayout)findViewById(R.id.fragment_content)).removeAllViews();
 		
@@ -82,7 +96,7 @@ public class SchedulePersonActivity extends FragmentActivity implements TermCode
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getSupportMenuInflater();
 		inflater.inflate(R.menu.schedule_person, menu);
-		menu.findItem(R.id.term).setActionProvider(new TermCodeProvider(this));
+		menu.findItem(R.id.term).setActionProvider(new TermCodeProvider(this, term));
         return true;
 	}
 
@@ -100,8 +114,13 @@ public class SchedulePersonActivity extends FragmentActivity implements TermCode
 
 	@Override
 	public void onTermSet(TermCode newTerm) {
+		if (newTerm.equals(term))
+			return;
+		
+		term = newTerm;
 		String text = newTerm.code + " selected";
 		Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
+		User.setTerm(term);
 	}
 	
 	private void createTab(String tag, String label) {
