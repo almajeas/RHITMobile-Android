@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.ActionBar.Tab;
@@ -32,9 +31,10 @@ public class ScheduleRoomActivity extends FragmentActivity implements OnTermSetL
 	}
 
 	public static Intent createIntent(Context context, String room, TermCode term) {
-		Intent intent = new Intent(context, SchedulePersonActivity.class);
+		Intent intent = new Intent(context, ScheduleRoomActivity.class);
 		intent.putExtra(EXTRA_ROOM, room);
 		intent.putExtra(EXTRA_TERM_CODE, term);
+		intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 		return intent;
 	}
 
@@ -44,6 +44,8 @@ public class ScheduleRoomActivity extends FragmentActivity implements OnTermSetL
 	private TaskManager taskManager = new TaskManager();
 	
 	private RoomScheduleWeek schedule;
+
+	private Bundle savedInstanceState;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -57,8 +59,22 @@ public class ScheduleRoomActivity extends FragmentActivity implements OnTermSetL
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
         
 		getSupportFragmentManager().beginTransaction().add(new AuthenticatedFragment(), "auth").commit();
+
+		this.savedInstanceState = savedInstanceState;
+        
+		handleIntent(getIntent());
+	}
+	
+	@Override
+	protected void onNewIntent(Intent newIntent) {
+		super.onNewIntent(newIntent);
+		setIntent(newIntent);
+		this.savedInstanceState = null;
+		handleIntent(newIntent);
+	}
+	
+	private void handleIntent(Intent intent) {
 		
-		Intent intent = getIntent();
 		if (!intent.hasExtra(EXTRA_ROOM)) {
 			finish();
 			return;
@@ -70,10 +86,14 @@ public class ScheduleRoomActivity extends FragmentActivity implements OnTermSetL
 			term = User.getTerm();
 		}
 		
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.removeAllTabs();
+		
 		if (savedInstanceState != null &&
 				savedInstanceState.containsKey("Schedule")) {
 			processSchedule((RoomScheduleWeek)savedInstanceState.getParcelable("Schedule"));
 			getSupportActionBar().setSelectedNavigationItem(savedInstanceState.getInt("Selected"));
+			setSupportProgressBarIndeterminateVisibility(false);
 		} else {
 			LoadSchedule task = new LoadSchedule();
 			taskManager.addTask(task);
@@ -124,9 +144,10 @@ public class ScheduleRoomActivity extends FragmentActivity implements OnTermSetL
 			return;
 		
 		term = newTerm;
-		String text = newTerm.code + " selected";
-		Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
 		User.setTerm(term);
+
+		Intent intent = createIntent(this, room, term);
+		startActivity(intent);
 	}
 	
 	private void createTab(String tag, String label) {

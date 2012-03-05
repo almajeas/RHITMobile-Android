@@ -6,7 +6,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.widget.FrameLayout;
-import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.ActionBar.Tab;
@@ -35,6 +34,7 @@ public class SchedulePersonActivity extends FragmentActivity implements TermCode
 		Intent intent = new Intent(context, SchedulePersonActivity.class);
 		intent.putExtra(EXTRA_PERSON, person);
 		intent.putExtra(EXTRA_TERM_CODE, term);
+		intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 		return intent;
 	}
 	
@@ -44,6 +44,8 @@ public class SchedulePersonActivity extends FragmentActivity implements TermCode
 	private TaskManager taskManager = new TaskManager();
 	
 	private PersonScheduleWeek schedule;
+	
+	private Bundle savedInstanceState;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -57,8 +59,22 @@ public class SchedulePersonActivity extends FragmentActivity implements TermCode
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
         
 		getSupportFragmentManager().beginTransaction().add(new AuthenticatedFragment(), "auth").commit();
+		
+		this.savedInstanceState = savedInstanceState;
         
-		Intent intent = getIntent();
+		handleIntent(getIntent());
+	}
+	
+	@Override
+	protected void onNewIntent(Intent newIntent) {
+		super.onNewIntent(newIntent);
+		setIntent(newIntent);
+		this.savedInstanceState = null;
+		handleIntent(newIntent);
+	}
+	
+	private void handleIntent(Intent intent) {
+
 		if (!intent.hasExtra(EXTRA_PERSON)) {
 			finish();
 			return;
@@ -70,12 +86,16 @@ public class SchedulePersonActivity extends FragmentActivity implements TermCode
 			term = User.getTerm();
 		}
 		
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.removeAllTabs();
+		
 		((FrameLayout)findViewById(R.id.fragment_content)).removeAllViews();
 		
 		if (savedInstanceState != null &&
 				savedInstanceState.containsKey("Schedule")) {
 			processSchedule((PersonScheduleWeek)savedInstanceState.getParcelable("Schedule"));
 			getSupportActionBar().setSelectedNavigationItem(savedInstanceState.getInt("Selected"));
+			setSupportProgressBarIndeterminateVisibility(false);
 		} else {
 			LoadSchedule task = new LoadSchedule();
 			taskManager.addTask(task);
@@ -126,9 +146,10 @@ public class SchedulePersonActivity extends FragmentActivity implements TermCode
 			return;
 		
 		term = newTerm;
-		String text = newTerm.code + " selected";
-		Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
 		User.setTerm(term);
+
+		Intent intent = createIntent(this, person, term);
+		startActivity(intent);
 	}
 	
 	private void createTab(String tag, String label) {
@@ -159,6 +180,27 @@ public class SchedulePersonActivity extends FragmentActivity implements TermCode
 
 		@Override
 		protected PersonScheduleWeek doInBackground(Void... params) {
+			
+			if ("201210".equals(term.code)) {
+				PersonScheduleItem csse432 = 
+						new PersonScheduleItem("CSSE432", "Computer Networks", 1, 5, 5, "O205");
+				PersonScheduleItem csse404 = 
+						new PersonScheduleItem("CSSE404", "Compiler Construction", 1, 7, 7, "O267");
+
+				return new PersonScheduleWeek(
+						new String[] {"Mon", "Thu", "Fri"}, 
+						new PersonScheduleDay[] {
+								new PersonScheduleDay(new PersonScheduleItem[] {
+										csse432, csse404
+								}),
+								new PersonScheduleDay(new PersonScheduleItem[] {
+										csse432, csse404
+								}),
+								new PersonScheduleDay(new PersonScheduleItem[] {
+										csse432
+								})
+						});
+			}
 			
 			PersonScheduleItem csse432 = 
 					new PersonScheduleItem("CSSE432", "Computer Networks", 1, 5, 5, "O205");
