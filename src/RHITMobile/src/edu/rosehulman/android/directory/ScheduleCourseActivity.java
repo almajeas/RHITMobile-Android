@@ -19,6 +19,8 @@ import android.widget.TextView;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.MenuItem;
 
+import edu.rosehulman.android.directory.model.TermCode;
+
 public class ScheduleCourseActivity extends FragmentActivity {
 
 	public static final String EXTRA_COURSE = "PERSON";
@@ -33,6 +35,7 @@ public class ScheduleCourseActivity extends FragmentActivity {
 	
 	private String course;
 	private int section;
+	private TermCode term;
 	
 	private ListView detailsView;
 	
@@ -56,6 +59,9 @@ public class ScheduleCourseActivity extends FragmentActivity {
 		}
 		course = intent.getStringExtra(EXTRA_COURSE);
 		section = intent.getIntExtra(EXTRA_SECTION, 0);
+		
+		//FIXME from intent?
+		term = User.getTerm();
 		
 		getSupportFragmentManager().beginTransaction().add(new AuthenticatedFragment(), "auth").commit();
         
@@ -88,6 +94,7 @@ public class ScheduleCourseActivity extends FragmentActivity {
     	List<ListItem> items = new LinkedList<ListItem>();
     	items.add(new ListHeader("General Info"));
     	items.add(new LabelItem("Name", "Senior Project"));
+    	items.add(new LabelItem("Term", term.name));
     	items.add(new InstructorItem("Shawn Bohner"));
     	items.add(new LabelItem("Enrollment", "24/25"));
     	
