@@ -242,7 +242,7 @@ public class PersonActivity extends FragmentActivity {
     	private String person;
     	
     	public ScheduleItem(String person) {
-    		super("Schedule", null, android.R.drawable.sym_action_chat);
+    		super("Schedule", null, R.drawable.action_schedule);
     		this.person = person;
 		}
     	
@@ -256,7 +256,7 @@ public class PersonActivity extends FragmentActivity {
     private class EmailItem extends ClickableListItem {
     	
     	public EmailItem(String value) {
-    		super("Email", value, android.R.drawable.sym_action_email);
+    		super("Email", value, R.drawable.action_email);
 		}
     	
     	@Override
@@ -270,7 +270,7 @@ public class PersonActivity extends FragmentActivity {
     private class CallItem extends ClickableListItem {
     	
     	public CallItem(String value) {
-    		super("Call", value, android.R.drawable.sym_action_call);
+    		super("Call", value, R.drawable.action_call);
 		}
     	
     	@Override
@@ -284,7 +284,7 @@ public class PersonActivity extends FragmentActivity {
     private class LocationItem extends ClickableListItem {
     	
     	public LocationItem(String value) {
-    		super("Room #", value, android.R.drawable.sym_action_chat);
+    		super("Room #", value, R.drawable.action_location);
 		}
     	
     	@Override
