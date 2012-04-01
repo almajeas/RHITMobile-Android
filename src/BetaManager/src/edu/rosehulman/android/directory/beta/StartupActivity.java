@@ -202,6 +202,11 @@ public class StartupActivity extends Activity {
     	this.getPreferences(MODE_PRIVATE).edit().putInt(PREF_STATE, state.ordinal()).commit();
     	
     	switch (state) {
+    	case CHECKING_FOR_UPDATES:
+    		btnContinue.setText("Skip");
+    		btnContinue.setEnabled(true);
+    		break;
+    	
     	case NO_UPDATES:
     		btnContinue.setEnabled(true);
     		stepCheckForUpdates.setState(StatusState.SUCCESS);
