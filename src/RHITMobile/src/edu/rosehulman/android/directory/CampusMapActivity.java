@@ -23,7 +23,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
-import android.widget.Button;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
@@ -151,11 +150,11 @@ public class CampusMapActivity extends SherlockMapActivity {
     private EventOverlay eventLayer;
     private MyLocationOverlay myLocation;
     
-    private Button btnZoomIn;
-    private Button btnZoomOut;
-    private Button btnPrev;
-    private Button btnNext;
-    private Button btnListDirections;
+    private View btnZoomIn;
+    private View btnZoomOut;
+    private View btnPrev;
+    private View btnNext;
+    private View btnListDirections;
     
     private TaskManager taskManager;
     
@@ -176,11 +175,11 @@ public class CampusMapActivity extends SherlockMapActivity {
         taskManager = new TaskManager();
         
         mapView = (MapView)findViewById(R.id.mapview);
-        btnZoomIn = (Button)findViewById(R.id.btnZoomIn);
-        btnZoomOut = (Button)findViewById(R.id.btnZoomOut);
-        btnPrev = (Button)findViewById(R.id.btnPrev);
-        btnNext = (Button)findViewById(R.id.btnNext);
-        btnListDirections = (Button)findViewById(R.id.btnListDirections);
+        btnZoomIn = findViewById(R.id.btnZoomIn);
+        btnZoomOut = findViewById(R.id.btnZoomOut);
+        btnPrev = findViewById(R.id.btnPrev);
+        btnNext = findViewById(R.id.btnNext);
+        btnListDirections = findViewById(R.id.btnListDirections);
         
         overlayManager = new OverlayManager();
         myLocation = new MyLocationOverlay(this, mapView);
@@ -413,8 +412,12 @@ public class CampusMapActivity extends SherlockMapActivity {
 			}
 		};
         
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+		if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+			locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+		}
+		if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+		}
         
         //enable the location overlay
         myLocation.enableCompass();

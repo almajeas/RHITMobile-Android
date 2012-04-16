@@ -17,48 +17,63 @@
 	    android:layout_height="fill_parent"
 	    android:padding="10dp" >
 	    
-		<Button
+		<ImageView
 		    android:id="@+id/btnZoomOut"
 		    android:layout_width="wrap_content"
 		    android:layout_height="wrap_content"
 		    android:layout_alignParentBottom="true"
 		    android:layout_alignParentRight="true"
-		    android:background="@drawable/btn_zoom_down" />
+		    android:adjustViewBounds="true"
+		    android:clickable="true"
+		    android:contentDescription="@string/zoom_out"
+		    android:src="@drawable/btn_zoom_down" />
 	
-		<Button
+		<ImageView
 		    android:id="@+id/btnZoomIn"
 		    android:layout_width="wrap_content"
 		    android:layout_height="wrap_content"
 		    android:layout_above="@+id/btnZoomOut"
 		    android:layout_alignParentRight="true"
-		    android:background="@drawable/btn_zoom_up" />
+		    android:adjustViewBounds="true"
+		    android:clickable="true"
+		    android:contentDescription="@string/zoom_in"
+		    android:src="@drawable/btn_zoom_up" />
 	
-		<Button
+		<ImageView
 		    android:id="@+id/btnListDirections"
 		    android:layout_width="wrap_content"
 		    android:layout_height="wrap_content"
 		    android:layout_alignParentBottom="true"
 		    android:layout_alignParentLeft="true"
 		    android:layout_marginRight="20dp"
+		    android:adjustViewBounds="true"
+		    android:clickable="true"
 		    android:visibility="invisible"
-		    android:background="@drawable/btn_list_directions" />
+		    android:contentDescription="@string/view_list"
+		    android:src="@drawable/btn_list_directions" />
 	
-		<Button
+		<ImageView
 		    android:id="@+id/btnPrev"
 		    android:layout_width="wrap_content"
 		    android:layout_height="wrap_content"
 		    android:layout_alignParentBottom="true"
 		    android:layout_toRightOf="@+id/btnListDirections"
+		    android:adjustViewBounds="true"
+		    android:clickable="true"
 		    android:visibility="invisible"
-		    android:background="@drawable/btn_prev_down" />
+		    android:contentDescription="@string/previous"
+		    android:src="@drawable/btn_prev_down" />
 	
-		<Button
+		<ImageView
 		    android:id="@+id/btnNext"
 		    android:layout_width="wrap_content"
 		    android:layout_height="wrap_content"
 		    android:layout_alignParentBottom="true"
 		    android:layout_toRightOf="@+id/btnPrev"
+		    android:adjustViewBounds="true"
+		    android:clickable="true"
 		    android:visibility="invisible"
-		    android:background="@drawable/btn_next_up" />
+		    android:contentDescription="@string/next"
+		    android:src="@drawable/btn_next_up" />
 	</RelativeLayout>
 </RelativeLayout>
