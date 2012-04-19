@@ -21,7 +21,7 @@ import edu.rosehulman.android.directory.util.ArrayUtil;
 public class MobileDirectoryService implements IMobileDirectoryService {
 
 	private static final String HOST = "mobilewin.csse.rose-hulman.edu";
-	private static final int PORT = 5600;
+	private static final int PORT = 5601;
 	
 	private static ClientFactory factory;
 	
