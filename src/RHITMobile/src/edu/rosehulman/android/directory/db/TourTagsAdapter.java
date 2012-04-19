@@ -321,7 +321,7 @@ public class TourTagsAdapter extends TableAdapter {
 				"ON c2.Pre < c1.Pre AND c2.Post > c1.Post " +
 				"WHERE c1.TagId IS NOT NULL AND c1.Pre + 1 = c1.Post AND c1.Name LIKE ? AND c2.Pre > 1 " +
 				"ORDER BY c1.Name, c2.Pre) " +
-				"GROUP BY Name " +
+				"GROUP BY TagId " +
 				"LIMIT 10 ";
 
 		String[] args = new String[] {"%" + path + "%"};
@@ -347,7 +347,7 @@ public class TourTagsAdapter extends TableAdapter {
 				"  ON c2.Pre < c1.Pre AND c2.Post > c1.Post " + 
 				"  WHERE c1.Pre + 1 = c1.Post AND c1.Name LIKE ? AND c2.Pre > 1 " + 
 				"  ORDER BY c1.Name, c2.Pre) " + 
-				"GROUP BY Name " ;
+				"GROUP BY TagId " ;
 		String[] args = new String[] {"%" + filter + "%"};
 		return new SearchIterator(db.rawQuery(query, args));
 	}

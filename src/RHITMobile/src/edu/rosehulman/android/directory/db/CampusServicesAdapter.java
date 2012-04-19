@@ -169,13 +169,13 @@ public class CampusServicesAdapter extends TableAdapter {
 		
 		String query = 
 				"SELECT Name, Url, group_concat(Node, '/') AS Path " + 
-				"FROM (SELECT c1.Name AS Name, c2.Name AS Node, c1.Url as Url " + 
+				"FROM (SELECT c1._Id as Id, c1.Name AS Name, c2.Name AS Node, c1.Url as Url " +
 				"  FROM CampusServices c1 " + 
 				"  INNER JOIN CampusServices c2 " + 
 				"  ON c2.Pre < c1.Pre AND c2.Post > c1.Post " + 
 				"  WHERE c1.Url IS NOT NULL AND c1.Pre + 1 = c1.Post AND c1.Name LIKE ? " + 
 				"  ORDER BY c1.Name, c2.Pre) " + 
-				"GROUP BY Name " ;
+				"GROUP BY Id " ;
 
 		String[] args = new String[] {"%" + filter + "%"};
 		return new SearchIterator(db.rawQuery(query, args));
@@ -203,7 +203,7 @@ public class CampusServicesAdapter extends TableAdapter {
 				"ON c2.Pre < c1.Pre AND c2.Post > c1.Post " +
 				"WHERE c1.Url IS NOT NULL AND c1.Pre + 1 = c1.Post AND c1.Name LIKE ? " +
 				"ORDER BY c1.Name, c2.Pre) " +
-				"GROUP BY Name " +
+				"GROUP BY _Id " +
 				"LIMIT 10 ";
 
 		String[] args = new String[] {"%" + path + "%"};
