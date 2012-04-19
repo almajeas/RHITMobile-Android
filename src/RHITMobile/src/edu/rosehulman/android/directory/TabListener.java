@@ -41,25 +41,24 @@ public class TabListener<T extends Fragment> implements ActionBar.TabListener {
         }
     }
 
-    public void onTabSelected(Tab tab) {
-    	FragmentTransaction ft = mActivity.getSupportFragmentManager().beginTransaction();
-        if (mFragment == null) {
+    @Override
+    public void onTabSelected(Tab tab, FragmentTransaction ft) {
+    	if (mFragment == null) {
             mFragment = Fragment.instantiate(mActivity, mClass.getName(), mArgs);
             ft.add(android.R.id.content, mFragment, mTag);
         } else {
             ft.attach(mFragment);
         }
-        ft.commit();
     }
 
-    public void onTabUnselected(Tab tab) {
+    @Override
+    public void onTabUnselected(Tab tab, FragmentTransaction ft) {
         if (mFragment != null) {
-        	FragmentTransaction ft = mActivity.getSupportFragmentManager().beginTransaction();
             ft.detach(mFragment);
-            ft.commit();
         }
     }
 
-    public void onTabReselected(Tab tab) {
+    @Override
+    public void onTabReselected(Tab tab, FragmentTransaction ft) {
     }
 }

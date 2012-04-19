@@ -4,11 +4,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.widget.FrameLayout;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.ActionBar.Tab;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
@@ -19,7 +19,7 @@ import edu.rosehulman.android.directory.model.PersonScheduleItem;
 import edu.rosehulman.android.directory.model.PersonScheduleWeek;
 import edu.rosehulman.android.directory.model.TermCode;
 
-public class SchedulePersonActivity extends FragmentActivity implements TermCodeProvider.OnTermSetListener {
+public class SchedulePersonActivity extends SherlockFragmentActivity implements TermCodeProvider.OnTermSetListener {
 	
 	public static final String EXTRA_PERSON = "Person";
 	public static final String EXTRA_TERM_CODE = "TermCode";

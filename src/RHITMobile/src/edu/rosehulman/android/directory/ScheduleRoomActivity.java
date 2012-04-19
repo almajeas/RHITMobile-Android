@@ -4,10 +4,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.ActionBar.Tab;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
@@ -19,7 +19,7 @@ import edu.rosehulman.android.directory.model.RoomScheduleItem;
 import edu.rosehulman.android.directory.model.RoomScheduleWeek;
 import edu.rosehulman.android.directory.model.TermCode;
 
-public class ScheduleRoomActivity extends FragmentActivity implements OnTermSetListener {
+public class ScheduleRoomActivity extends SherlockFragmentActivity implements OnTermSetListener {
 	
 	public static final String EXTRA_ROOM = "ROOM";
 	public static final String EXTRA_TERM_CODE = "TermCode";
