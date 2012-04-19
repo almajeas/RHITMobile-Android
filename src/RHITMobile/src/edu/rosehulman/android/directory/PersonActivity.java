@@ -96,10 +96,6 @@ public class PersonActivity extends SherlockFragmentActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         //handle item selection
         switch (item.getItemId()) {
-        case R.id.add_contact:
-        	//TODO finish implementing createContact
-        	//createContact();
-        	return true;
         case android.R.id.home:
         	finish();
         	return true;
@@ -107,34 +103,6 @@ public class PersonActivity extends SherlockFragmentActivity {
             return super.onOptionsItemSelected(item);
         }
     }
-    /*
-	private void createContact() {
-		ArrayList<ContentProviderOperation> ops =
-				new ArrayList<ContentProviderOperation>();
-		int rawContactInsertIndex = ops.size();
-		ops.add(ContentProviderOperation.newInsert(RawContacts.CONTENT_URI)
-				.withValue(RawContacts.ACCOUNT_TYPE, "RHIT")
-				.withValue(RawContacts.ACCOUNT_NAME, "RHIT")
-				.build());
-
-		ops.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)
-				.withValueBackReference(Data.RAW_CONTACT_ID, rawContactInsertIndex)
-				.withValue(Data.MIMETYPE, StructuredName.CONTENT_ITEM_TYPE)
-				.withValue(StructuredName.DISPLAY_NAME, "Eric Hayes")
-				.build());
-
-		try {
-			getContentResolver().applyBatch(ContactsContract.AUTHORITY, ops);
-		} catch (RemoteException e) {
-			e.printStackTrace();
-			return;
-		} catch (OperationApplicationException e) {
-			e.printStackTrace();
-			return;
-		}
-
-	}
-	*/
     
     private void updateUI(PersonInfo person) {
     	setTitle(person.name);
