@@ -1,4 +1,6 @@
 package edu.rosehulman.android.directory;
+import org.apache.http.client.HttpResponseException;
+
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -6,12 +8,17 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.MenuItem;
+
+import edu.rosehulman.android.directory.model.AuthenticationResponse;
+import edu.rosehulman.android.directory.service.MobileDirectoryService;
 
 /**
  * Activity used to register users for the beta program
@@ -31,6 +38,8 @@ public class LoginActivity extends SherlockActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login);
+
+        getSupportActionBar().setHomeButtonEnabled(true);
         
         txtUsername = (TextView)findViewById(R.id.username);
         txtPassword = (TextView)findViewById(R.id.password);
@@ -54,10 +63,28 @@ public class LoginActivity extends SherlockActivity {
     	
     	taskManager.abortTasks();
     }
+
+	@Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+			case android.R.id.home:
+				finish();
+				break;
+			default:
+				return super.onOptionsItemSelected(item); 
+		}
+		return true;
+	}
     
     private void btnBack_onClick() {
-    	setResult(RESULT_CANCELED);
-    	finish();
+    	//FIXME remove temporary authentication bypass
+		User.setCookie("wellska1", "AN AUTH TOKEN");
+        setResult(Activity.RESULT_OK);
+		finish();
+		return;
+    	
+    	//setResult(RESULT_CANCELED);
+    	//finish();
     }
     
     private void btnLogin_onClick() {
@@ -89,6 +116,8 @@ public class LoginActivity extends SherlockActivity {
     	private String username;
     	private String password;
     	
+    	private boolean serverError;
+    	
     	public RegisterTask(String username, String password) {
     		this.username = username;
     		this.password = password;
@@ -113,15 +142,35 @@ public class LoginActivity extends SherlockActivity {
 		@Override
 		protected String doInBackground(Void... args) {
 
-			//TODO authenticate against the server
-			try {
-				Thread.sleep(2000);
-			} catch (InterruptedException e) { }
-
-			if ("jimmy".equals(username) || "".equals(password))
-				return null;
+			MobileDirectoryService service = new MobileDirectoryService();
+			AuthenticationResponse response = null;
+			serverError = false;
 			
-			return "$3cr3tT0|<3|\\|";
+			do {
+				try {
+					response = service.login(username, password);
+					if (response == null)
+						break;
+					
+				} catch (HttpResponseException e) {
+					Log.e(C.TAG, "Server is not accepting authentication");
+					serverError = true;
+					return null;
+					
+				} catch (Exception e) {
+					Log.e(C.TAG, "Failed to authenticate user, retrying...", e);
+					try {
+						Thread.sleep(2000);
+					} catch (InterruptedException ex) {}
+				}
+			} while (response == null);
+			
+			if (response == null) {
+				//login failure
+				return null;
+			}
+			
+			return response.token;
 		}
 
 		@Override
@@ -137,7 +186,11 @@ public class LoginActivity extends SherlockActivity {
     		dialog.dismiss();
     		
     		if (result == null) {
-    			Toast.makeText(LoginActivity.this, "Invalid username or password", Toast.LENGTH_SHORT).show();
+    			if (serverError) {
+    				Toast.makeText(LoginActivity.this, "Authentication service is rejecting requests.  Please try again later.", Toast.LENGTH_SHORT).show();
+    			} else {
+    				Toast.makeText(LoginActivity.this, "Invalid username or password", Toast.LENGTH_SHORT).show();
+    			}
     			return;
     		}
 

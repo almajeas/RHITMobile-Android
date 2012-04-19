@@ -1,11 +1,16 @@
 package edu.rosehulman.android.directory.service;
 
+import edu.rosehulman.android.directory.model.AuthenticationResponse;
 import edu.rosehulman.android.directory.model.CampusServicesResponse;
+import edu.rosehulman.android.directory.model.Course;
+import edu.rosehulman.android.directory.model.CoursesResponse;
 import edu.rosehulman.android.directory.model.DirectionsResponse;
 import edu.rosehulman.android.directory.model.LocationCollection;
 import edu.rosehulman.android.directory.model.LocationIdsResponse;
 import edu.rosehulman.android.directory.model.LocationNamesCollection;
 import edu.rosehulman.android.directory.model.TourTagsResponse;
+import edu.rosehulman.android.directory.model.UserDataResponse;
+import edu.rosehulman.android.directory.model.UsersResponse;
 import edu.rosehulman.android.directory.model.VersionResponse;
 
 /**
@@ -111,5 +116,68 @@ public interface IMobileDirectoryService {
 	 * @throws Exception On error
 	 */
 	public DirectionsResponse getOncampusTourStatus(int requestId) throws Exception;
+	
+	/**
+	 * Authenticates the user
+	 * @param username The user's username
+	 * @param password The user's password
+	 * @return An auth token, or null if invalid credentials were provided
+	 * @throws Exception On error
+	 */
+	public AuthenticationResponse login(String username, String password) throws Exception;
+	
+	/**
+	 * Gets information about a specific user
+	 * @param authToken The valid, active auth token
+	 * @param username The username to lookup
+	 * @return user data
+	 * @throws Exception On error
+	 */
+	public UserDataResponse getUser(String authToken, String username) throws Exception;
+	
+	/**
+	 * Gets lightweight information about a group of users
+	 * @param authToken The valid, active auth token
+	 * @param username The search query
+	 * @return lightweight user data list
+	 * @throws Exception On error
+	 */
+	public UsersResponse searchUsers(String authToken, String search) throws Exception;
+	
+	/**
+	 * Looks up a specific user's schedule
+	 * @param authToken The valid, active auth token
+	 * @param username The user's username
+	 * @return The courses the user is currently taking
+	 * @throws Exception On error
+	 */
+	public CoursesResponse getUserSchedule(String authToken, String username) throws Exception;
 
+	/**
+	 * Looks up information about a specific course
+	 * @param authToken The valid, active auth token
+	 * @param term The term the course exists in
+	 * @param crn The CRN of the course
+	 * @return Information about the course
+	 * @throws Exception On error
+	 */
+	public Course getCourse(String authToken, String term, int crn) throws Exception;
+	
+	/**
+	 * Searches through all courses 
+	 * @param authToken The valid, active auth token
+	 * @param search The search query
+	 * @return Matching courses
+	 * @throws Exception On error
+	 */
+	public CoursesResponse searchCourses(String authToken, String search) throws Exception;
+	
+	/**
+	 * Gets the schedule for a specific room
+	 * @param authToken The valid, active auth token
+	 * @param room The name of the room
+	 * @return The schedule for the found room, or null if no room is found
+	 * @throws Exception On error
+	 */
+	public CoursesResponse getRoomSchedule(String authToken, String room) throws Exception;
 }

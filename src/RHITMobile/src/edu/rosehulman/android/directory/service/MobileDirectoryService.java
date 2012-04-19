@@ -2,12 +2,17 @@ package edu.rosehulman.android.directory.service;
 
 import org.json.JSONObject;
 
+import edu.rosehulman.android.directory.model.AuthenticationResponse;
 import edu.rosehulman.android.directory.model.CampusServicesResponse;
+import edu.rosehulman.android.directory.model.Course;
+import edu.rosehulman.android.directory.model.CoursesResponse;
 import edu.rosehulman.android.directory.model.DirectionsResponse;
 import edu.rosehulman.android.directory.model.LocationCollection;
 import edu.rosehulman.android.directory.model.LocationIdsResponse;
 import edu.rosehulman.android.directory.model.LocationNamesCollection;
 import edu.rosehulman.android.directory.model.TourTagsResponse;
+import edu.rosehulman.android.directory.model.UserDataResponse;
+import edu.rosehulman.android.directory.model.UsersResponse;
 import edu.rosehulman.android.directory.model.VersionResponse;
 import edu.rosehulman.android.directory.util.ArrayUtil;
 
@@ -161,5 +166,111 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 		}
 		
 		return DirectionsResponse.deserialize(root);
+	}
+
+	@Override
+	public AuthenticationResponse login(String username, String password) throws Exception {
+		JsonClient client = factory.makeJsonClient(HOST, PORT, "/banner/authenticate");
+		client.addHeader("Login-Username", username);
+		client.addHeader("Login-Password", password);
+		
+		JSONObject root = client.execute();
+		if (root == null) {
+			return null;
+		}
+		
+		return AuthenticationResponse.deserialize(root);
+	}
+
+	@Override
+	public UserDataResponse getUser(String authToken, String username) throws Exception {
+		String url = String.format("/banner/user/data/%s", username);
+		JsonClient client = factory.makeJsonClient(HOST, PORT, url);
+		client.addHeader("Auth-Token", authToken);
+		
+		JSONObject root = client.execute();
+		if (root == null) {
+			return null;
+		}
+		
+		return UserDataResponse.deserialize(root);
+	}
+
+	@Override
+	public UsersResponse searchUsers(String authToken, String search) throws Exception {
+		String url = String.format("/banner/user/search/%s", search);
+		JsonClient client = factory.makeJsonClient(HOST, PORT, url);
+		client.addHeader("Auth-Token", authToken);
+		
+		JSONObject root = client.execute();
+		if (root == null) {
+			return null;
+		}
+		
+		return UsersResponse.deserialize(root);
+	}
+
+	@Override
+	public CoursesResponse getUserSchedule(String authToken, String username) throws Exception {
+		String url = String.format("/banner/user/schedule/%s", username);
+		JsonClient client = factory.makeJsonClient(HOST, PORT, url);
+		client.addHeader("Auth-Token", authToken);
+		client.addParameter("getschedule", "true");
+		
+		JSONObject root = client.execute();
+		if (root == null) {
+			return null;
+		}
+		
+		return CoursesResponse.deserialize(root);
+	}
+
+	@Override
+	public Course getCourse(String authToken, String term, int crn) throws Exception {
+		String url = String.format("/banner/course/data/%s/%d", term, crn);
+		JsonClient client = factory.makeJsonClient(HOST, PORT, url);
+		client.addHeader("Auth-Token", authToken);
+		client.addParameter("getschedule", "true");
+		client.addParameter("getenrolled", "true");
+		
+		JSONObject root = client.execute();
+		if (root == null) {
+			return null;
+		}
+		
+		CoursesResponse response = CoursesResponse.deserialize(root);
+		
+		assert(response.courses.length != 1);
+		
+		return response.courses[0]; 
+	}
+
+	@Override
+	public CoursesResponse searchCourses(String authToken, String search) throws Exception {
+		String url = String.format("/banner/course/search/%s", search);
+		JsonClient client = factory.makeJsonClient(HOST, PORT, url);
+		client.addHeader("Auth-Token", authToken);
+		
+		JSONObject root = client.execute();
+		if (root == null) {
+			return null;
+		}
+		
+		return CoursesResponse.deserialize(root);
+	}
+
+	@Override
+	public CoursesResponse getRoomSchedule(String authToken, String room) throws Exception {
+		String url = String.format("/banner/room/schedule/%s", room);
+		JsonClient client = factory.makeJsonClient(HOST, PORT, url);
+		client.addHeader("Auth-Token", authToken);
+		client.addParameter("getschedule", "true");
+		
+		JSONObject root = client.execute();
+		if (root == null) {
+			return null;
+		}
+		
+		return CoursesResponse.deserialize(root);
 	}
 }

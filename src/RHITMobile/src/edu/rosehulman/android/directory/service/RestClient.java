@@ -5,6 +5,7 @@ import java.net.URISyntaxException;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
@@ -14,6 +15,7 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URIUtils;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 
 import android.net.SSLCertificateSocketFactory;
@@ -23,6 +25,9 @@ public abstract class RestClient {
 
 	/** The set of parameters added to the query string */
 	protected List<NameValuePair> queryParams;
+	
+	/** The set of headers to send */
+	protected List<Header> headers;
 
 	/** The path of the request */
 	protected String path;
@@ -31,7 +36,8 @@ public abstract class RestClient {
 	private int port;
 	private HttpMethod method;
 
-	/** Create a new RestClient
+	/** 
+	 * Create a new RestClient
 	 * 
 	 * @param host
 	 *            The host to send the request to (i.e. example.com)
@@ -41,13 +47,15 @@ public abstract class RestClient {
 	 *            The request path (i.e. index.htm) */
 	public RestClient(String host, int port, String path) {
 		this.queryParams = new LinkedList<NameValuePair>();
+		this.headers = new LinkedList<Header>();
 		this.host = host;
 		this.port = port;
 		this.path = path;
 		this.method = HttpMethod.GET;
 	}
 
-	/** Adds a parameter to the request's query string. This method does not do
+	/**
+	 * Adds a parameter to the request's query string. This method does not do
 	 * duplicate detection. Adding a parameter more than once will result in a
 	 * query string with a duplicated parameter.
 	 * 
@@ -58,8 +66,19 @@ public abstract class RestClient {
 	public void addParameter(String name, String value) {
 		queryParams.add(new BasicNameValuePair(name, value));
 	}
+	
+	/**
+	 * Adds a header to the request
+	 * 
+	 * @param name The name of the header
+	 * @param value The header's value
+	 */
+	public void addHeader(String name, String value) {
+		headers.add(new BasicHeader(name, value));
+	}
 
-	/** Sets the HTTP method that is used for this request
+	/** 
+	 * Sets the HTTP method that is used for this request
 	 * 
 	 * @param method
 	 *            The method to use */
@@ -67,7 +86,8 @@ public abstract class RestClient {
 		this.method = method;
 	}
 
-	/** Perform the REST request, parsing the server's response as a JSONObject
+	/** 
+	 * Perform the REST request, parsing the server's response as a JSONObject
 	 * 
 	 * @return The HttpResponse
 	 * 
@@ -95,6 +115,10 @@ public abstract class RestClient {
 			break;
 		default:
 			throw new UnsupportedOperationException("Invalid http method");
+		}
+		
+		for (Header header : headers) {
+			request.addHeader(header);
 		}
 		
 		HttpClient http = new DefaultHttpClient(SSLUtil.getManager(), SSLUtil.getParams());
