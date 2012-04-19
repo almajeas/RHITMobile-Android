@@ -169,6 +169,14 @@ public class CampusToursStartupActivity extends SherlockActivity {
 	}
 	
     @Override
+	protected void onSaveInstanceState(Bundle state) {
+		super.onSaveInstanceState(state);
+		
+		//TODO save/restore inside room state
+		//TODO save/restore outside position state
+	}
+
+	@Override
     public boolean onOptionsItemSelected(MenuItem item) {
         //handle item selection
         switch (item.getItemId()) {

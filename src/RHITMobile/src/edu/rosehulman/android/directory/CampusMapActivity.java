@@ -18,6 +18,7 @@ import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -58,6 +59,7 @@ import edu.rosehulman.android.directory.model.LocationIdsResponse;
 import edu.rosehulman.android.directory.model.LocationNamesCollection;
 import edu.rosehulman.android.directory.model.VersionType;
 import edu.rosehulman.android.directory.service.MobileDirectoryService;
+import edu.rosehulman.android.directory.util.ArrayUtil;
 import edu.rosehulman.android.directory.util.BoundingBox;
 import edu.rosehulman.android.directory.util.Point;
 
@@ -212,7 +214,8 @@ public class CampusMapActivity extends SherlockMapActivity {
         			savedInstanceState.containsKey(STATE_DIRECTIONS) &&
         			savedInstanceState.containsKey(STATE_LOCATIONS)) {
 				Directions directions = savedInstanceState.getParcelable(STATE_DIRECTIONS);
-				Location[] locations = (Location[])savedInstanceState.getParcelableArray(STATE_LOCATIONS);
+				Parcelable[] pLocations = savedInstanceState.getParcelableArray(STATE_LOCATIONS);
+				Location[] locations = ArrayUtil.cast(pLocations, new Location[pLocations.length]);
 				
 				generateDirectionsLayer(directions, locations);
 				if (savedInstanceState.containsKey(STATE_SELECTED_STEP)) {
@@ -240,7 +243,8 @@ public class CampusMapActivity extends SherlockMapActivity {
         			startId >= 0) {
 				//restore on-campus tour
 				Directions directions = savedInstanceState.getParcelable(STATE_DIRECTIONS);
-				Location[] locations = (Location[])savedInstanceState.getParcelableArray(STATE_LOCATIONS);
+				Parcelable[] pLocations = savedInstanceState.getParcelableArray(STATE_LOCATIONS);
+				Location[] locations = ArrayUtil.cast(pLocations, new Location[pLocations.length]);
 				
 				generateDirectionsLayer(directions, locations);
 				if (savedInstanceState.containsKey(STATE_SELECTED_STEP)) {
@@ -250,7 +254,8 @@ public class CampusMapActivity extends SherlockMapActivity {
         			savedInstanceState.containsKey(STATE_LOCATIONS) &&
         			startId == -1) {
 				//restore off-campus tour
-				Location[] locations = (Location[])savedInstanceState.getParcelableArray(STATE_LOCATIONS);
+				Parcelable[] pLocations = savedInstanceState.getParcelableArray(STATE_LOCATIONS);
+				Location[] locations = ArrayUtil.cast(pLocations, new Location[pLocations.length]); 
 				
 				generateOffsiteTourLayer(locations);
 				if (savedInstanceState.containsKey(STATE_SELECTED_STEP)) {
