@@ -23,7 +23,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1.0"
-            android:drawableTop="@android:drawable/ic_menu_mapmode"
+            android:drawableTop="@drawable/ic_menu_mapmode"
             android:text="@string/map" />
 
         <Button
@@ -31,7 +31,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1.0"
-            android:drawableTop="@android:drawable/ic_menu_directions"
+            android:drawableTop="@drawable/ic_menu_directions"
             android:text="@string/directions" />
 
         <Button
@@ -39,7 +39,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1.0"
-            android:drawableTop="@android:drawable/ic_menu_my_calendar"
+            android:drawableTop="@drawable/ic_menu_my_calendar"
             android:text="@string/schedule"
             android:visibility="gone" />
     </LinearLayout>
