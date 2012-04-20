@@ -57,7 +57,7 @@ public class TermCodeProvider extends ActionProvider {
 		Spinner terms = (Spinner)inflater.inflate(R.layout.schedule_term_selector, null);
 		
 		ArrayAdapter<TermCode> termAdapter = new ArrayAdapter<TermCode>(mContext, R.layout.sherlock_spinner_item, mTerms);
-        termAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        termAdapter.setDropDownViewResource(R.layout.sherlock_spinner_dropdown_item);
         terms.setAdapter(termAdapter);
         
         int index = ArrayUtil.indexOf(mTerms, mDefaultTerm);

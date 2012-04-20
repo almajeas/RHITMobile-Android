@@ -169,13 +169,13 @@
         <activity
             android:label="Schedule"
             android:name=".SchedulePersonActivity" 
-            android:theme="@style/Theme.Sherlock.Light.DarkActionBar" >
+            android:theme="@style/Theme.Sherlock.Light" >
         </activity>
         
         <activity
             android:label="Room Schedule"
             android:name=".ScheduleRoomActivity" 
-            android:theme="@style/Theme.Sherlock.Light.DarkActionBar">
+            android:theme="@style/Theme.Sherlock.Light">
         </activity>
         
         <activity
