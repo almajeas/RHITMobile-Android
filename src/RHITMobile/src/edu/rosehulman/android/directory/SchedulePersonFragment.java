@@ -14,22 +14,18 @@ import android.widget.ListView;
 import android.widget.TextView;
 import edu.rosehulman.android.directory.model.PersonScheduleDay;
 import edu.rosehulman.android.directory.model.PersonScheduleItem;
+import edu.rosehulman.android.directory.model.TermCode;
 import edu.rosehulman.android.directory.util.Ordinal;
-
 
 public class SchedulePersonFragment extends Fragment {
 	
-	private static final String[] HOURS = new String[] {"",
-			"8:05am", "9:00am", "9:55am",
-			"10:50am", "11:45am", "12:40pm",
-			"1:35pm", "2:30pm", "3:25pm",
-			"4:20pm"};
-	
+	private TermCode term;
 	private String tag;
 	private PersonScheduleDay day;
 	
-	public static Bundle buildArguments(String tag, PersonScheduleDay day) {
+	public static Bundle buildArguments(TermCode term, String tag, PersonScheduleDay day) {
 		Bundle args = new Bundle();
+		args.putParcelable("Term", term);
     	args.putString("Day", tag);
     	args.putParcelable("Schedule", day);
     	return args;
@@ -38,8 +34,8 @@ public class SchedulePersonFragment extends Fragment {
 	public SchedulePersonFragment() {
 	}
 	
-    public SchedulePersonFragment(String tag, PersonScheduleDay day) {
-    	setArguments(buildArguments(tag, day));
+    public SchedulePersonFragment(TermCode term, String tag, PersonScheduleDay day) {
+    	setArguments(buildArguments(term, tag, day));
 	}
 
     public String getDay() {
@@ -50,8 +46,10 @@ public class SchedulePersonFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
     	
+    	term = getArguments().getParcelable("Term");
     	tag = getArguments().getString("Day");
     	day = getArguments().getParcelable("Schedule");
+    	
     }
     
 	@Override
@@ -59,7 +57,7 @@ public class SchedulePersonFragment extends Fragment {
     	View root = inflater.inflate(R.layout.schedule_list, null);
 		ListView list = (ListView)root.findViewById(R.id.list);
 		
-		list.setAdapter(new ScheduleAdapter(day.items));
+		list.setAdapter(new ScheduleAdapter(day));
 		
 		list.setOnItemClickListener(new OnItemClickListener() {
 
@@ -68,9 +66,9 @@ public class SchedulePersonFragment extends Fragment {
 				if (adapter == null)
 					return;
 
-				PersonScheduleItem item = day.items[position];
+				PersonScheduleItem item = day.getItem(position);
 				
-				Intent intent = ScheduleCourseActivity.createIntent(getActivity(), item.course, item.section);
+				Intent intent = ScheduleCourseActivity.createIntent(getActivity(), term, item.crn, item.course);
 				startActivity(intent);
 			}
 			
@@ -82,20 +80,24 @@ public class SchedulePersonFragment extends Fragment {
     
     private class ScheduleAdapter extends BaseAdapter {
 		
-		private PersonScheduleItem[] items;
+    	private String[] hours;
+    	
+		private PersonScheduleDay day;
 		
-		public ScheduleAdapter(PersonScheduleItem[] items) {
-			this.items = items;
+		public ScheduleAdapter(PersonScheduleDay day) {
+			this.day = day;
+
+	    	hours = getResources().getStringArray(R.array.hours);
 		}
 
 		@Override
 		public int getCount() {
-			return items.length;
+			return day.count();
 		}
 
 		@Override
 		public Object getItem(int position) {
-			return items[position];
+			return day.getItem(position);
 		}
 
 		@Override
@@ -111,7 +113,7 @@ public class SchedulePersonFragment extends Fragment {
 				v = inflater.inflate(R.layout.schedule_person_list_item, null);
 			}
 			
-			PersonScheduleItem item = items[position];
+			PersonScheduleItem item = day.getItem(position);
 			
 			TextView course = (TextView)v.findViewById(R.id.course);
 			TextView time = (TextView)v.findViewById(R.id.time);
@@ -120,16 +122,16 @@ public class SchedulePersonFragment extends Fragment {
 			String hour;
 			if (item.hourStart == item.hourEnd) {
 				hour = String.format("%s - %s (%s hour)", 
-						HOURS[item.hourStart], HOURS[item.hourEnd+1], 
+						hours[item.hourStart], hours[item.hourEnd+1], 
 						Ordinal.convert(item.hourStart));
 			} else {
 				hour = String.format("%s - %s (%s - %s hour)", 
-						HOURS[item.hourStart], HOURS[item.hourEnd+1], 
+						hours[item.hourStart], hours[item.hourEnd+1], 
 						Ordinal.convert(item.hourStart),
 						Ordinal.convert(item.hourEnd+1));
 			}
 			
-			course.setText(String.format("%s-%02d %s", item.course, item.section, item.courseName));
+			course.setText(String.format("%s-%02d %s", item.course, item.courseName));
 			
 			time.setText(hour);
 			

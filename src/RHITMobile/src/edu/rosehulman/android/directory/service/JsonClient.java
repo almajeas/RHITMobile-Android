@@ -44,6 +44,9 @@ public class JsonClient extends RestClient implements Client<JSONObject> {
 		}
 		
 		String responseBody = handler.handleResponse(response);
+		
+		//if (!responseBody.isEmpty() && responseBody.charAt(0) != '[' && responseBody.charAt(0) != '{')
+		
 		JSONObject root = new JSONObject(responseBody);
 		
 		return root;

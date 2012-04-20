@@ -11,23 +11,37 @@ public class TermCode implements Parcelable {
 	/** The term's code (ex. 201230) */
 	public String code;
 	
-	/** The term's name (ex. Spring 2012) */
-	public String name;
-	
 	/**
 	 * Creates a new instance
 	 * 
 	 * @param code The term code
-	 * @param name The name of the term
 	 */
-	public TermCode(String code, String name) {
+	public TermCode(String code) {
 		this.code = code;
-		this.name = name;
+		assert(code.length() == 6);
 	}
 
 	@Override
 	public String toString() {
-		return name;
+		String year = code.substring(0, 5);
+		String term = code.substring(5);
+		
+		String termName;
+		switch (Integer.parseInt(term)) {
+		case 10:
+			termName = "Fall";
+			break;
+		case 20:
+			termName = "Winter";
+			break;
+		case 30:
+			termName = "Spring";
+			break;
+		default:
+			termName = "";
+		}
+		
+		return String.format("%s %s", termName, year);
 	}
 	
 	@Override
@@ -37,8 +51,7 @@ public class TermCode implements Parcelable {
 		
 		TermCode o = (TermCode)other;
 		
-		return code.equals(o.code) && 
-				name.equals(o.name);
+		return code.equals(o.code);
 	}
 
 	@Override
@@ -49,7 +62,6 @@ public class TermCode implements Parcelable {
 	@Override
 	public void writeToParcel(Parcel out, int flags) {
 		out.writeString(code);
-		out.writeString(name);
 	}
 	
 	public static final Parcelable.Creator<TermCode> CREATOR = new Parcelable.Creator<TermCode>() {
@@ -57,8 +69,7 @@ public class TermCode implements Parcelable {
 		@Override
 		public TermCode createFromParcel(Parcel in) {
 			String code = in.readString();
-			String name = in.readString();
-			return new TermCode(code, name);
+			return new TermCode(code);
 		}
 
 		@Override

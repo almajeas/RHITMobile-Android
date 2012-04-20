@@ -1,5 +1,7 @@
 package edu.rosehulman.android.directory.model;
 
+import java.util.HashMap;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -10,7 +12,7 @@ import org.json.JSONObject;
 public class CourseMeeting {
 
 	/** The day of the meeting (M, T, W, R, F) */
-	public char day;
+	public ScheduleDay day;
 	
 	/** The time that the meeting starts (inclusive) */
 	public int startPeriod;
@@ -31,12 +33,24 @@ public class CourseMeeting {
 	public static CourseMeeting deserialize(JSONObject root) throws JSONException {
 		CourseMeeting res = new CourseMeeting();
 		
-		res.day = root.getString("Day").charAt(0);
+		res.day = dayMap.get(root.getString("Day"));
 		res.startPeriod = root.getInt("StartPeriod");
 		res.endPeriod = root.getInt("EndPeriod");
 		res.room = root.getString("Room");
 		
 		return res;
+	}
+	
+	private static HashMap<String, ScheduleDay> dayMap;
+
+	static {
+		dayMap = new HashMap<String, ScheduleDay>();
+		dayMap.put("M", ScheduleDay.MONDAY);
+		dayMap.put("T", ScheduleDay.TUESDAY);
+		dayMap.put("W", ScheduleDay.WEDNESDAY);
+		dayMap.put("R", ScheduleDay.THURSDAY);
+		dayMap.put("F", ScheduleDay.FRIDAY);
+		dayMap.put("S", ScheduleDay.SATURDAY);
 	}
 	
 	/**

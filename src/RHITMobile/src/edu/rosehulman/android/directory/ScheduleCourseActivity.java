@@ -23,19 +23,20 @@ import edu.rosehulman.android.directory.model.TermCode;
 
 public class ScheduleCourseActivity extends SherlockFragmentActivity {
 
-	public static final String EXTRA_COURSE = "PERSON";
-	public static final String EXTRA_SECTION = "SECTION";
+	public static final String EXTRA_TERM = "Term";
+	public static final String EXTRA_CRN = "CRN";
+	public static final String EXTRA_COURSE = "Course";
 	
-	public static Intent createIntent(Context context, String course, int section) {
+	public static Intent createIntent(Context context, TermCode term, int crn, String course) {
 		Intent intent = new Intent(context, ScheduleCourseActivity.class);
+		intent.putExtra(EXTRA_TERM, term);
+		intent.putExtra(EXTRA_CRN, crn);
 		intent.putExtra(EXTRA_COURSE, course);
-		intent.putExtra(EXTRA_SECTION, section);
 		return intent;
 	}
 	
-	private String course;
-	private int section;
 	private TermCode term;
+	private int crn;
 	
 	private ListView detailsView;
 	
@@ -53,21 +54,22 @@ public class ScheduleCourseActivity extends SherlockFragmentActivity {
         detailsView = (ListView)findViewById(R.id.details);
         
 		Intent intent = getIntent();
-		if (!(intent.hasExtra(EXTRA_COURSE) && intent.hasExtra(EXTRA_SECTION))) {
+		if (!(intent.hasExtra(EXTRA_TERM) && intent.hasExtra(EXTRA_CRN))) {
 			finish();
 			return;
 		}
-		course = intent.getStringExtra(EXTRA_COURSE);
-		section = intent.getIntExtra(EXTRA_SECTION, 0);
-		
-		//FIXME from intent?
-		term = User.getTerm();
+		term = intent.getParcelableExtra(EXTRA_TERM);
+		crn = intent.getIntExtra(EXTRA_CRN, 0);
 		
 		getSupportFragmentManager().beginTransaction().add(new AuthenticatedFragment(), "auth").commit();
         
         createListItems();
         
-        setTitle(String.format("%s-%02d", course, section));
+        if (intent.hasExtra(EXTRA_COURSE)) {
+        	setTitle(intent.getStringExtra(EXTRA_COURSE));
+        }
+        
+        //TODO load course information
         
         detailsView.setAdapter(new DetailsAdapter());
         detailsView.setOnItemClickListener(new OnItemClickListener() {
@@ -94,7 +96,7 @@ public class ScheduleCourseActivity extends SherlockFragmentActivity {
     	List<ListItem> items = new LinkedList<ListItem>();
     	items.add(new ListHeader("General Info"));
     	items.add(new LabelItem("Name", "Senior Project"));
-    	items.add(new LabelItem("Term", term.name));
+    	items.add(new LabelItem("Term", term.toString()));
     	items.add(new InstructorItem("Shawn Bohner"));
     	items.add(new LabelItem("Enrollment", "24/25"));
     	

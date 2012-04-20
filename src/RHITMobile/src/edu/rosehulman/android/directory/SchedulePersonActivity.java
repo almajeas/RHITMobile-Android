@@ -1,9 +1,12 @@
 package edu.rosehulman.android.directory;
 
+import org.apache.http.client.HttpResponseException;
+
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.FrameLayout;
 
 import com.actionbarsherlock.app.ActionBar;
@@ -14,10 +17,15 @@ import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 
+import edu.rosehulman.android.directory.model.Course;
+import edu.rosehulman.android.directory.model.CourseMeeting;
+import edu.rosehulman.android.directory.model.CoursesResponse;
 import edu.rosehulman.android.directory.model.PersonScheduleDay;
 import edu.rosehulman.android.directory.model.PersonScheduleItem;
 import edu.rosehulman.android.directory.model.PersonScheduleWeek;
+import edu.rosehulman.android.directory.model.ScheduleDay;
 import edu.rosehulman.android.directory.model.TermCode;
+import edu.rosehulman.android.directory.service.MobileDirectoryService;
 
 public class SchedulePersonActivity extends SherlockFragmentActivity implements TermCodeProvider.OnTermSetListener {
 	
@@ -152,9 +160,9 @@ public class SchedulePersonActivity extends SherlockFragmentActivity implements 
 		startActivity(intent);
 	}
 	
-	private void createTab(String tag, String label) {
+	private void createTab(ScheduleDay day, String tag, String label) {
 		ActionBar actionBar = getSupportActionBar();
-		Bundle args = SchedulePersonFragment.buildArguments(tag, schedule.getDay(tag));
+		Bundle args = SchedulePersonFragment.buildArguments(term, tag, schedule.getDay(day));
 		TabListener<SchedulePersonFragment> l = new TabListener<SchedulePersonFragment>(this, tag, SchedulePersonFragment.class, args);
 		Tab tab = actionBar.newTab()
 				.setText(label)
@@ -165,8 +173,12 @@ public class SchedulePersonActivity extends SherlockFragmentActivity implements 
 	
 	private void processSchedule(PersonScheduleWeek res) {
 		schedule = res;
-		for (String day : res.tags) {
-			createTab(day, day);
+		String[] tags = getResources().getStringArray(R.array.schedule_days);
+		for (ScheduleDay day : ScheduleDay.values()) {
+			if (schedule.hasDay(day)) {
+				String tag = tags[day.ordinal()];
+				createTab(day, tag, tag);
+			}
 		}
 		getSupportActionBar().setSubtitle(person);
 	}
@@ -181,60 +193,38 @@ public class SchedulePersonActivity extends SherlockFragmentActivity implements 
 		@Override
 		protected PersonScheduleWeek doInBackground(Void... params) {
 			
-			if ("201210".equals(term.code)) {
-				PersonScheduleItem csse432 = 
-						new PersonScheduleItem("CSSE432", "Computer Networks", 1, 5, 5, "O205");
-				PersonScheduleItem csse404 = 
-						new PersonScheduleItem("CSSE404", "Compiler Construction", 1, 7, 7, "O267");
-
-				return new PersonScheduleWeek(
-						new String[] {"Mon", "Thu", "Fri"}, 
-						new PersonScheduleDay[] {
-								new PersonScheduleDay(new PersonScheduleItem[] {
-										csse432, csse404
-								}),
-								new PersonScheduleDay(new PersonScheduleItem[] {
-										csse432, csse404
-								}),
-								new PersonScheduleDay(new PersonScheduleItem[] {
-										csse432
-								})
-						});
+			//get the person's course schedules
+			MobileDirectoryService service = new MobileDirectoryService();
+			CoursesResponse response = null;
+			do {
+				try {
+					response = service.getUserSchedule(User.getCookie(), person);
+					
+				} catch (HttpResponseException e) {
+					Log.e(C.TAG, "Failed to download user schedule, aborting...", e);
+					return null;
+					
+				} catch (Exception e) {
+					Log.e(C.TAG, "Failed to download user schedule, retrying...", e);
+					try {
+						Thread.sleep(2000);
+					} catch (InterruptedException ex) {}
+				}
+			} while (response == null);
+			
+			//convert the course schedules to a user schedule
+			PersonScheduleWeek schedule = new PersonScheduleWeek();
+			
+			for (Course course : response.courses) {
+				for (CourseMeeting meeting : course.schedule) {
+					PersonScheduleDay day = schedule.getDay(meeting.day);
+					PersonScheduleItem item;
+					item = new PersonScheduleItem(course.crn, course.course, course.title, meeting.startPeriod, meeting.endPeriod, meeting.room);
+					day.addItem(item);
+				}
 			}
 			
-			PersonScheduleItem csse432 = 
-					new PersonScheduleItem("CSSE432", "Computer Networks", 1, 5, 5, "O205");
-			PersonScheduleItem csse404 = 
-					new PersonScheduleItem("CSSE404", "Compiler Construction", 1, 7, 7, "O267");
-			PersonScheduleItem csse304 = 
-					new PersonScheduleItem("CSSE304", "Programming Language Concepts", 1, 8, 8, "O257");
-			
-			
-			PersonScheduleItem csse404Wed = 
-					new PersonScheduleItem("CSSE404", "Compiler Construction", 1, 6, 6, "O267");
-			PersonScheduleItem csse499Wed = 
-					new PersonScheduleItem("CSSE499", "Senior Project III", 1, 7, 9, "O201");
-
-			return new PersonScheduleWeek(
-					new String[] {"Mon", "Tue", "Wed", "Thu", "Fri"}, 
-					new PersonScheduleDay[] {
-							new PersonScheduleDay(new PersonScheduleItem[] {
-									csse432, csse404, csse304
-							}),
-							new PersonScheduleDay(new PersonScheduleItem[] {
-									csse432, csse404, csse304
-							}),
-							new PersonScheduleDay(new PersonScheduleItem[] {
-									csse404Wed, csse499Wed
-							}),
-							new PersonScheduleDay(new PersonScheduleItem[] {
-									csse432, csse404, csse304
-							}),
-							new PersonScheduleDay(new PersonScheduleItem[] {
-									csse432, csse304
-							})
-					});
-			
+			return schedule;
 		}
 		
 		@Override

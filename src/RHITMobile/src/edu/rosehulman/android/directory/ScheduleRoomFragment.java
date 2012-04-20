@@ -1,6 +1,5 @@
 package edu.rosehulman.android.directory;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -11,6 +10,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 import edu.rosehulman.android.directory.model.RoomScheduleDay;
 import edu.rosehulman.android.directory.model.RoomScheduleItem;
 import edu.rosehulman.android.directory.util.Ordinal;
@@ -69,8 +69,9 @@ public class ScheduleRoomFragment extends Fragment {
 
 				RoomScheduleItem item = day.items[position];
 				
-				Intent intent = ScheduleCourseActivity.createIntent(getActivity(), item.course, item.section);
-				startActivity(intent);
+				Toast.makeText(getActivity(), "TODO implement", Toast.LENGTH_SHORT).show();
+				//Intent intent = ScheduleCourseActivity.createIntent(getActivity(), item.course, item.section);
+				//startActivity(intent);
 			}
 			
 		});

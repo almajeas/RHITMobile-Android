@@ -1,25 +1,25 @@
 package edu.rosehulman.android.directory.model;
 
-import java.util.Arrays;
-
 import android.os.Parcel;
 import android.os.Parcelable;
 
 public class PersonScheduleWeek implements Parcelable {
 	
-	public String[] tags;
 	public PersonScheduleDay[] days;
 	
 	public PersonScheduleWeek() {
+		days = new PersonScheduleDay[ScheduleDay.values().length];
+		for (int i = 0; i < days.length; i++) {
+			days[i] = new PersonScheduleDay();
+		}
 	}
 	
-	public PersonScheduleWeek(String[] tags, PersonScheduleDay[] days) {
-		this.tags = tags;
-		this.days = days;
+	public boolean hasDay(ScheduleDay day) {
+		return getDay(day).isEmpty();
 	}
 	
-	public PersonScheduleDay getDay(String tag) {
-		return days[Arrays.asList(tags).indexOf(tag)];
+	public PersonScheduleDay getDay(ScheduleDay day) {
+		return days[day.ordinal()];
 	}
 
 	@Override
@@ -29,18 +29,19 @@ public class PersonScheduleWeek implements Parcelable {
 
 	@Override
 	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeStringArray(tags);
 		dest.writeTypedArray(days, flags);
 	}
 	
-	public static Parcelable.Creator<PersonScheduleWeek> CREATOR = new Parcelable.Creator<PersonScheduleWeek>() {
+	public PersonScheduleWeek(Parcel in) {
+		days = in.createTypedArray(PersonScheduleDay.CREATOR);
+	}
+	
+	public static Parcelable.Creator<PersonScheduleWeek> CREATOR =
+			new Parcelable.Creator<PersonScheduleWeek>() {
 
 		@Override
 		public PersonScheduleWeek createFromParcel(Parcel source) {
-			PersonScheduleWeek res = new PersonScheduleWeek();
-			res.tags = source.createStringArray();
-			res.days = source.createTypedArray(PersonScheduleDay.CREATOR);
-			return res;
+			return new PersonScheduleWeek(source);
 		}
 
 		@Override

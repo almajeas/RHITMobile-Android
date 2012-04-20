@@ -35,5 +35,28 @@
     <string name="next">Next</string>
     <string name="zoom_in">Zoom In</string>
     <string name="zoom_out">Zoom Out</string>
+    
+    <string-array name="schedule_days">
+        <item>MON</item>
+        <item>TUE</item>
+        <item>WED</item>
+        <item>THU</item>
+        <item>FRI</item>
+        <item>SAT</item>
+    </string-array>
+    
+    <string-array name="hours">
+        <item></item>
+        <item>8:05am</item>
+		<item>9:00am</item>
+		<item>9:55am</item>
+		<item>10:50am</item>
+		<item>11:45am</item>
+		<item>12:40pm</item>
+		<item>1:35pm</item>
+		<item>2:30pm</item>
+		<item>3:25pm</item>
+		<item>4:20pm</item>
+    </string-array>
 
 </resources>

@@ -14,19 +14,21 @@ public class TermCodes {
 //		"Fall", "Winter", "Spring", "Summer"
 //	};
 	
+	//FIXME Retrieve term codes from remote server
+	
 	private static TermCode[] TERMS = new TermCode[] {
-			new TermCode("201230", "Spring 2012"),
-			new TermCode("201220", "Winter 2011"),
-			new TermCode("201210", "Fall 2011"),
-			new TermCode("201130", "Spring 2011"),
-			new TermCode("201120", "Winter 2010"),
-			new TermCode("201110", "Fall 2010"),
-			new TermCode("201030", "Spring 2010"),
-			new TermCode("201020", "Winter 2009"),
-			new TermCode("201010", "Fall 2009"),
-			new TermCode("200930", "Spring 2009"),
-			new TermCode("200920", "Winter 2008"),
-			new TermCode("200910", "Fall 2008")
+			new TermCode("201230"),
+			new TermCode("201220"),
+			new TermCode("201210"),
+			new TermCode("201130"),
+			new TermCode("201120"),
+			new TermCode("201110"),
+			new TermCode("201030"),
+			new TermCode("201020"),
+			new TermCode("201010"),
+			new TermCode("200930"),
+			new TermCode("200920"),
+			new TermCode("200910")
 		};
 
 	/**

@@ -163,6 +163,9 @@ public class LoginActivity extends SherlockActivity {
 						Thread.sleep(2000);
 					} catch (InterruptedException ex) {}
 				}
+				
+				if (isCancelled())
+					return null;
 			} while (response == null);
 			
 			if (response == null) {

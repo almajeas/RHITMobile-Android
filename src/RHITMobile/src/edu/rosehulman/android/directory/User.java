@@ -11,7 +11,6 @@ public class User {
 	private static final String PREF_USERNAME = "Username";
 	private static final String PREF_COOKIE = "AuthCookie";
 	private static final String PREF_TERM_CODE = "TermCode";
-	private static final String PREF_TERM_NAME = "TermName";
 	
 	/**
 	 * Retrieve the user's authentication token
@@ -67,13 +66,13 @@ public class User {
 	 */
 	public static TermCode getTerm() {
 		String code = getPrefs().getString(PREF_TERM_CODE, null);
-		String name = getPrefs().getString(PREF_TERM_NAME, null);
 		
-		if (code == null || name == null) {
+		if (code == null) {
+			//FIXME remove
 			return TermCodes.generateTerms()[0];
 		}
 		
-		return new TermCode(code, name);
+		return new TermCode(code);
 	}
 	
 	/**
@@ -87,7 +86,6 @@ public class User {
 		
 		getPrefs().edit()
 		.putString(PREF_TERM_CODE, term.code)
-		.putString(PREF_TERM_NAME, term.name)
 		.commit();
 	}
 	
