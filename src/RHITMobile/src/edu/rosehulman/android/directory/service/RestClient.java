@@ -1,5 +1,6 @@
 package edu.rosehulman.android.directory.service;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.LinkedList;
@@ -91,17 +92,20 @@ public abstract class RestClient {
 	 * 
 	 * @return The HttpResponse
 	 * 
-	 * @throws URISyntaxException
-	 *             If an invalid URI was used
-	 * @throws Exception
-	 *             On other errors, including Internal Server Errors */
-	protected HttpResponse performRequest() throws URISyntaxException, Exception {
+	 * @throws IOException On network related errors
+	 */
+	protected HttpResponse performRequest() throws IOException {
 		String query = null;
 		if (queryParams.size() > 0) {
 			query = URLEncodedUtils.format(queryParams, "UTF-8");
 		}
 		URI uri;
-		uri = URIUtils.createURI("https", host, port, path, query, null);
+		try {
+			uri = URIUtils.createURI("https", host, port, path, query, null);
+			
+		} catch (URISyntaxException ex) {
+			throw new RuntimeException("Invalid URI", ex);
+		}
 
 		SSLCertificateSocketFactory.getInsecure(0, null);
 		HttpRequestBase request;
@@ -122,16 +126,10 @@ public abstract class RestClient {
 		}
 		
 		HttpClient http = new DefaultHttpClient(SSLUtil.getManager(), SSLUtil.getParams());
+		
 		HttpResponse response = http.execute(request);
-
-		int statusClass = response.getStatusLine().getStatusCode() / 100;
-		if (statusClass == 5) {
-			String msg = "Internal Server Error: " +
-				response.getStatusLine().toString();
-			throw new Exception(msg);
-		}
-
 		return response;
+			
 	}
 
 

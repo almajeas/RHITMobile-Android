@@ -1,5 +1,8 @@
 package edu.rosehulman.android.directory.service;
 
+import java.io.IOException;
+
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import edu.rosehulman.android.directory.model.AuthenticationResponse;
@@ -40,7 +43,7 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 	}
 	
 	@Override
-	public VersionResponse getVersions() throws Exception {
+	public VersionResponse getVersions() throws ClientException, ServerException, JSONException, IOException {
 		JsonClient client = factory.makeJsonClient(HOST, PORT, "");
 		
 		JSONObject root = client.execute();
@@ -52,7 +55,7 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 	}
 	
 	@Override
-	public CampusServicesResponse getCampusServicesData(String currentVersion) throws Exception {
+	public CampusServicesResponse getCampusServicesData(String currentVersion) throws ClientException, ServerException, JSONException, IOException {
 		JsonClient client = factory.makeJsonClient(HOST, PORT, "services");
 		if (currentVersion != null) {
 			client.addParameter("version", currentVersion);
@@ -67,7 +70,7 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 	}
 	
 	@Override
-	public TourTagsResponse getTourTagData(String currentVersion) throws Exception {
+	public TourTagsResponse getTourTagData(String currentVersion) throws ClientException, ServerException, JSONException, IOException {
 		JsonClient client = factory.makeJsonClient(HOST, PORT, "tours/tags");
 		if (currentVersion != null) {
 			client.addParameter("version", currentVersion);
@@ -82,17 +85,17 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 	}
 	
 	@Override
-	public LocationCollection getTopLocationData(String currentVersion) throws Exception {
+	public LocationCollection getTopLocationData(String currentVersion) throws ClientException, ServerException, JSONException, IOException {
 		return getLocationCollection("locations/data/top", currentVersion);
 	}
 	
 	@Override
-	public LocationCollection getLocationData(long parent, String currentVersion) throws Exception {
+	public LocationCollection getLocationData(long parent, String currentVersion) throws ClientException, ServerException, JSONException, IOException {
 		String url = String.format("locations/data/within/%d", parent);
 		return getLocationCollection(url, currentVersion);
 	}
 
-	private LocationCollection getLocationCollection(String url, String currentVersion) throws Exception {
+	private LocationCollection getLocationCollection(String url, String currentVersion) throws ClientException, ServerException, JSONException, IOException {
 		JsonClient client = factory.makeJsonClient(HOST, PORT, url);
 		if (currentVersion != null) {
 			client.addParameter("version", currentVersion);
@@ -107,7 +110,7 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 	}
 	
 	@Override
-	public LocationNamesCollection searchLocations(String query) throws Exception {
+	public LocationNamesCollection searchLocations(String query) throws ClientException, ServerException, JSONException, IOException {
 		JsonClient client = factory.makeJsonClient(HOST, PORT, "locations/names");
 		client.addParameter("s", query);
 		
@@ -120,20 +123,20 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 	}
 	
 	@Override
-	public DirectionsResponse getDirections(long from, long to) throws Exception {
+	public DirectionsResponse getDirections(long from, long to) throws ClientException, ServerException, JSONException, IOException {
 		String url = String.format("directions/fromloc/%d/toloc/%d", from, to);
 		return getDirectionsResponse(url);
 	}
 	
 	@Override
-	public DirectionsResponse getTour(long startId, long[] tagIds) throws Exception {
+	public DirectionsResponse getTour(long startId, long[] tagIds) throws ClientException, ServerException, JSONException, IOException {
 		String url = String.format("tours/oncampus/fromloc/%d/%s", 
 				startId, ArrayUtil.join(tagIds, "/"));
 		return getDirectionsResponse(url);
 	}
 
 	@Override
-	public LocationIdsResponse getTour(long[] tagIds) throws Exception {
+	public LocationIdsResponse getTour(long[] tagIds) throws ClientException, ServerException, JSONException, IOException {
 		String url = String.format("tours/offcampus/%s", ArrayUtil.join(tagIds, "/"));
 		JsonClient client = factory.makeJsonClient(HOST, PORT, url);
 		
@@ -146,18 +149,18 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 	}
 	
 	@Override
-	public DirectionsResponse getDirectionsStatus(int requestId) throws Exception {
+	public DirectionsResponse getDirectionsStatus(int requestId) throws ClientException, ServerException, JSONException, IOException {
 		String url = String.format("directions/status/%d", requestId);
 		return getDirectionsResponse(url);
 	}
 	
 	@Override
-	public DirectionsResponse getOncampusTourStatus(int requestId) throws Exception {
+	public DirectionsResponse getOncampusTourStatus(int requestId) throws ClientException, ServerException, JSONException, IOException {
 		String url = String.format("tours/oncampus/status/%d", requestId);
 		return getDirectionsResponse(url);
 	}
 	
-	private DirectionsResponse getDirectionsResponse(String url) throws Exception {
+	private DirectionsResponse getDirectionsResponse(String url) throws ClientException, ServerException, JSONException, IOException {
 		JsonClient client = factory.makeJsonClient(HOST, PORT, url);
 		
 		JSONObject root = client.execute();
@@ -169,12 +172,13 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 	}
 
 	@Override
-	public AuthenticationResponse login(String username, String password) throws Exception {
+	public AuthenticationResponse login(String username, String password) throws ClientException, ServerException, JSONException, IOException {
 		JsonClient client = factory.makeJsonClient(HOST, PORT, "/banner/authenticate");
 		client.addHeader("Login-Username", username);
 		client.addHeader("Login-Password", password);
 		
 		JSONObject root = client.execute();
+		
 		if (root == null) {
 			return null;
 		}
@@ -183,7 +187,7 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 	}
 
 	@Override
-	public UserDataResponse getUser(String authToken, String username) throws Exception {
+	public UserDataResponse getUser(String authToken, String username) throws ClientException, ServerException, JSONException, IOException {
 		String url = String.format("/banner/user/data/%s", username);
 		JsonClient client = factory.makeJsonClient(HOST, PORT, url);
 		client.addHeader("Auth-Token", authToken);
@@ -197,7 +201,7 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 	}
 
 	@Override
-	public UsersResponse searchUsers(String authToken, String search) throws Exception {
+	public UsersResponse searchUsers(String authToken, String search) throws ClientException, ServerException, JSONException, IOException {
 		String url = String.format("/banner/user/search/%s", search);
 		JsonClient client = factory.makeJsonClient(HOST, PORT, url);
 		client.addHeader("Auth-Token", authToken);
@@ -211,7 +215,7 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 	}
 
 	@Override
-	public CoursesResponse getUserSchedule(String authToken, String username) throws Exception {
+	public CoursesResponse getUserSchedule(String authToken, String username) throws ClientException, ServerException, JSONException, IOException {
 		String url = String.format("/banner/user/schedule/%s", username);
 		JsonClient client = factory.makeJsonClient(HOST, PORT, url);
 		client.addHeader("Auth-Token", authToken);
@@ -226,7 +230,7 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 	}
 
 	@Override
-	public Course getCourse(String authToken, String term, int crn) throws Exception {
+	public Course getCourse(String authToken, String term, int crn) throws ClientException, ServerException, JSONException, IOException {
 		String url = String.format("/banner/course/data/%s/%d", term, crn);
 		JsonClient client = factory.makeJsonClient(HOST, PORT, url);
 		client.addHeader("Auth-Token", authToken);
@@ -246,7 +250,7 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 	}
 
 	@Override
-	public CoursesResponse searchCourses(String authToken, String search) throws Exception {
+	public CoursesResponse searchCourses(String authToken, String search) throws ClientException, ServerException, JSONException, IOException {
 		String url = String.format("/banner/course/search/%s", search);
 		JsonClient client = factory.makeJsonClient(HOST, PORT, url);
 		client.addHeader("Auth-Token", authToken);
@@ -260,7 +264,7 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 	}
 
 	@Override
-	public CoursesResponse getRoomSchedule(String authToken, String room) throws Exception {
+	public CoursesResponse getRoomSchedule(String authToken, String room) throws ClientException, ServerException, JSONException, IOException {
 		String url = String.format("/banner/room/schedule/%s", room);
 		JsonClient client = factory.makeJsonClient(HOST, PORT, url);
 		client.addHeader("Auth-Token", authToken);

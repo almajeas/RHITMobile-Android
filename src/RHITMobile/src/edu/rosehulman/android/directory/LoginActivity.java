@@ -1,5 +1,7 @@
 package edu.rosehulman.android.directory;
-import org.apache.http.client.HttpResponseException;
+import java.io.IOException;
+
+import org.json.JSONException;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -18,7 +20,9 @@ import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.MenuItem;
 
 import edu.rosehulman.android.directory.model.AuthenticationResponse;
+import edu.rosehulman.android.directory.service.ClientException;
 import edu.rosehulman.android.directory.service.MobileDirectoryService;
+import edu.rosehulman.android.directory.service.ServerException;
 
 /**
  * Activity used to register users for the beta program
@@ -103,7 +107,7 @@ public class LoginActivity extends SherlockActivity {
     	task.execute();
     }
 
-    private class LoginTask extends AsyncTask<Void, Void, String> {
+    private class LoginTask extends AsyncTask<Void, Integer, String> {
 
 		private ProgressDialog dialog;
 		
@@ -140,38 +144,49 @@ public class LoginActivity extends SherlockActivity {
 			AuthenticationResponse response = null;
 			serverError = false;
 			
-			do {
+			for (int attempt = 2; ; attempt++) {
 				try {
 					response = service.login(username, password);
 					if (response == null)
-						break;
+						return null;
+					return response.token;
 					
-				} catch (HttpResponseException e) {
-					Log.e(C.TAG, "Server is not accepting authentication");
+				} catch (ClientException e) {
+					//invalid username or password
+					return null;
+					
+				} catch (ServerException e) {
+					Log.e(C.TAG, "Server is not accepting authentication requests", e);
 					serverError = true;
 					return null;
 					
-				} catch (Exception e) {
+				} catch (JSONException e) {
+					Log.e(C.TAG, "An error occured while parsing the JSON response", e);
+					serverError = true;
+					return null;
+					
+				} catch (IOException e) {
 					Log.e(C.TAG, "Failed to authenticate user, retrying...", e);
-					try {
-						Thread.sleep(2000);
-					} catch (InterruptedException ex) {}
 				}
-				
+
 				if (isCancelled())
 					return null;
-			} while (response == null);
-			
-			if (response == null) {
-				//login failure
-				return null;
+				
+				try {
+					Thread.sleep(2000);
+				} catch (InterruptedException ex) {}
+				publishProgress(attempt);
 			}
-			
-			return response.token;
+		}
+		
+		@Override
+		protected void onProgressUpdate(Integer... status) {
+			int attempt = status[0];
+			dialog.setMessage(String.format("Logging in (attempt %d)...", attempt));
 		}
 
 		@Override
-    	protected void onCancelled() {
+    	protected void onCancelled(String result) {
 			dialog.dismiss();
 		}
 		
