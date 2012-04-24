@@ -77,14 +77,8 @@ public class LoginActivity extends SherlockActivity {
 	}
     
     private void btnBack_onClick() {
-    	//FIXME remove temporary authentication bypass
-		User.setCookie("wellska1", "AN AUTH TOKEN");
-        setResult(Activity.RESULT_OK);
-		finish();
-		return;
-    	
-    	//setResult(RESULT_CANCELED);
-    	//finish();
+    	setResult(RESULT_CANCELED);
+    	finish();
     }
     
     private void btnLogin_onClick() {
@@ -104,12 +98,12 @@ public class LoginActivity extends SherlockActivity {
     	}
     	
     	//start the registration process
-    	RegisterTask task = new RegisterTask(username, password);
+    	LoginTask task = new LoginTask(username, password);
     	taskManager.addTask(task);
     	task.execute();
     }
 
-    private class RegisterTask extends AsyncTask<Void, Void, String> {
+    private class LoginTask extends AsyncTask<Void, Void, String> {
 
 		private ProgressDialog dialog;
 		
@@ -118,7 +112,7 @@ public class LoginActivity extends SherlockActivity {
     	
     	private boolean serverError;
     	
-    	public RegisterTask(String username, String password) {
+    	public LoginTask(String username, String password) {
     		this.username = username;
     		this.password = password;
     	}
@@ -179,9 +173,6 @@ public class LoginActivity extends SherlockActivity {
 		@Override
     	protected void onCancelled() {
 			dialog.dismiss();
-			
-			setResult(RESULT_CANCELED);
-			finish();
 		}
 		
 		@Override
