@@ -3,6 +3,9 @@ import java.io.IOException;
 
 import org.json.JSONException;
 
+import android.accounts.Account;
+import android.accounts.AccountAuthenticatorResponse;
+import android.accounts.AccountManager;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -19,6 +22,7 @@ import android.widget.Toast;
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.MenuItem;
 
+import edu.rosehulman.android.directory.auth.AccountAuthenticator;
 import edu.rosehulman.android.directory.model.AuthenticationResponse;
 import edu.rosehulman.android.directory.service.ClientException;
 import edu.rosehulman.android.directory.service.MobileDirectoryService;
@@ -29,8 +33,10 @@ import edu.rosehulman.android.directory.service.ServerException;
  */
 public class LoginActivity extends SherlockActivity {
 
-	public static Intent createIntent(Context context) {
-		return new Intent(context, LoginActivity.class);
+	public static Intent createIntent(Context context, AccountAuthenticatorResponse response) {
+		Intent intent = new Intent(context, LoginActivity.class);
+		intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response);
+		return intent;
 	}
 	
 	private TaskManager taskManager = new TaskManager();
@@ -47,6 +53,11 @@ public class LoginActivity extends SherlockActivity {
         
         txtUsername = (TextView)findViewById(R.id.username);
         txtPassword = (TextView)findViewById(R.id.password);
+        
+        if (!getIntent().hasExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE)) {
+        	finish();
+        	return;
+        }
         
         findViewById(R.id.back).setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
@@ -106,8 +117,31 @@ public class LoginActivity extends SherlockActivity {
     	taskManager.addTask(task);
     	task.execute();
     }
+    
+    private void processAuthentication(String username, String password, AuthenticationResponse auth) {
+    	Account account = new Account(username, AccountAuthenticator.ACCOUNT_TYPE);
+		AccountManager manager = AccountManager.get(LoginActivity.this);
+		Bundle args = new Bundle();
+		args.putString("AuthToken", auth.token);
+		boolean accountCreated = manager.addAccountExplicitly(account, password, args);
+		
+		Bundle extras = getIntent().getExtras();
+		if (accountCreated) {
+			AccountAuthenticatorResponse response = extras.getParcelable(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE);
+			Bundle result = new Bundle();
+			result.putString(AccountManager.KEY_ACCOUNT_NAME, username);
+			result.putString(AccountManager.KEY_ACCOUNT_TYPE, AccountAuthenticator.ACCOUNT_TYPE);
+			response.onResult(result);
+		}
+		
+		User.setCookie(username, null);
 
-    private class LoginTask extends AsyncTask<Void, Integer, String> {
+        //remove ourselves from the app stack
+        setResult(Activity.RESULT_OK);
+		finish();
+    }
+
+    private class LoginTask extends AsyncTask<Void, Integer, AuthenticationResponse> {
 
 		private ProgressDialog dialog;
 		
@@ -138,7 +172,7 @@ public class LoginActivity extends SherlockActivity {
     	}
     	
 		@Override
-		protected String doInBackground(Void... args) {
+		protected AuthenticationResponse doInBackground(Void... args) {
 
 			MobileDirectoryService service = new MobileDirectoryService();
 			AuthenticationResponse response = null;
@@ -149,7 +183,7 @@ public class LoginActivity extends SherlockActivity {
 					response = service.login(username, password);
 					if (response == null)
 						return null;
-					return response.token;
+					return response;
 					
 				} catch (ClientException e) {
 					//invalid username or password
@@ -186,15 +220,15 @@ public class LoginActivity extends SherlockActivity {
 		}
 
 		@Override
-    	protected void onCancelled(String result) {
+    	protected void onCancelled(AuthenticationResponse result) {
 			dialog.dismiss();
 		}
 		
 		@Override
-    	protected void onPostExecute(String result) {
+    	protected void onPostExecute(AuthenticationResponse auth) {
     		dialog.dismiss();
     		
-    		if (result == null) {
+    		if (auth == null) {
     			if (serverError) {
     				Toast.makeText(LoginActivity.this, "Authentication service is rejecting requests.  Please try again later.", Toast.LENGTH_SHORT).show();
     			} else {
@@ -202,13 +236,9 @@ public class LoginActivity extends SherlockActivity {
     			}
     			return;
     		}
-
-    		User.setCookie(username, result);
-	        
-	        //remove ourselves from the app stack
-	        setResult(Activity.RESULT_OK);
-			finish();
-    	}
+    		
+    		processAuthentication(username, password, auth);
+		}
     }
 
 }

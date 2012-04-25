@@ -1,7 +1,11 @@
 package edu.rosehulman.android.directory;
 
-import edu.rosehulman.android.directory.model.TermCode;
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.content.Context;
 import android.content.SharedPreferences;
+import edu.rosehulman.android.directory.auth.AccountAuthenticator;
+import edu.rosehulman.android.directory.model.TermCode;
 
 /**
  * Utility methods to manager the user's login state
@@ -9,16 +13,16 @@ import android.content.SharedPreferences;
 public class User {
 	
 	private static final String PREF_USERNAME = "Username";
-	private static final String PREF_COOKIE = "AuthCookie";
 	private static final String PREF_TERM_CODE = "TermCode";
-	
+
 	/**
 	 * Retrieve the user's authentication token
 	 * 
 	 * @return The authentication token that can be used in web requests
 	 */
 	public static String getCookie() {
-		return getPrefs().getString(PREF_COOKIE, null);
+		//TODO implement
+		return null;
 	}
 	
 	/**
@@ -35,8 +39,19 @@ public class User {
 	 * 
 	 * @return True if we have an authentication token
 	 */
-	public static boolean isLoggedIn() {
-		return getCookie() != null;
+	public static boolean isLoggedIn(AccountManager manager) {
+		String username = getUsername();
+		
+		if (username == null)
+			return false;
+		
+		Account[] accounts = manager.getAccountsByType(AccountAuthenticator.ACCOUNT_TYPE);
+		
+		for (Account account : accounts) {
+			if (account.name.equals(username))
+				return true;
+		}
+		return false;
 	}
 
 	/**
@@ -46,9 +61,10 @@ public class User {
 	 * @param token The authentication token that can be used in web requests
 	 */
 	public static void setCookie(String username, String token) {
+		
+		//TODO token
 		getPrefs().edit()
 		.putString(PREF_USERNAME, username)
-		.putString(PREF_COOKIE, token)
 		.commit();
 	}
 
@@ -56,7 +72,8 @@ public class User {
 	 * Clears the user's authentication token
 	 */
 	public static void clearLogin() {
-		getPrefs().edit().remove(PREF_USERNAME).remove(PREF_COOKIE).commit();
+		//TODO implement
+		getPrefs().edit().remove(PREF_USERNAME).commit();
 	}
 
 	/**

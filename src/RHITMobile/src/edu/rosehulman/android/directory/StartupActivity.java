@@ -3,6 +3,9 @@ package edu.rosehulman.android.directory;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.accounts.AccountManager;
+import android.accounts.AccountManagerCallback;
+import android.accounts.AccountManagerFuture;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -25,6 +28,7 @@ import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 
 import edu.rosehulman.android.directory.ServiceManager.ServiceRunnable;
+import edu.rosehulman.android.directory.auth.AccountAuthenticator;
 
 public class StartupActivity extends SherlockActivity {
 	
@@ -153,7 +157,7 @@ public class StartupActivity extends SherlockActivity {
     
     @Override
     public boolean onSearchRequested() {
-    	if (User.isLoggedIn()) {
+    	if (User.isLoggedIn(AccountManager.get(this))) {
     		super.onSearchRequested();
     		return true;
     	}
@@ -211,7 +215,7 @@ public class StartupActivity extends SherlockActivity {
 	private void updateUI() {
 		tasks = new ArrayList<Task>();
 		
-		boolean loggedIn = User.isLoggedIn();
+		boolean loggedIn = User.isLoggedIn(AccountManager.get(this));
 		
 		tasks.add(
 			new Task("Campus Map",
@@ -275,8 +279,16 @@ public class StartupActivity extends SherlockActivity {
 					new OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					Intent intent = LoginActivity.createIntent(StartupActivity.this);
-					startActivity(intent);
+					AccountManager manager = AccountManager.get(StartupActivity.this);
+					manager.addAccount(AccountAuthenticator.ACCOUNT_TYPE, AccountAuthenticator.TOKEN_TYPE, null, null, null, new AccountManagerCallback<Bundle>() {
+						@Override
+						public void run(AccountManagerFuture<Bundle> future) {
+							try {
+								Intent intent = future.getResult().getParcelable(AccountManager.KEY_INTENT);
+								startActivity(intent);
+							} catch (Exception e) { }
+						}
+					}, null);
 				}
 			}));
 		}

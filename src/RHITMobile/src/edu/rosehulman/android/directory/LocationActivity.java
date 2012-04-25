@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import android.accounts.AccountManager;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -114,7 +115,7 @@ public class LocationActivity extends SherlockActivity {
 	    	//restore state
 	    }
 
-        if (!User.isLoggedIn()) {
+        if (!User.isLoggedIn(AccountManager.get(this))) {
         	btnSchedule.setVisibility(View.GONE);
         }
     }

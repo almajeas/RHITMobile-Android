@@ -1,5 +1,6 @@
 package edu.rosehulman.android.directory;
 
+import android.accounts.AccountManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,6 +10,8 @@ import android.preference.Preference.OnPreferenceClickListener;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockPreferenceActivity;
+
+import edu.rosehulman.android.directory.auth.AccountAuthenticator;
 
 /**
  * An activity for managing preferences related to the app
@@ -48,6 +51,9 @@ public class PreferencesActivity extends SherlockPreferenceActivity {
 	private void logout_clicked() {
 		User.clearLogin();
 		Toast.makeText(this, "Logged out", Toast.LENGTH_SHORT).show();
+		
+		AccountManager manager = AccountManager.get(this);
+		manager.invalidateAuthToken(AccountAuthenticator.ACCOUNT_TYPE, null);
 	}
 	
 	private void clearData_clicked() {
