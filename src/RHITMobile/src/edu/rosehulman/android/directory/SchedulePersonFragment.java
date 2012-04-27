@@ -131,7 +131,7 @@ public class SchedulePersonFragment extends Fragment {
 						Ordinal.convert(item.hourEnd+1));
 			}
 			
-			course.setText(String.format("%s-%02d %s", item.course, item.courseName));
+			course.setText(String.format("%s %s", item.course, item.courseName));
 			
 			time.setText(hour);
 			

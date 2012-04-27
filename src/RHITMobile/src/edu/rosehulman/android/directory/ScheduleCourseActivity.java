@@ -1,11 +1,16 @@
 package edu.rosehulman.android.directory;
 
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.json.JSONException;
+
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +24,12 @@ import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.MenuItem;
 
+import edu.rosehulman.android.directory.model.Course;
 import edu.rosehulman.android.directory.model.TermCode;
+import edu.rosehulman.android.directory.service.AuthenticationException;
+import edu.rosehulman.android.directory.service.ClientException;
+import edu.rosehulman.android.directory.service.MobileDirectoryService;
+import edu.rosehulman.android.directory.service.ServerException;
 
 public class ScheduleCourseActivity extends SherlockFragmentActivity {
 
@@ -282,4 +292,99 @@ public class ScheduleCourseActivity extends SherlockFragmentActivity {
 		}
 		
     }
+    
+    private class LoadCourse extends AsyncTask<Void, Void, Course> {
+	
+    	private TermCode term;
+    	private int crn;
+    	
+    	private boolean serverError = false;
+	
+		public LoadCourse(TermCode term, int crn) {
+			this.term = term;
+			this.crn = crn;
+		}
+
+		@Override
+		protected void onPreExecute() {
+			setSupportProgressBarIndeterminateVisibility(true);
+		}
+		
+		private boolean authenticate(MobileDirectoryService service) {
+			return false;
+			/*while (true) {
+				try {
+					//TODO authenticate
+					return false;
+				} catch (AuthenticationException e) {
+					Log.e(C.TAG, "Invalid auth token", e);
+					return false;
+					
+				} catch (ClientException e) {
+					Log.e(C.TAG, "Client request failed", e);
+					return false;
+					
+				} catch (ServerException e) {
+					Log.e(C.TAG, "Server request failed", e);
+					serverError = true;
+					return false;
+					
+				} catch (JSONException e) {
+					Log.e(C.TAG, "An error occured while parsing the JSON response", e);
+					serverError = true;
+					return false;
+					
+				} catch (IOException e) {
+					Log.e(C.TAG, "Network error, retrying...", e);
+				}
+			}*/
+		}
+		
+		private Course loadCourse(MobileDirectoryService service) {
+			while (true) {
+				try {
+					return service.getCourse(User.getCookie(), term.code, crn);
+
+				} catch (AuthenticationException e) {
+					Log.e(C.TAG, "Invalid auth token", e);
+					return null;
+					
+				} catch (ClientException e) {
+					Log.e(C.TAG, "Client request failed", e);
+					return null;
+					
+				} catch (ServerException e) {
+					Log.e(C.TAG, "Server request failed", e);
+					serverError = true;
+					return null;
+					
+				} catch (JSONException e) {
+					Log.e(C.TAG, "An error occured while parsing the JSON response", e);
+					serverError = true;
+					return null;
+					
+				} catch (IOException e) {
+					Log.e(C.TAG, "Network error, retrying...", e);
+				}
+			}
+		}
+
+		@Override
+		protected Course doInBackground(Void... params) {
+			
+			//get the person's course schedules
+			MobileDirectoryService service = new MobileDirectoryService();
+			Course course = loadCourse(service);
+			
+			//TODO convert the course
+			return course;
+		}
+		
+		@Override
+		protected void onPostExecute(Course res) {
+			setSupportProgressBarIndeterminateVisibility(false);
+			//TODO load course info
+		}
+		
+	}
 }

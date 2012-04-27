@@ -59,7 +59,11 @@ public class JsonClient extends RestClient implements Client<JSONObject> {
 				int errorClass = ex.getStatusCode() / 100;
 				switch (errorClass) {
 					case 4:
-						throw new ClientException(e.getMessage(), e);
+						if (ex.getStatusCode() == 401) {
+							throw new AuthenticationException(ex.getStatusCode(), ex.getMessage(), e);
+						} else {
+							throw new ClientException(ex.getStatusCode(), e.getMessage(), e);
+						}
 
 					case 5:
 						throw new ServerException(e.getMessage(), e);

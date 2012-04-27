@@ -32,10 +32,24 @@ import edu.rosehulman.android.directory.service.ServerException;
  * Activity used to register users for the beta program
  */
 public class LoginActivity extends SherlockActivity {
+	
+	public static final String ACTION_NEW_ACCOUNT = "NewAccount";
+	public static final String ACTION_UPDATE_ACCOUNT = "UpdateAccount";
+	
+	public static final String KEY_ACCOUNT = "Account";
 
-	public static Intent createIntent(Context context, AccountAuthenticatorResponse response) {
+	public static Intent createIntentForNewAccount(Context context, AccountAuthenticatorResponse response) {
 		Intent intent = new Intent(context, LoginActivity.class);
+		intent.setAction(ACTION_NEW_ACCOUNT);
 		intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response);
+		return intent;
+	}
+	
+	public static Intent createIntentForUpdateAccount(Context context, AccountAuthenticatorResponse response, Account account) {
+		Intent intent = new Intent(context, LoginActivity.class);
+		intent.setAction(ACTION_UPDATE_ACCOUNT);
+		intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response);
+		intent.putExtra(KEY_ACCOUNT, account);
 		return intent;
 	}
 	
@@ -43,6 +57,9 @@ public class LoginActivity extends SherlockActivity {
 
     private TextView txtUsername;
     private TextView txtPassword;
+    
+    private AccountAuthenticatorResponse mResponse;
+    private Account mAccount;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -54,9 +71,29 @@ public class LoginActivity extends SherlockActivity {
         txtUsername = (TextView)findViewById(R.id.username);
         txtPassword = (TextView)findViewById(R.id.password);
         
-        if (!getIntent().hasExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE)) {
+        Intent intent = getIntent();
+        
+        if (!intent.hasExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE)) {
+        	setResult(RESULT_CANCELED);
         	finish();
         	return;
+        }
+        Bundle extras = intent.getExtras();
+        mResponse = extras.getParcelable(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE);
+        
+        if (ACTION_NEW_ACCOUNT.equals(intent.getAction())) {
+        	
+        } else if (ACTION_UPDATE_ACCOUNT.equals(intent.getAction())) {
+        	mAccount = extras.getParcelable(KEY_ACCOUNT);
+        	txtUsername.setText(mAccount.name);
+        	txtUsername.setEnabled(false);
+        	((TextView)findViewById(R.id.title)).setText(R.string.update_login_message);
+        	
+        } else {
+        	mResponse.onError(AccountManager.ERROR_CODE_BAD_ARGUMENTS, "Invalid action");
+        	setResult(RESULT_CANCELED);
+        	finish();
+        	return; 
         }
         
         findViewById(R.id.back).setOnClickListener(new OnClickListener() {
@@ -83,6 +120,8 @@ public class LoginActivity extends SherlockActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 			case android.R.id.home:
+				setResult(Activity.RESULT_CANCELED);
+				mResponse.onError(AccountManager.ERROR_CODE_CANCELED, "Leaving login task");
 				finish();
 				break;
 			default:
@@ -90,10 +129,19 @@ public class LoginActivity extends SherlockActivity {
 		}
 		return true;
 	}
+	
+	@Override
+	public void onBackPressed() {
+		setResult(Activity.RESULT_CANCELED);
+		mResponse.onError(AccountManager.ERROR_CODE_CANCELED, "Leaving login task");
+		super.onBackPressed();
+	}
     
     private void btnBack_onClick() {
-    	setResult(RESULT_CANCELED);
-    	finish();
+        //remove ourselves from the app stack
+        setResult(Activity.RESULT_CANCELED);
+        mResponse.onError(AccountManager.ERROR_CODE_CANCELED, "Leaving login task");
+		finish();
     }
     
     private void btnLogin_onClick() {
@@ -111,7 +159,7 @@ public class LoginActivity extends SherlockActivity {
     		Toast.makeText(this, "A password is required", Toast.LENGTH_SHORT).show();
     		return;
     	}
-    	
+	
     	//start the registration process
     	LoginTask task = new LoginTask(username, password);
     	taskManager.addTask(task);
@@ -119,22 +167,44 @@ public class LoginActivity extends SherlockActivity {
     }
     
     private void processAuthentication(String username, String password, AuthenticationResponse auth) {
-    	Account account = new Account(username, AccountAuthenticator.ACCOUNT_TYPE);
-		AccountManager manager = AccountManager.get(LoginActivity.this);
-		Bundle args = new Bundle();
-		args.putString("AuthToken", auth.token);
-		boolean accountCreated = manager.addAccountExplicitly(account, password, args);
-		
-		Bundle extras = getIntent().getExtras();
-		if (accountCreated) {
-			AccountAuthenticatorResponse response = extras.getParcelable(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE);
+    	
+    	AccountManager manager = AccountManager.get(LoginActivity.this);
+    	
+    	String action = getIntent().getAction();
+    	
+    	if (ACTION_NEW_ACCOUNT.equals(action)) {
+	    	Account account = new Account(username, AccountAuthenticator.ACCOUNT_TYPE);
+			boolean accountCreated = manager.addAccountExplicitly(account, password, null);
+			
+			if (!accountCreated) {
+				mResponse.onError(AccountManager.ERROR_CODE_BAD_REQUEST, "Failed to create account");
+				setResult(RESULT_CANCELED);
+				finish();
+				return;
+			}
+			
+			if (accountCreated) {
+				Bundle result = new Bundle();
+				result.putString(AccountManager.KEY_ACCOUNT_NAME, username);
+				result.putString(AccountManager.KEY_ACCOUNT_TYPE, AccountAuthenticator.ACCOUNT_TYPE);
+				mResponse.onResult(result);
+				
+				manager.setAuthToken(account, AccountAuthenticator.TOKEN_TYPE, auth.token);
+			}
+			
+			User.setAccount(username);
+			
+    	} else if (ACTION_UPDATE_ACCOUNT.equals(action)) {
 			Bundle result = new Bundle();
-			result.putString(AccountManager.KEY_ACCOUNT_NAME, username);
+			result.putString(AccountManager.KEY_ACCOUNT_NAME, mAccount.name);
 			result.putString(AccountManager.KEY_ACCOUNT_TYPE, AccountAuthenticator.ACCOUNT_TYPE);
-			response.onResult(result);
-		}
-		
-		User.setCookie(username, null);
+			result.putString(AccountManager.KEY_AUTHTOKEN, auth.token);
+			result.putLong(AccountAuthenticator.KEY_EXPIRATION_TIME, auth.expiration.getTime());
+			mResponse.onResult(result);
+    		
+			manager.setPassword(mAccount, password);
+    		manager.setAuthToken(mAccount, AccountAuthenticator.TOKEN_TYPE, auth.token);
+    	}
 
         //remove ourselves from the app stack
         setResult(Activity.RESULT_OK);

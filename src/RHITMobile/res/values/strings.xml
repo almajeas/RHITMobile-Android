@@ -25,7 +25,8 @@
     <string name="schedule">Schedule</string>
     <string name="links">Links</string>
     <string name="whats_inside">What\'s Inside</string>
-    <string name="login_message">Have a Kerberos login?  Sign in to access features exclusive to members of Rose-Hulman.</string>
+    <string name="login_message">Have a Kerberos login? Sign in to access features exclusive to members of Rose-Hulman.</string>
+    <string name="update_login_message">Password changed? Sign in again to access features exclusive to members of Rose-Hulman.</string>
     <string name="username">Username</string>
     <string name="password">Password</string>
     <string name="back">Back</string>
@@ -36,6 +37,15 @@
     <string name="zoom_in">Zoom In</string>
     <string name="zoom_out">Zoom Out</string>
     
+    <!-- Choose Account Activity label -->
+    <string name="choose_account_label">Select an account</string>
+
+    <string name="add_account_label">"Add an account"</string>
+    <string name="choose_account_text">"Which account would you like to use?"</string>
+
+    <!-- Button label to add an account [CHAR LIMIT=20] -->
+    <string name="add_account_button_label">Add account</string>
+
     <string-array name="schedule_days">
         <item>MON</item>
         <item>TUE</item>

@@ -61,6 +61,16 @@
         </activity>
         
         <activity
+            android:name=".ChooseTypeAndAccountActivity" 
+            android:theme="@style/Theme.Sherlock">
+        </activity>
+        
+        <activity
+            android:name=".ChooseAccountTypeActivity" 
+            android:theme="@style/Theme.Sherlock">
+        </activity>
+        
+        <activity
             android:label="Campus Map"
             android:name=".CampusMapActivity" 
             android:exported="true" 
@@ -250,7 +260,7 @@
             android:authorities="edu.rosehulman.android.directory.providers.TourTagsSearchSuggestions"/>
         
 		<service android:enabled="true" android:name=".DataUpdateService" />
-		
+
 		<service android:name=".auth.AuthenticationService" android:permission="android.permission.ACCOUNT_MANAGER">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" >

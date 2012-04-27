@@ -63,7 +63,7 @@ public class Course {
 		
 		res.term = root.getInt("Term");
 		res.crn = root.getInt("CRN");
-		res.course = root.getString("Course");
+		res.course = root.getString("CourseNumber");
 		res.title = root.getString("Title");
 		res.credits = root.getInt("Credits");
 		res.instructor = ShortUser.deserialize(root.getJSONObject("Instructor"));

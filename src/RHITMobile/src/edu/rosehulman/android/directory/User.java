@@ -2,7 +2,6 @@ package edu.rosehulman.android.directory;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.content.Context;
 import android.content.SharedPreferences;
 import edu.rosehulman.android.directory.auth.AccountAuthenticator;
 import edu.rosehulman.android.directory.model.TermCode;
@@ -35,6 +34,43 @@ public class User {
 	}
 	
 	/**
+	 * Retrieve the user's password
+	 * 
+	 * @return The user's password, if known
+	 */
+	/*
+	public static String getPassword() {
+		SharedPreferences prefs = getPrefs();
+		
+		String encodedKey = prefs.getString(PREF_KEY, null);
+		String encodedPassword = prefs.getString(PREF_PASSWORD, null);
+		
+		if (encodedKey == null || encodedPassword == null)
+			return null;
+		
+		byte[] key = fromString(encodedKey);
+		byte[] encrypted = fromString(encodedPassword);
+		
+		return decrypt(key, encrypted);
+	}
+	*/
+	
+	public static Account getAccount(AccountManager manager) {
+		String username = getUsername();
+		return findAccount(manager, username);
+	}
+	
+	private static Account findAccount(AccountManager manager, String username) {
+		Account[] accounts = manager.getAccountsByType(AccountAuthenticator.ACCOUNT_TYPE);
+		
+		for (Account account : accounts) {
+			if (account.name.equals(username))
+				return account;
+		}
+		return null;
+	}
+	
+	/**
 	 * Determine if the user has logged in
 	 * 
 	 * @return True if we have an authentication token
@@ -45,13 +81,14 @@ public class User {
 		if (username == null)
 			return false;
 		
-		Account[] accounts = manager.getAccountsByType(AccountAuthenticator.ACCOUNT_TYPE);
+		Account account = findAccount(manager, username);
 		
-		for (Account account : accounts) {
-			if (account.name.equals(username))
-				return true;
+		if (account == null) {
+			//account has been deleted
+			clearLogin();
 		}
-		return false;
+		
+		return account != null;
 	}
 
 	/**
@@ -60,12 +97,40 @@ public class User {
 	 * @param username The user's name
 	 * @param token The authentication token that can be used in web requests
 	 */
-	public static void setCookie(String username, String token) {
+	public static void setAccount(String username) {
 		
-		//TODO token
 		getPrefs().edit()
 		.putString(PREF_USERNAME, username)
 		.commit();
+		/*
+	public static void setCookie(String username, String password, String token, long timestamp) {
+		byte[] key = generateKey();
+		byte[] encrypted = null;
+		if (key != null)
+			encrypted = encrypt(key, password);
+		
+		if (key == null || encrypted == null) {
+			getPrefs().edit()
+			.putString(PREF_USERNAME, username)
+			.putString(PREF_COOKIE, token)
+			.remove(PREF_KEY)
+			.remove(PREF_PASSWORD)
+			.putLong(PREF_TIMESTAMP, timestamp)
+			.commit();
+			
+		} else {
+			String encodedKey = toString(key);
+			String encodedPassword = toString(encrypted);
+			
+			getPrefs().edit()
+			.putString(PREF_USERNAME, username)
+			.putString(PREF_COOKIE, token)
+			.putString(PREF_KEY, encodedKey)
+			.putString(PREF_PASSWORD, encodedPassword)
+			.putLong(PREF_TIMESTAMP, timestamp)
+			.commit();
+		}
+		*/
 	}
 
 	/**
@@ -110,4 +175,47 @@ public class User {
 		MyApplication app = MyApplication.getInstance();
 		return app.getAppPreferences();
 	}
+	
+/*
+	private static String toString(byte[] bytes) {
+		return Base64.encodeToString(bytes, Base64.NO_WRAP);
+	}
+	
+	private static byte[] fromString(String data) {
+		return Base64.decode(data, Base64.NO_WRAP);
+	}
+	
+	private static byte[] encrypt(byte[] key, String password) {
+		try {
+			Cipher c = Cipher.getInstance("AES");
+			c.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(key, "AES"));
+			return c.doFinal(password.getBytes());
+			
+		} catch (Exception e) {
+			return null;
+		}
+	}
+	
+	private static String decrypt(byte[] key, byte[] password) {
+		try {
+			Cipher c = Cipher.getInstance("AES");
+			c.init(Cipher.DECRYPT_MODE, new SecretKeySpec(key, "AES"));
+			return new String(c.doFinal(password));
+			
+		} catch (Exception e) {
+			return null;
+		}
+	}
+	
+	private static byte[] generateKey() {
+		try {
+			KeyGenerator keygen = KeyGenerator.getInstance("AES");
+			keygen.init(128);
+			return keygen.generateKey().getEncoded();
+			
+		} catch (Exception e) {
+			return null;
+		}
+	}
+	*/
 }

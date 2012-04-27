@@ -1,11 +1,16 @@
 package edu.rosehulman.android.directory;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.AccountManagerCallback;
 import android.accounts.AccountManagerFuture;
+import android.accounts.AuthenticatorException;
+import android.accounts.OperationCanceledException;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -47,9 +52,12 @@ public class StartupActivity extends SherlockActivity {
 	private GridView tasksView;
 	
 	private static final int REQUEST_STARTUP_CODE = 4;
+	private static final int REQUEST_LOGIN_CODE = 5;
 
 	private ServiceManager<IDataUpdateService> updateService;
 	private boolean updateData = true;
+	
+	private AccountManagerFuture<Bundle> mPendingLogin;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -112,6 +120,11 @@ public class StartupActivity extends SherlockActivity {
 		super.onPause();
 		
 		updateService.cancel();
+		
+		if (mPendingLogin != null) {
+			mPendingLogin.cancel(true);
+			mPendingLogin = null;
+		}
 	}
 
 	@Override
@@ -135,24 +148,67 @@ public class StartupActivity extends SherlockActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-    	if (requestCode != REQUEST_STARTUP_CODE)
-    		return;
-    	
-    	switch (resultCode) {
-    		case Activity.RESULT_CANCELED:
-    			//The user declined an update, exit
-    			finish();
-    			break;
-    		case Activity.RESULT_OK:
-    			//We were up to date, continue on happily
-    			updateService.run(new ServiceRunnable<IDataUpdateService>() {
-    				@Override
-    				public void run(IDataUpdateService service) {
-    					service.startUpdate();
-    				}
-    			});
-    			break;	
+    	if (requestCode == REQUEST_STARTUP_CODE) {
+			switch (resultCode) {
+				case Activity.RESULT_CANCELED:
+					//The user declined an update, exit
+					finish();
+					break;
+				case Activity.RESULT_OK:
+					//We were up to date, continue on happily
+					updateService.run(new ServiceRunnable<IDataUpdateService>() {
+						@Override
+						public void run(IDataUpdateService service) {
+							service.startUpdate();
+						}
+					});
+					break;	
+			}
+
+    	} else if (requestCode == REQUEST_LOGIN_CODE) {
+    		if (resultCode != RESULT_OK)
+    			return;
+    		
+			Bundle extras = data.getExtras();
+			String username = extras.getString(AccountManager.KEY_ACCOUNT_NAME);
+			User.setAccount(username);
+
+			validateLogin();
     	}
+    }
+    
+    private void validateLogin() {
+    	final AccountManager manager = AccountManager.get(this);
+		Account account = User.getAccount(manager);
+		
+    	mPendingLogin = manager.getAuthToken(account, AccountAuthenticator.TOKEN_TYPE, null, this, new AccountManagerCallback<Bundle>() {
+			@Override
+			public void run(AccountManagerFuture<Bundle> future) {
+				mPendingLogin = null;
+				
+				Bundle res;
+				try {
+					res = future.getResult();
+					
+				} catch (OperationCanceledException e) {
+					return;
+					
+				} catch (AuthenticatorException e) {
+					return;
+					
+				} catch (IOException e) {
+					
+					return;
+				}
+				String token = res.getString(AccountManager.KEY_AUTHTOKEN);
+				Date expTime = new Date(res.getLong(AccountAuthenticator.KEY_EXPIRATION_TIME));
+				
+				if (expTime.before(new Date())) {
+					manager.invalidateAuthToken(AccountAuthenticator.ACCOUNT_TYPE, token);
+				}
+			}}, null);
+		
+		updateUI();
     }
     
     @Override
@@ -279,16 +335,11 @@ public class StartupActivity extends SherlockActivity {
 					new OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					AccountManager manager = AccountManager.get(StartupActivity.this);
-					manager.addAccount(AccountAuthenticator.ACCOUNT_TYPE, AccountAuthenticator.TOKEN_TYPE, null, null, null, new AccountManagerCallback<Bundle>() {
-						@Override
-						public void run(AccountManagerFuture<Bundle> future) {
-							try {
-								Intent intent = future.getResult().getParcelable(AccountManager.KEY_INTENT);
-								startActivity(intent);
-							} catch (Exception e) { }
-						}
-					}, null);
+					Intent intent = ChooseTypeAndAccountActivity.createIntent(StartupActivity.this, new String[] {AccountAuthenticator.ACCOUNT_TYPE});
+					startActivityForResult(intent, REQUEST_LOGIN_CODE);
+
+					//AccountManager manager = AccountManager.get(StartupActivity.this);
+					//manager.addAccount(AccountAuthenticator.ACCOUNT_TYPE, AccountAuthenticator.TOKEN_TYPE, null, null, StartupActivity.this, null, null);
 				}
 			}));
 		}

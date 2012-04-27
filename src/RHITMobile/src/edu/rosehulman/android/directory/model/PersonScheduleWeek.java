@@ -15,7 +15,7 @@ public class PersonScheduleWeek implements Parcelable {
 	}
 	
 	public boolean hasDay(ScheduleDay day) {
-		return getDay(day).isEmpty();
+		return !getDay(day).isEmpty();
 	}
 	
 	public PersonScheduleDay getDay(ScheduleDay day) {

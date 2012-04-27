@@ -173,7 +173,7 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 
 	@Override
 	public AuthenticationResponse login(String username, String password) throws ClientException, ServerException, JSONException, IOException {
-		JsonClient client = factory.makeJsonClient(HOST, PORT, "/banner/authenticate");
+		JsonClient client = factory.makeJsonClient("rhitmobile-authtest.herokuapp.com", 443, "/banner/authenticate");
 		client.addHeader("Login-Username", username);
 		client.addHeader("Login-Password", password);
 		
@@ -217,7 +217,7 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 	@Override
 	public CoursesResponse getUserSchedule(String authToken, String username) throws ClientException, ServerException, JSONException, IOException {
 		String url = String.format("/banner/user/schedule/%s", username);
-		JsonClient client = factory.makeJsonClient(HOST, PORT, url);
+		JsonClient client = factory.makeJsonClient("rhitmobile-authtest.herokuapp.com", 443, url);
 		client.addHeader("Auth-Token", authToken);
 		client.addParameter("getschedule", "true");
 		
