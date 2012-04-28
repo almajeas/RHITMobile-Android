@@ -15,12 +15,38 @@ public abstract class CachedAsyncLoader<D> extends AsyncLoader<AsyncLoaderResult
 	
 	@Override
 	protected void onStartLoading() {
-		if (mData == null || shouldUpdate()) {
-			forceLoad();
-			
-		} else {
-			deliverResult(mData);	
+		if (mData != null) {
+			deliverResult(mData);
 		}
+		
+		if (takeContentChanged() || mData == null) {
+			forceLoad();
+		}
+	}
+	
+    @Override
+    protected void onStopLoading() {
+    	cancelLoad(true);
+    }
+    
+	@Override
+	protected void onReset() {
+		super.onReset();
+		
+		onStopLoading();
+		
+		mData = null;
+	}
+	
+	@Override
+	public void deliverResult(AsyncLoaderResult<D> data) {
+		if (isReset()) {
+			return;
+		}
+		
+		mData = data;
+		
+		super.deliverResult(data);
 	}
 
 	@Override
@@ -47,42 +73,6 @@ public abstract class CachedAsyncLoader<D> extends AsyncLoader<AsyncLoaderResult
 		}
 	}
 	
-	/**
-	 * Implementations can override this method to specify
-	 * whether or not the loader should use the cached result
-	 * or recompute the data
-	 *  
-	 * @return True if the AsyncTask should be run
-	 */
-	protected boolean shouldUpdate() {
-		return true;
-	}
-
 	protected abstract D doInBackground() throws AsyncLoaderException;
-
-	@Override
-	public void onCanceled(AsyncLoaderResult<D> data) {
-		//override to dispose data
-	}
-
-	@Override
-	public void deliverResult(AsyncLoaderResult<D> data) {
-		mData = data;
-		
-		if (isStarted()) {
-			super.deliverResult(data);
-		}
-	}
-	
-	@Override
-	protected void onReset() {
-		super.onReset();
-		
-		onStopLoading();
-		
-		if (mData != null) {
-			mData = null;
-		}
-	}
 	
 }

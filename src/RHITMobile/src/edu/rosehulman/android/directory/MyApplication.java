@@ -6,7 +6,10 @@ import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Handler;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.LoaderManager;
 import edu.rosehulman.android.directory.db.DatabaseHelper;
+import edu.rosehulman.android.directory.loaders.AsyncLoader;
 import edu.rosehulman.android.directory.service.MobileDirectoryService;
 import edu.rosehulman.android.directory.service.MockClientFactory;
 import edu.rosehulman.android.directory.service.MockJsonClient;
@@ -41,7 +44,7 @@ public class MyApplication extends Application {
 	
 	private Handler handler = new Handler();
 	
-	public static final boolean DEBUG = false;
+	public static final boolean DEBUG = true;
 	
 	private static final boolean PURGE_DB = false;
 	
@@ -86,9 +89,15 @@ public class MyApplication extends Application {
 		
 		instance = this;
 		
-		//start with a fresh database every run
-		if (PURGE_DB) {
-			purgeDb();
+		if (DEBUG) {
+			LoaderManager.enableDebugLogging(true);
+			FragmentManager.enableDebugLogging(true);
+			AsyncLoader.DEBUG = true;
+			
+			//start with a fresh database every run
+			if (PURGE_DB) {
+				purgeDb();
+			}
 		}
 		
 	}

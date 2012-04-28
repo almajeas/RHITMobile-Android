@@ -192,7 +192,12 @@ public class LoginActivity extends SherlockActivity {
 				manager.setAuthToken(account, AccountAuthenticator.TOKEN_TYPE, auth.token);
 			}
 			
-			User.setAccount(username, auth.terms, auth.currentTerm);
+			String terms[] = new String[auth.terms.length];
+			for (int i = 0; i < terms.length; i++) {
+				terms[i] = auth.terms[i].code;
+			}
+			
+			User.setAccount(username, terms, auth.currentTerm.code);
 			
     	} else if (ACTION_UPDATE_ACCOUNT.equals(action)) {
 			Bundle result = new Bundle();

@@ -100,13 +100,18 @@ public class AccountAuthenticator extends AbstractAccountAuthenticator {
 			Log.e(C.TAG, "Login failed due to network issue, giving up...");
 			throw new NetworkErrorException(e);
 		}
+		
+		String terms[] = new String[auth.terms.length];
+		for (int i = 0; i < terms.length; i++) {
+			terms[i] = auth.terms[i].code;
+		}
 
 		res.putString(AccountManager.KEY_ACCOUNT_NAME, account.name);
 		res.putString(AccountManager.KEY_ACCOUNT_TYPE, account.type);
 		res.putString(AccountManager.KEY_AUTHTOKEN, auth.token);
 		res.putLong(KEY_EXPIRATION_TIME, auth.expiration.getTime());
-		res.putParcelableArray(KEY_TERM_CODES, auth.terms);
-		res.putParcelable(KEY_TERM_CODE, auth.currentTerm);
+		res.putStringArray(KEY_TERM_CODES, terms);
+		res.putString(KEY_TERM_CODE, auth.currentTerm.code);
 		return res;
 	}
 

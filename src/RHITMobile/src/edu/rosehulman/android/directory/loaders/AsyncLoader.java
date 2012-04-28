@@ -52,7 +52,7 @@ import android.util.Log;
  */
 public abstract class AsyncLoader<D> extends Loader<D> {
     static final String TAG = "AsyncTaskLoader";
-    static final boolean DEBUG = false;
+    public static boolean DEBUG = false;
 
     final class LoadTask extends AsyncTask<Void, Void, D> implements Runnable {
 
@@ -132,11 +132,6 @@ public abstract class AsyncLoader<D> extends Loader<D> {
         executePendingTask();
     }
 
-    @Override
-    protected void onStopLoading() {
-    	cancelLoad(true);
-    }
-    
     /**
      * Attempt to cancel the current load task. See {@link AsyncTask#cancel(boolean)}
      * for more info.  Must be called on the main thread of the process.

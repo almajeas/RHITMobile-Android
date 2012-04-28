@@ -92,15 +92,15 @@ public class AuthenticatedFragment extends Fragment {
 	}
 	
 	private AuthenticationCallbacks getCallbacks() {
+		Activity activity = getActivity();
 		try {
-			Activity activity = getActivity();
 			if (activity == null) {
 				return mLonelyCallbacks;
 			} else {
 				return (AuthenticationCallbacks)getActivity();
 			}
 		} catch (ClassCastException ex) {
-			throw new RuntimeException("Activity must implement AuthenticationCallbacks");
+			throw new ClassCastException(activity.toString() + " must implement AuthenticationCallbacks");
 		}
 	}
 	

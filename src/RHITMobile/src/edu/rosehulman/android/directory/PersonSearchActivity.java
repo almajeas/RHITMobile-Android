@@ -2,28 +2,42 @@ package edu.rosehulman.android.directory;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 
-public class PersonSearchActivity extends SherlockFragmentActivity {
+import edu.rosehulman.android.directory.AuthenticatedFragment.AuthenticationCallbacks;
+import edu.rosehulman.android.directory.PersonListFragment.PersonListCallbacks;
 
+public class PersonSearchActivity extends SherlockFragmentActivity implements AuthenticationCallbacks, PersonListCallbacks {
+
+	private AuthenticatedFragment mAuth;
+	private PersonListFragment mList;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.person_search);
 		getSupportActionBar().setHomeButtonEnabled(true);
-		
-		getSupportFragmentManager().beginTransaction().add(new AuthenticatedFragment(), "auth").commit();
+
+		FragmentManager fragments = getSupportFragmentManager();
+        mAuth = (AuthenticatedFragment)fragments.findFragmentByTag("auth");
+        if (mAuth == null) {
+        	mAuth = new AuthenticatedFragment();
+			getSupportFragmentManager().beginTransaction().add(mAuth, "auth").commit();
+        }
+        
+        mList = (PersonListFragment)fragments.findFragmentById(R.id.list_fragment);
 	}
 	
 	@Override
 	protected void onNewIntent(Intent intent) {
 		setIntent(intent);
 	}
-	
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -47,4 +61,25 @@ public class PersonSearchActivity extends SherlockFragmentActivity {
         }
         return true;
     }
+
+	@Override
+	public void onRequestAuthToken() {
+		mAuth.obtainAuthToken();
+	}
+	
+	@Override
+	public void onInvalidateAuthToken(String authToken) {
+		mAuth.invalidateAuthToken(authToken);
+	}
+
+	@Override
+	public void onAuthTokenObtained(String authToken) {
+		mList.onAuthTokenObtained(authToken);
+	}
+
+	@Override
+	public void onAuthTokenCancelled() {
+		Toast.makeText(this, getString(R.string.authentication_error), Toast.LENGTH_SHORT).show();
+		finish();
+	}
 }

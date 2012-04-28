@@ -7,7 +7,7 @@ import android.os.IBinder;
 public class AuthenticationService extends Service {
 
 	private AccountAuthenticator mAuth;
-	
+
 	@Override
 	public void onCreate() {
 		super.onCreate();
@@ -18,5 +18,4 @@ public class AuthenticationService extends Service {
 	public IBinder onBind(Intent intent) {
 		return mAuth.getIBinder();
 	}
-
 }

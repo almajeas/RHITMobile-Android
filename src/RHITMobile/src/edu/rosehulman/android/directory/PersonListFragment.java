@@ -1,48 +1,55 @@
 package edu.rosehulman.android.directory;
-import java.util.ArrayList;
-import java.util.List;
 
 import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Intent;
 import android.net.Uri;
-import android.util.Log;
+import android.os.Bundle;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.app.SherlockListFragment;
+
+import edu.rosehulman.android.directory.loaders.AsyncLoaderException;
+import edu.rosehulman.android.directory.loaders.AsyncLoaderResult;
+import edu.rosehulman.android.directory.loaders.InvalidAuthTokenException;
+import edu.rosehulman.android.directory.loaders.LoadUserSearch;
+import edu.rosehulman.android.directory.model.ShortUser;
 
 public class PersonListFragment extends SherlockListFragment {
 	
-	private String searchQuery;
+	public interface PersonListCallbacks {
+		public void onInvalidateAuthToken(String authToken);
+		public void onRequestAuthToken();
+	}
+	
+	private static final int LOAD_USER_SEARCH = 1;
 
-	private PersonInfo[] people;
-	private ArrayAdapter<PersonInfo> dataSet;
+	private PersonListCallbacks mCallbacks;
+	private String mAuthToken;
 
-	private PersonInfo[] defaultPeople = new PersonInfo[] {
-			new PersonInfo("glowskst", "Scott Glowski", "CS/SE/MA Student"),
-			new PersonInfo("theisje", "Jimmy Theis", "SE Student"),
-			new PersonInfo("wellska1", "Kevin Wells", "SE/CS Student"),
-			new PersonInfo("wattsbn", "Bryan Watts", "CS/SE Student"),
-			new PersonInfo("hayesez", "Erik Hayes", "Assistant Dean of Student Affairs")
-	};
+	private String mSearchQuery;
+	private ShortUser[] mUsers;
 
-	public class PersonInfo {
-		public String username;
-		public String name;
-		public String description;
-
-		public PersonInfo(String username, String name, String description) {
-			this.username = username;
-			this.name = name;
-			this.description = description;
+	@Override
+	public void onAttach(Activity activity) {
+		super.onAttach(activity);
+		
+		try {
+			mCallbacks = (PersonListCallbacks)activity;			
+		} catch (ClassCastException e) {
+			throw new ClassCastException(activity.toString() + " must implement " + PersonListCallbacks.class.getName());
 		}
 	}
-
+	
 	@Override
 	public void onResume() {
 		super.onResume();
@@ -70,48 +77,104 @@ public class PersonListFragment extends SherlockListFragment {
 			return;
 		}
 	}
+	
+	public void onAuthTokenObtained(String authToken) {
+		mAuthToken = authToken;
+		loadUsers();
+	}
 
-	public void runSearch(String query) {
-		searchQuery = query;
-		getSherlockActivity().getSupportActionBar().setSubtitle(searchQuery);
-
-		List<PersonInfo> res = new ArrayList<PersonInfo>();
-		Log.d(C.TAG, "Query: " + query);
-		for (PersonInfo person : defaultPeople) {
-			if (person.name.toLowerCase().contains(query.toLowerCase())) {
-				Log.d(C.TAG, "Checked person: " + person.username);
-				res.add(person);
-			}
-		}
-		people = new PersonInfo[res.size()];
-		res.toArray(people);
-
-		dataSet = new ArrayAdapter<PersonInfo>(getActivity(),
-				R.layout.search_item, R.id.name, people) {
-
-			@Override
-			public View getView(int position, View convertView, ViewGroup parent) {
-				LayoutInflater inflater = LayoutInflater.from(getActivity());
-				View v = inflater.inflate(R.layout.search_item, null);
-
-				TextView name = (TextView)v.findViewById(R.id.name);
-				TextView info = (TextView)v.findViewById(R.id.description);
-
-				name.setText(people[position].name);
-				info.setText(people[position].description);
-
-				return v;
-			}
-		};
-		setListAdapter(dataSet);
+	private void runSearch(String query) {
+		mSearchQuery = query;
+		
+		SherlockFragmentActivity activity = getSherlockActivity();
+		activity.getSupportActionBar().setSubtitle(mSearchQuery);
+		activity.setProgressBarIndeterminateVisibility(true);
+		
+		mCallbacks.onRequestAuthToken();
 	}
 
 	@Override
 	public void onListItemClick(ListView l, View v, int position, long rowId)
 	{
 		getActivity().finish();
-		Intent newIntent = PersonActivity.createIntent(getActivity(), people[position].username);
+		Intent newIntent = PersonActivity.createIntent(getActivity(), mUsers[position].username);
 		startActivity(newIntent);
 	}
+
+	private void processResult(ShortUser[] users) {
+		mUsers = users;
+
+		ArrayAdapter<ShortUser> adapter = null;
+		if (mUsers != null) {
+			adapter = new ArrayAdapter<ShortUser>(getActivity(),
+					R.layout.search_item, R.id.name, users) {
 	
+				@Override
+				public View getView(int position, View convertView, ViewGroup parent) {
+					View v = convertView;					
+					if (v == null) {
+						LayoutInflater inflater = LayoutInflater.from(getActivity());
+						v = inflater.inflate(R.layout.search_item, null);
+					}
+
+					TextView name = (TextView)v.findViewById(R.id.name);
+					TextView info = (TextView)v.findViewById(R.id.description);
+
+					name.setText(mUsers[position].fullname);
+					info.setText(mUsers[position].subtitle);
+
+					return v;
+				}
+			};
+		}
+		setListAdapter(adapter);
+	}
+	
+	private Bundle mArgs;
+	private void loadUsers() {
+		Bundle args = LoadUserSearch.bundleArgs(mAuthToken, mSearchQuery);
+		
+		if (mArgs != null) {
+			getLoaderManager().restartLoader(LOAD_USER_SEARCH, args, mLoadUsersCallbacks);
+		} else {
+			getLoaderManager().initLoader(LOAD_USER_SEARCH, args, mLoadUsersCallbacks);
+		}
+		
+		mArgs = args;
+	}
+	
+	private LoaderCallbacks<AsyncLoaderResult<ShortUser[]>> mLoadUsersCallbacks = new LoaderCallbacks<AsyncLoaderResult<ShortUser[]>>() {
+		
+		@Override
+		public Loader<AsyncLoaderResult<ShortUser[]>> onCreateLoader(int id, Bundle args) {
+			return new LoadUserSearch(getActivity(), args);
+		}
+
+		@Override
+		public void onLoadFinished(Loader<AsyncLoaderResult<ShortUser[]>> loader, AsyncLoaderResult<ShortUser[]> data) {
+			
+			try {
+				final ShortUser[] result = data.getResult();
+				getSherlockActivity().setSupportProgressBarIndeterminateVisibility(false);
+				processResult(result);
+				
+			} catch (InvalidAuthTokenException ex) {
+				mCallbacks.onInvalidateAuthToken(mAuthToken);
+				mCallbacks.onRequestAuthToken();
+				mAuthToken = null;
+				
+			} catch (AsyncLoaderException ex) {
+				String message = ex.getMessage();
+				if (message != null) {
+					Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+				}
+				getActivity().finish();
+			}	
+		}
+
+		@Override
+		public void onLoaderReset(Loader<AsyncLoaderResult<ShortUser[]>> loader) {
+			processResult(null);
+		}
+	};
 }

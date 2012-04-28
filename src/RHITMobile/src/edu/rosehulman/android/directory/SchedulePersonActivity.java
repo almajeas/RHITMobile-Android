@@ -7,8 +7,10 @@ import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.LoaderManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
+import android.util.Log;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
@@ -32,6 +34,8 @@ public class SchedulePersonActivity extends SherlockFragmentActivity implements 
 	
 	public static final String EXTRA_PERSON = "Person";
 	public static final String EXTRA_TERM_CODE = "TermCode";
+
+	private static final String STATE_SELECTED = "Selected";
 	
 	public static Intent createIntent(Context context, String person) {
 		Intent intent = new Intent(context, SchedulePersonActivity.class);
@@ -51,8 +55,6 @@ public class SchedulePersonActivity extends SherlockFragmentActivity implements 
 	
 	private String person;
 	private TermCode term;
-	
-	private TaskManager taskManager = new TaskManager();
 	
 	private PersonScheduleWeek schedule;
 	
@@ -80,6 +82,11 @@ public class SchedulePersonActivity extends SherlockFragmentActivity implements 
 		this.savedInstanceState = savedInstanceState;
         
 		handleIntent(getIntent());
+		
+		LoaderManager loaders = getSupportLoaderManager();
+		if (LoadUserSchedule.getInstance(loaders, TASK_LOAD_SCHEDULE) != null) {
+			loaders.initLoader(TASK_LOAD_SCHEDULE, null, mLoadScheduleCallbacks);
+		}
 	}
 	
 	@Override
@@ -110,37 +117,19 @@ public class SchedulePersonActivity extends SherlockFragmentActivity implements 
 
 		((FrameLayout)findViewById(R.id.fragment_content)).removeAllViews();
 	}
-	
+
 	@Override
 	public void onSaveInstanceState(Bundle state) {
 		super.onSaveInstanceState(state);
-		
-		if (schedule != null) {
-			state.putParcelable("Schedule", schedule);
-		}
-		
-		state.putInt("Selected", getSupportActionBar().getSelectedNavigationIndex());
+
+		state.putInt(STATE_SELECTED, getSupportActionBar().getSelectedNavigationIndex());
 	}
 	
 	@Override
 	protected void onResume() {
 		super.onResume();
 		
-		if (savedInstanceState != null &&
-				savedInstanceState.containsKey("Schedule")) {
-			processSchedule((PersonScheduleWeek)savedInstanceState.getParcelable("Schedule"));
-			getSupportActionBar().setSelectedNavigationItem(savedInstanceState.getInt("Selected"));
-			setSupportProgressBarIndeterminateVisibility(false);
-			
-		} else {
-			fragAuth.obtainAuthToken();
-		}
-	}
-	
-	@Override
-	protected void onPause() {
-		super.onPause();
-		taskManager.abortTasks();
+		fragAuth.obtainAuthToken();
 	}
     
 	@Override
@@ -190,7 +179,6 @@ public class SchedulePersonActivity extends SherlockFragmentActivity implements 
 		//cleanup old schedule
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.removeAllTabs();
-		((FrameLayout)findViewById(R.id.fragment_content)).removeAllViews();
 		String[] tags = getResources().getStringArray(R.array.schedule_days);
 		if (schedule != null) {
 			FragmentManager fragments = getSupportFragmentManager();
@@ -199,17 +187,19 @@ public class SchedulePersonActivity extends SherlockFragmentActivity implements 
 				if (schedule.hasDay(day)) {
 					String tag = tags[day.ordinal()];
 					Fragment frag = fragments.findFragmentByTag(tag);
-					if (frag != null)
+					if (frag != null) {
 						ft.remove(frag);
+					}
 				}
 			}
 			ft.commit();
+			fragments.executePendingTransactions();
 		}
 		
 		//populate new schedule, if there is one
 		schedule = res;
 		if (schedule == null) {
-			getSupportActionBar().setSubtitle(null);
+			actionBar.setSubtitle(null);
 			return;
 		}
 		
@@ -219,12 +209,19 @@ public class SchedulePersonActivity extends SherlockFragmentActivity implements 
 				createTab(day, tag, tag);
 			}
 		}
-		getSupportActionBar().setSubtitle(person);
+		actionBar.setSubtitle(person);
+		
+		if (savedInstanceState != null) {
+			int index = savedInstanceState.getInt(STATE_SELECTED);
+			if (index >= 0 && index < actionBar.getTabCount()) {
+				actionBar.setSelectedNavigationItem(index);
+			}
+		}
 	}
 	
 	@Override
 	public void onAuthTokenObtained(String authToken) {
-		reloadSchedule(authToken);
+		loadSchedule(authToken);
 	}
 
 	@Override
@@ -233,9 +230,17 @@ public class SchedulePersonActivity extends SherlockFragmentActivity implements 
 		finish();
 	}
 	
-	private void reloadSchedule(String authToken) {
+	private Bundle mArgs;
+	private void loadSchedule(String authToken) {
 		Bundle args = LoadUserSchedule.bundleArgs(authToken, term.code, person);
-		getSupportLoaderManager().restartLoader(TASK_LOAD_SCHEDULE, args, mLoadScheduleCallbacks);
+		
+		if (mArgs != null) {
+			getSupportLoaderManager().restartLoader(TASK_LOAD_SCHEDULE, args, mLoadScheduleCallbacks);
+		} else {
+			getSupportLoaderManager().initLoader(TASK_LOAD_SCHEDULE, args, mLoadScheduleCallbacks);
+		}
+		
+		mArgs = args;
 	}
 	
 	private LoaderCallbacks<AsyncLoaderResult<PersonScheduleWeek>> mLoadScheduleCallbacks = new LoaderCallbacks<AsyncLoaderResult<PersonScheduleWeek>>() {
@@ -249,6 +254,7 @@ public class SchedulePersonActivity extends SherlockFragmentActivity implements 
 
 		@Override
 		public void onLoadFinished(Loader<AsyncLoaderResult<PersonScheduleWeek>> loader, AsyncLoaderResult<PersonScheduleWeek> data) {
+			Log.d(C.TAG, "Finished LoadUserSchedule");
 			
 			try {
 				final PersonScheduleWeek result = data.getResult();
@@ -276,10 +282,6 @@ public class SchedulePersonActivity extends SherlockFragmentActivity implements 
 
 		@Override
 		public void onLoaderReset(Loader<AsyncLoaderResult<PersonScheduleWeek>> loader) {
-			if (isFinishing())
-				return;
-			
-			processSchedule(null);
 		}
 	};
 }

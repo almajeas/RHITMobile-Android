@@ -93,16 +93,16 @@ public class User {
 	 * @param term The current term
 	 * @param token The authentication token that can be used in web requests
 	 */
-	public static void setAccount(String username, TermCode[] terms, TermCode term) {
+	public static void setAccount(String username, String[] terms, String term) {
 		JSONArray array = new JSONArray();
-		for (TermCode t : terms) {
-			array.put(t.code);
+		for (String t : terms) {
+			array.put(t);
 		}
 
 		getPrefs().edit()
 		.putString(PREF_USERNAME, username)
 		.putString(PREF_TERM_CODES, array.toString())
-		.putString(PREF_TERM_CODE, term.code)
+		.putString(PREF_TERM_CODE, term)
 		.commit();
 	}
 

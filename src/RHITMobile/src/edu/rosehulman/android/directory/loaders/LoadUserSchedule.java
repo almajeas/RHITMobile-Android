@@ -6,6 +6,8 @@ import org.json.JSONException;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.util.Log;
 import edu.rosehulman.android.directory.C;
 import edu.rosehulman.android.directory.R;
@@ -33,6 +35,11 @@ public class LoadUserSchedule extends CachedAsyncLoader<PersonScheduleWeek> {
 		res.putString(ARG_USERNAME, username);
 		return res;
 	}
+	
+	public static LoadUserSchedule getInstance(LoaderManager loaderManager, int id) {
+		Loader<AsyncLoaderResult<PersonScheduleWeek>> res = loaderManager.getLoader(id);
+		return (LoadUserSchedule)res;
+	}
 
 	private String mAuthToken;
 	private String mTerm;
@@ -51,6 +58,8 @@ public class LoadUserSchedule extends CachedAsyncLoader<PersonScheduleWeek> {
 	
 	@Override
 	protected PersonScheduleWeek doInBackground() throws AsyncLoaderException {
+		Log.d(C.TAG, "Starting LoadUserSchedule");
+		
 		//get the person's course schedules
 		MobileDirectoryService service = new MobileDirectoryService();
 		CoursesResponse response = loadCourses(service);

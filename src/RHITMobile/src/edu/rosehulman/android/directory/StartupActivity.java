@@ -176,23 +176,23 @@ public class StartupActivity extends SherlockActivity {
 			@Override
 			public void run(AccountManagerFuture<Bundle> future) {
 				try {
-					future.getResult();
+					Bundle res = future.getResult();
 
-					/*
 					String token = res.getString(AccountManager.KEY_AUTHTOKEN);
-					Date expTime = new Date(res.getLong(AccountAuthenticator.KEY_EXPIRATION_TIME));
+					//Date expTime = new Date(res.getLong(AccountAuthenticator.KEY_EXPIRATION_TIME));
 					
-					Parcelable[] pTerms = res.getParcelableArray(AccountAuthenticator.KEY_TERM_CODES);
-					TermCode[] terms = ArrayUtil.cast(pTerms, new TermCode[pTerms.length]);
-					
-					TermCode term = (TermCode)res.getParcelable(AccountAuthenticator.KEY_TERM_CODE);
-
-					if (expTime.before(new Date())) {
+					if (!res.containsKey(AccountAuthenticator.KEY_TERM_CODES) || !res.containsKey(AccountAuthenticator.KEY_TERM_CODE)) {
 						manager.invalidateAuthToken(AccountAuthenticator.ACCOUNT_TYPE, token);
+						validateLogin(username);
+						return;
 					}
 					
+					String[] terms = res.getStringArray(AccountAuthenticator.KEY_TERM_CODES);
+					String term = res.getString(AccountAuthenticator.KEY_TERM_CODE);
+					
 					User.setAccount(username, terms, term);
-					*/
+					
+					updateUI();
 
 				} catch (OperationCanceledException e) {
 				} catch (AuthenticatorException e) {

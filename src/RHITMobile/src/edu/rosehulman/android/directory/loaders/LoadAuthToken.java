@@ -11,15 +11,12 @@ import android.accounts.OperationCanceledException;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Parcelable;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.util.Log;
 import edu.rosehulman.android.directory.C;
 import edu.rosehulman.android.directory.User;
 import edu.rosehulman.android.directory.auth.AccountAuthenticator;
-import edu.rosehulman.android.directory.model.TermCode;
-import edu.rosehulman.android.directory.util.ArrayUtil;
 
 public class LoadAuthToken extends Loader<String> {
 	
@@ -126,9 +123,8 @@ public class LoadAuthToken extends Loader<String> {
 						
 						//update term codes
 						if (res.containsKey(AccountAuthenticator.KEY_TERM_CODES) && res.containsKey(AccountAuthenticator.KEY_TERM_CODE)) {
-							Parcelable[] pTerms = res.getParcelableArray(AccountAuthenticator.KEY_TERM_CODES);
-							TermCode[] terms = ArrayUtil.cast(pTerms, new TermCode[pTerms.length]);
-							TermCode term = (TermCode)res.getParcelable(AccountAuthenticator.KEY_TERM_CODE);
+							String[] terms = res.getStringArray(AccountAuthenticator.KEY_TERM_CODES);
+							String term = res.getString(AccountAuthenticator.KEY_TERM_CODE);
 							User.setAccount(account.name, terms, term);
 						}
 						
