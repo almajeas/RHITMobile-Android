@@ -68,5 +68,6 @@
 		<item>3:25pm</item>
 		<item>4:20pm</item>
     </string-array>
+		<string name="authentication_error">Unable to authenticate</string>
 
 </resources>

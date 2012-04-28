@@ -1,42 +1,40 @@
 package edu.rosehulman.android.directory;
 
-import java.io.IOException;
-
 import android.accounts.AccountManager;
-import android.accounts.AccountManagerCallback;
-import android.accounts.AccountManagerFuture;
-import android.accounts.AuthenticatorException;
-import android.accounts.OperationCanceledException;
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
-import android.widget.Toast;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import edu.rosehulman.android.directory.auth.AccountAuthenticator;
+import edu.rosehulman.android.directory.loaders.LoadAuthToken;
 
 /**
  * A fragment that ensures that the user is logged in
  */
 public class AuthenticatedFragment extends Fragment {
 	
+	private static final String KEY_LOAD_ATTEMPTED = "LoadAttempted";
+	
 	public interface AuthenticationCallbacks {
 		public void onAuthTokenObtained(String authtoken);
 		public void onAuthTokenCancelled();
 	}
 
-	private String mAuthToken;
-	private boolean mCancelled;
+	private boolean mLoadAttempted;
+	private boolean mAbortOnLogin;
 	
-	//private static final int LOAD_AUTH_TOKEN = 400;
+	private String mAuthToken;
+	
+	private static final int LOAD_AUTH_TOKEN = 400;
 	
 	public AuthenticatedFragment() {
 		setRetainInstance(true);
-		mCancelled = false;
 	}
 
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
-		outState.putBoolean("Cancelled", mCancelled);
+		outState.putBoolean(KEY_LOAD_ATTEMPTED, mLoadAttempted);
 	}
 
 	public boolean hasAuthToken() {
@@ -61,68 +59,36 @@ public class AuthenticatedFragment extends Fragment {
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		Activity activity = getActivity();
-		
 		if (savedInstanceState != null) {
-			mCancelled = savedInstanceState.getBoolean("Cancelled");
-		}
-		
-		if (mCancelled) {
-			activity.finish();
-			return;
+			mLoadAttempted = savedInstanceState.getBoolean(KEY_LOAD_ATTEMPTED);
 		}
 	}
 	
-	private AccountManagerFuture<Bundle> startAuthRequest() {
-		final Activity activity = getActivity();
+	@Override
+	public void onDetach() {
+		super.onDetach();
+		
+		LoadAuthToken loader = LoadAuthToken.getInstance(getLoaderManager(), LOAD_AUTH_TOKEN);
+		if (loader != null) {
+			loader.setActivity(null);
+		}
+	}
 
-		AccountManager manager = AccountManager.get(activity);
-		
-		return manager.getAuthToken(User.getAccount(manager), AccountAuthenticator.TOKEN_TYPE, null, activity, new AccountManagerCallback<Bundle>() {
-			@Override
-			public void run(AccountManagerFuture<Bundle> future) {
-				AuthenticationCallbacks callbacks = getCallbacks();
-				
-				try {
-					Bundle res = future.getResult();
-					if (!res.containsKey(AccountManager.KEY_AUTHTOKEN)) {
-						callbacks.onAuthTokenCancelled();	
-					} else {
-						mAuthToken = res.getString(AccountManager.KEY_AUTHTOKEN);
-						callbacks.onAuthTokenObtained(mAuthToken);
-					}
-					
-				} catch (OperationCanceledException e) {
-					Log.i(C.TAG, "User cancelled authentication");
-					Toast.makeText(activity, "Unable to authenticate", Toast.LENGTH_SHORT).show();
-					callbacks.onAuthTokenCancelled();
-					
-				} catch (AuthenticatorException e) {
-					Log.e(C.TAG, "Authenticator error", e);
-					Toast.makeText(activity, "Unable to authenticate", Toast.LENGTH_SHORT).show();
-					callbacks.onAuthTokenCancelled();
-				
-				} catch (IOException e) {
-					Log.e(C.TAG, "Network error, retrying...");
-					try {
-						Thread.sleep(2000);
-						startAuthRequest();
-					} catch (InterruptedException ex) {
-					}
-				}
-			}
-		}, null);
-	}
-	
 	public void invalidateAuthToken(String authToken) {
-		//getLoaderManager().destroyLoader(LOAD_AUTH_TOKEN);
 		assert(authToken != null && authToken.equals(mAuthToken));
 		AccountManager.get(getActivity()).invalidateAuthToken(AccountAuthenticator.ACCOUNT_TYPE, authToken);
+		
+		getLoaderManager().destroyLoader(LOAD_AUTH_TOKEN);
 		mAuthToken = null;
 	}
 	
-	public AccountManagerFuture<Bundle> obtainAuthToken() {
-		return startAuthRequest();
+	public void obtainAuthToken() {
+		if (mLoadAttempted) {
+			mAbortOnLogin = true;
+		}
+		
+		mLoadAttempted = true;
+		loadAuthToken();
 	}
 	
 	private AuthenticationCallbacks getCallbacks() {
@@ -141,14 +107,48 @@ public class AuthenticatedFragment extends Fragment {
 	private AuthenticationCallbacks mLonelyCallbacks = new AuthenticationCallbacks() {
 		
 		@Override
-		public void onAuthTokenObtained(String authtoken) {
-			mAuthToken = authtoken;
+		public void onAuthTokenObtained(String authToken) {
+			mAuthToken = authToken;
 		}
 		
 		@Override
 		public void onAuthTokenCancelled() {
 			mAuthToken = null;
-			mCancelled = true;
+		}
+	};
+	
+	private void loadAuthToken() {
+		LoaderManager loaderManager = getLoaderManager();
+		
+		LoadAuthToken loader;
+		Bundle args = LoadAuthToken.bundleArgs(mAbortOnLogin);
+		loader = (LoadAuthToken)loaderManager.initLoader(LOAD_AUTH_TOKEN, args, mLoadAuthTokenCallbacks);
+		loader.setActivity(getActivity());
+	}
+	
+	private LoaderManager.LoaderCallbacks<String> mLoadAuthTokenCallbacks = new LoaderManager.LoaderCallbacks<String>() {
+		@Override
+		public Loader<String> onCreateLoader(int id, Bundle args) {
+			return new LoadAuthToken(args, getActivity());
+		}
+
+		@Override
+		public void onLoadFinished(Loader<String> loader, String data) {
+			mAuthToken = data;
+			
+			AuthenticationCallbacks callbacks = getCallbacks();
+			
+			if (mAuthToken == null) {
+				callbacks.onAuthTokenCancelled();
+			} else {
+				mLoadAttempted = false;
+				callbacks.onAuthTokenObtained(mAuthToken);
+			}
+		}
+
+		@Override
+		public void onLoaderReset(Loader<String> loader) {
+			mAuthToken = null;
 		}
 	};
 }

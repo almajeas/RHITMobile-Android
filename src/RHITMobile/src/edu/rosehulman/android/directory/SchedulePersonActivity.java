@@ -1,15 +1,12 @@
 package edu.rosehulman.android.directory;
 
-import java.io.IOException;
-
-import org.json.JSONException;
-
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.FragmentManager;
-import android.util.Log;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.content.Loader;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
@@ -21,18 +18,13 @@ import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 
-import edu.rosehulman.android.directory.model.Course;
-import edu.rosehulman.android.directory.model.CourseMeeting;
-import edu.rosehulman.android.directory.model.CoursesResponse;
-import edu.rosehulman.android.directory.model.PersonScheduleDay;
-import edu.rosehulman.android.directory.model.PersonScheduleItem;
+import edu.rosehulman.android.directory.loaders.AsyncLoaderException;
+import edu.rosehulman.android.directory.loaders.AsyncLoaderResult;
+import edu.rosehulman.android.directory.loaders.InvalidAuthTokenException;
+import edu.rosehulman.android.directory.loaders.LoadSchedule;
 import edu.rosehulman.android.directory.model.PersonScheduleWeek;
 import edu.rosehulman.android.directory.model.ScheduleDay;
 import edu.rosehulman.android.directory.model.TermCode;
-import edu.rosehulman.android.directory.service.AuthenticationException;
-import edu.rosehulman.android.directory.service.ClientException;
-import edu.rosehulman.android.directory.service.MobileDirectoryService;
-import edu.rosehulman.android.directory.service.ServerException;
 
 public class SchedulePersonActivity extends SherlockFragmentActivity implements TermCodeProvider.OnTermSetListener, AuthenticatedFragment.AuthenticationCallbacks {
 	
@@ -52,6 +44,8 @@ public class SchedulePersonActivity extends SherlockFragmentActivity implements 
 		intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 		return intent;
 	}
+	
+	private static final int TASK_LOAD_SCHEDULE = 1;
 	
 	private String person;
 	private TermCode term;
@@ -75,14 +69,12 @@ public class SchedulePersonActivity extends SherlockFragmentActivity implements 
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
         
-        
         FragmentManager fragments = getSupportFragmentManager();
         fragAuth = (AuthenticatedFragment)fragments.findFragmentByTag("auth");
         if (fragAuth == null) {
         	fragAuth = new AuthenticatedFragment();
 			getSupportFragmentManager().beginTransaction().add(fragAuth, "auth").commit();
         }
-		
 		this.savedInstanceState = savedInstanceState;
         
 		handleIntent(getIntent());
@@ -94,6 +86,8 @@ public class SchedulePersonActivity extends SherlockFragmentActivity implements 
 		setIntent(newIntent);
 		this.savedInstanceState = null;
 		handleIntent(newIntent);
+		setSupportProgressBarIndeterminateVisibility(true);
+		fragAuth.obtainAuthToken();
 	}
 	
 	private void handleIntent(Intent intent) {
@@ -137,9 +131,7 @@ public class SchedulePersonActivity extends SherlockFragmentActivity implements 
 			setSupportProgressBarIndeterminateVisibility(false);
 			
 		} else {
-			if (!fragAuth.hasAuthToken()) {
-				fragAuth.obtainAuthToken();
-			}
+			fragAuth.obtainAuthToken();
 		}
 	}
 	
@@ -194,6 +186,17 @@ public class SchedulePersonActivity extends SherlockFragmentActivity implements 
 	
 	private void processSchedule(PersonScheduleWeek res) {
 		schedule = res;
+		
+		//cleanup old schedule
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.removeAllTabs();
+		((FrameLayout)findViewById(R.id.fragment_content)).removeAllViews();
+		
+		//populate new schedule, if there is one
+		if (schedule == null) {
+			getSupportActionBar().setSubtitle(null);
+			return;
+		}
 		String[] tags = getResources().getStringArray(R.array.schedule_days);
 		for (ScheduleDay day : ScheduleDay.values()) {
 			if (schedule.hasDay(day)) {
@@ -205,117 +208,60 @@ public class SchedulePersonActivity extends SherlockFragmentActivity implements 
 	}
 	
 	@Override
-	public void onAuthTokenObtained(String authtoken) {
-		LoadSchedule task = new LoadSchedule(authtoken);
-		taskManager.addTask(task);
-		task.execute();
+	public void onAuthTokenObtained(String authToken) {
+		reloadSchedule(authToken);
 	}
 
 	@Override
 	public void onAuthTokenCancelled() {
+		Toast.makeText(this, getString(R.string.authentication_error), Toast.LENGTH_SHORT).show();
 		finish();
 	}
 	
-	private class LoadSchedule extends AsyncTask<Void, Void, PersonScheduleWeek> {
-		
-		private boolean invalidAuthToken;
-		private String authToken;
-		private String errorMessage;
-		
-		public LoadSchedule(String authToken) {
-			this.authToken = authToken;
-		}
-		
-		@Override
-		protected void onPreExecute() {
-			setSupportProgressBarIndeterminateVisibility(true);
-		}
-		
-		private CoursesResponse loadCourses(MobileDirectoryService service) {
-			while (true) {
-				if (isCancelled())
-					return null;
-				
-				try {
-					Log.d(C.TAG, "Retrieving schedule");
-					return service.getUserSchedule(authToken, person);
-
-				} catch (AuthenticationException e) {
-					invalidAuthToken = true;
-					Log.w(C.TAG, "Invalid auth token");
-					return null;
-					
-				} catch (ClientException e) {
-					Log.e(C.TAG, "Client request failed", e);
-					errorMessage = "Invalid request";
-					return null;
-					
-				} catch (ServerException e) {
-					Log.e(C.TAG, "Server request failed", e);
-					errorMessage = "Service is rejecting requests. Please try again later.";
-					return null;
-					
-				} catch (JSONException e) {
-					Log.e(C.TAG, "An error occured while parsing the JSON response", e);
-					errorMessage = "Service is rejecting requests. Please try again later.";
-					return null;
-					
-				} catch (IOException e) {
-					Log.e(C.TAG, "Network error, retrying...", e);
-					try {
-						Thread.sleep(2000);
-					} catch (InterruptedException ex) {
-						return null;
-					}
-				}
-			}
-		}
-
-		@Override
-		protected PersonScheduleWeek doInBackground(Void... params) {
-			Log.d(C.TAG, "Starting background task");
-			
-			//get the person's course schedules
-			MobileDirectoryService service = new MobileDirectoryService();
-			CoursesResponse response = loadCourses(service);
-			
-			if (response == null) {
-				return null;
-			}
-			
-			//convert the course schedules to a user schedule
-			PersonScheduleWeek schedule = new PersonScheduleWeek();
-			
-			for (Course course : response.courses) {
-				for (CourseMeeting meeting : course.schedule) {
-					PersonScheduleDay day = schedule.getDay(meeting.day);
-					PersonScheduleItem item;
-					item = new PersonScheduleItem(course.crn, course.course, course.title, meeting.startPeriod, meeting.endPeriod, meeting.room);
-					day.addItem(item);
-				}
-			}
-			
-			return schedule;
-		}
-		
-		@Override
-		protected void onPostExecute(PersonScheduleWeek res) {
-			if (res == null) {
-				if (errorMessage != null) {
-    				Toast.makeText(SchedulePersonActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
-    			}
-				if (invalidAuthToken) {
-					fragAuth.invalidateAuthToken(authToken);
-					fragAuth.obtainAuthToken();
-				} else {
-					finish();
-				}
-				return;
-			}
-			
-			setSupportProgressBarIndeterminateVisibility(false);
-			processSchedule(res);
-		}
-		
+	private void reloadSchedule(String authToken) {
+		Bundle args = LoadSchedule.bundleArgs(authToken, person);
+		getSupportLoaderManager().restartLoader(TASK_LOAD_SCHEDULE, args, mLoadScheduleCallbacks);
 	}
+	
+	private LoaderCallbacks<AsyncLoaderResult<PersonScheduleWeek>> mLoadScheduleCallbacks = new LoaderCallbacks<AsyncLoaderResult<PersonScheduleWeek>>() {
+
+		private Handler mHandler = new Handler();
+		
+		@Override
+		public Loader<AsyncLoaderResult<PersonScheduleWeek>> onCreateLoader(int id, Bundle args) {
+			return new LoadSchedule(SchedulePersonActivity.this, args);
+		}
+
+		@Override
+		public void onLoadFinished(Loader<AsyncLoaderResult<PersonScheduleWeek>> loader, AsyncLoaderResult<PersonScheduleWeek> data) {
+			
+			try {
+				final PersonScheduleWeek result = data.getResult();
+				mHandler.post(new Runnable() {
+					@Override
+					public void run() {
+						setSupportProgressBarIndeterminateVisibility(false);
+						processSchedule(result);	
+					}
+				});
+				
+			} catch (InvalidAuthTokenException ex) {
+				LoadSchedule scheduleLoader = (LoadSchedule)loader;
+				fragAuth.invalidateAuthToken(scheduleLoader.getAuthToken());
+				fragAuth.obtainAuthToken();
+				
+			} catch (AsyncLoaderException ex) {
+				String message = ex.getMessage();
+				if (message != null) {
+					Toast.makeText(SchedulePersonActivity.this, message, Toast.LENGTH_SHORT).show();
+				}
+				finish();
+			}	
+		}
+
+		@Override
+		public void onLoaderReset(Loader<AsyncLoaderResult<PersonScheduleWeek>> loader) {
+			processSchedule(null);
+		}
+	};
 }

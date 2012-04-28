@@ -23,8 +23,8 @@ public class TermCode implements Parcelable {
 
 	@Override
 	public String toString() {
-		String year = code.substring(0, 5);
-		String term = code.substring(5);
+		String year = code.substring(0, 4);
+		String term = code.substring(4);
 		
 		String termName;
 		switch (Integer.parseInt(term)) {
