@@ -1,5 +1,9 @@
 package edu.rosehulman.android.directory.model;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -19,6 +23,20 @@ public class TermCode implements Parcelable {
 	public TermCode(String code) {
 		this.code = code;
 		assert(code.length() == 6);
+	}
+	
+	public static TermCode[] deserialize(JSONArray array) throws JSONException {
+		TermCode[] res = new TermCode[array.length()];
+		for (int i = 0; i < res.length; i++) {
+			res[i] = deserialize(array.getJSONObject(i));
+		}
+		return res;
+	}
+	
+	public static TermCode deserialize(JSONObject root) throws JSONException {
+		TermCode res = new TermCode(root.getString("Id"));
+		//root.getString("Name");
+		return res;
 	}
 
 	@Override

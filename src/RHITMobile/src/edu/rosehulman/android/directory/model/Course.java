@@ -73,8 +73,14 @@ public class Course {
 		res.finalHour = root.getInt("FinalHour");
 		res.finalRoom = root.getString("FinalRoom");
 		res.comments = root.optString("Comments");
-		res.schedule = CourseMeeting.deserialize(root.getJSONArray("Schedule"));
-		res.students = ShortUser.deserialize(root.getJSONArray("Students"));
+		
+		if (!root.isNull("Schedule")) {
+			res.schedule = CourseMeeting.deserialize(root.getJSONArray("Schedule"));
+		}
+		
+		if (!root.isNull("Students")) {
+			res.students = ShortUser.deserialize(root.getJSONArray("Students"));
+		}
 		
 		return res;
 	}

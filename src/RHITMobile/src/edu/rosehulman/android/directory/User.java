@@ -1,5 +1,8 @@
 package edu.rosehulman.android.directory;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.content.SharedPreferences;
@@ -13,17 +16,8 @@ public class User {
 	
 	private static final String PREF_USERNAME = "Username";
 	private static final String PREF_TERM_CODE = "TermCode";
+	private static final String PREF_TERM_CODES = "TermCodes";
 
-	/**
-	 * Retrieve the user's authentication token
-	 * 
-	 * @return The authentication token that can be used in web requests
-	 */
-	public static String getCookie() {
-		//TODO implement
-		return null;
-	}
-	
 	/**
 	 * Retrieve the user's username
 	 * 
@@ -95,50 +89,32 @@ public class User {
 	 * Set the user's authentication token
 	 * 
 	 * @param username The user's name
+	 * @param terms The available terms
+	 * @param term The current term
 	 * @param token The authentication token that can be used in web requests
 	 */
-	public static void setAccount(String username) {
-		
+	public static void setAccount(String username, TermCode[] terms, TermCode term) {
+		JSONArray array = new JSONArray();
+		for (TermCode t : terms) {
+			array.put(t.code);
+		}
+
 		getPrefs().edit()
 		.putString(PREF_USERNAME, username)
+		.putString(PREF_TERM_CODES, array.toString())
+		.putString(PREF_TERM_CODE, term.code)
 		.commit();
-		/*
-	public static void setCookie(String username, String password, String token, long timestamp) {
-		byte[] key = generateKey();
-		byte[] encrypted = null;
-		if (key != null)
-			encrypted = encrypt(key, password);
-		
-		if (key == null || encrypted == null) {
-			getPrefs().edit()
-			.putString(PREF_USERNAME, username)
-			.putString(PREF_COOKIE, token)
-			.remove(PREF_KEY)
-			.remove(PREF_PASSWORD)
-			.putLong(PREF_TIMESTAMP, timestamp)
-			.commit();
-			
-		} else {
-			String encodedKey = toString(key);
-			String encodedPassword = toString(encrypted);
-			
-			getPrefs().edit()
-			.putString(PREF_USERNAME, username)
-			.putString(PREF_COOKIE, token)
-			.putString(PREF_KEY, encodedKey)
-			.putString(PREF_PASSWORD, encodedPassword)
-			.putLong(PREF_TIMESTAMP, timestamp)
-			.commit();
-		}
-		*/
 	}
 
 	/**
 	 * Clears the user's authentication token
 	 */
 	public static void clearLogin() {
-		//TODO implement
-		getPrefs().edit().remove(PREF_USERNAME).commit();
+		getPrefs().edit()
+		.remove(PREF_USERNAME)
+		.remove(PREF_TERM_CODE)
+		.remove(PREF_TERM_CODES)
+		.commit();
 	}
 
 	/**
@@ -149,12 +125,32 @@ public class User {
 	public static TermCode getTerm() {
 		String code = getPrefs().getString(PREF_TERM_CODE, null);
 		
-		if (code == null) {
-			//FIXME remove
-			return TermCodes.generateTerms()[0];
-		}
+		if (code == null)
+			return null;
 		
 		return new TermCode(code);
+	}
+	
+	/**
+	 * Gets the available TermCodes
+	 * 
+	 * @return The available TermCodes, or null if none are available
+	 */
+	public static TermCode[] getTerms() {
+		String termCodes = getPrefs().getString(PREF_TERM_CODES, null);
+		if (termCodes == null)
+			return null;
+		
+		try {
+			JSONArray array = new JSONArray(termCodes);
+			TermCode[] res = new TermCode[array.length()];
+			for (int i = 0; i < res.length; i++)
+				res[i] = new TermCode(array.getString(i));
+			return res;
+			
+		} catch (JSONException e) {
+			return null;
+		} 
 	}
 	
 	/**

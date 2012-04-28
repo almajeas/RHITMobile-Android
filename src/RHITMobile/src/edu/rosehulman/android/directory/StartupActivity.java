@@ -2,7 +2,6 @@ package edu.rosehulman.android.directory;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import android.accounts.Account;
@@ -176,18 +175,24 @@ public class StartupActivity extends SherlockActivity {
     	manager.getAuthToken(account, AccountAuthenticator.TOKEN_TYPE, null, this, new AccountManagerCallback<Bundle>() {
 			@Override
 			public void run(AccountManagerFuture<Bundle> future) {
-				Bundle res;
 				try {
-					res = future.getResult();
+					future.getResult();
 
+					/*
 					String token = res.getString(AccountManager.KEY_AUTHTOKEN);
 					Date expTime = new Date(res.getLong(AccountAuthenticator.KEY_EXPIRATION_TIME));
+					
+					Parcelable[] pTerms = res.getParcelableArray(AccountAuthenticator.KEY_TERM_CODES);
+					TermCode[] terms = ArrayUtil.cast(pTerms, new TermCode[pTerms.length]);
+					
+					TermCode term = (TermCode)res.getParcelable(AccountAuthenticator.KEY_TERM_CODE);
 
 					if (expTime.before(new Date())) {
 						manager.invalidateAuthToken(AccountAuthenticator.ACCOUNT_TYPE, token);
 					}
 					
-					User.setAccount(username);
+					User.setAccount(username, terms, term);
+					*/
 
 				} catch (OperationCanceledException e) {
 				} catch (AuthenticatorException e) {

@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import edu.rosehulman.android.directory.model.AuthenticationResponse;
+import edu.rosehulman.android.directory.model.BannerAuthResponse;
 import edu.rosehulman.android.directory.model.CampusServicesResponse;
 import edu.rosehulman.android.directory.model.Course;
 import edu.rosehulman.android.directory.model.CoursesResponse;
@@ -172,8 +172,8 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 	}
 
 	@Override
-	public AuthenticationResponse login(String username, String password) throws ClientException, ServerException, JSONException, IOException {
-		JsonClient client = factory.makeJsonClient("rhitmobile-authtest.herokuapp.com", 443, "/banner/authenticate");
+	public BannerAuthResponse login(String username, String password) throws ClientException, ServerException, JSONException, IOException {
+		JsonClient client = factory.makeJsonClient(HOST, PORT, "/banner/authenticate");
 		client.addHeader("Login-Username", username);
 		client.addHeader("Login-Password", password);
 		
@@ -183,7 +183,7 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 			return null;
 		}
 		
-		return AuthenticationResponse.deserialize(root);
+		return BannerAuthResponse.deserialize(root);
 	}
 
 	@Override
@@ -215,9 +215,9 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 	}
 
 	@Override
-	public CoursesResponse getUserSchedule(String authToken, String username) throws ClientException, ServerException, JSONException, IOException {
-		String url = String.format("/banner/user/schedule/%s", username);
-		JsonClient client = factory.makeJsonClient("rhitmobile-authtest.herokuapp.com", 443, url);
+	public CoursesResponse getUserSchedule(String authToken, String term, String username) throws ClientException, ServerException, JSONException, IOException {
+		String url = String.format("/banner/user/schedule/%s/%s", term, username);
+		JsonClient client = factory.makeJsonClient(HOST, PORT, url);
 		client.addHeader("Auth-Token", authToken);
 		client.addParameter("getschedule", "true");
 		
@@ -250,8 +250,8 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 	}
 
 	@Override
-	public CoursesResponse searchCourses(String authToken, String search) throws ClientException, ServerException, JSONException, IOException {
-		String url = String.format("/banner/course/search/%s", search);
+	public CoursesResponse searchCourses(String authToken, String term, String search) throws ClientException, ServerException, JSONException, IOException {
+		String url = String.format("/banner/course/search/%s/%s", term, search);
 		JsonClient client = factory.makeJsonClient(HOST, PORT, url);
 		client.addHeader("Auth-Token", authToken);
 		
@@ -264,8 +264,8 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 	}
 
 	@Override
-	public CoursesResponse getRoomSchedule(String authToken, String room) throws ClientException, ServerException, JSONException, IOException {
-		String url = String.format("/banner/room/schedule/%s", room);
+	public CoursesResponse getRoomSchedule(String authToken, String term, String room) throws ClientException, ServerException, JSONException, IOException {
+		String url = String.format("/banner/room/schedule/%s/%s", term, room);
 		JsonClient client = factory.makeJsonClient(HOST, PORT, url);
 		client.addHeader("Auth-Token", authToken);
 		client.addParameter("getschedule", "true");

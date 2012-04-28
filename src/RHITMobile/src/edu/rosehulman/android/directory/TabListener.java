@@ -45,7 +45,7 @@ public class TabListener<T extends Fragment> implements ActionBar.TabListener {
     public void onTabSelected(Tab tab, FragmentTransaction ft) {
     	if (mFragment == null) {
             mFragment = Fragment.instantiate(mActivity, mClass.getName(), mArgs);
-            ft.add(android.R.id.content, mFragment, mTag);
+            ft.add(R.id.fragment_content, mFragment, mTag);
         } else {
             ft.attach(mFragment);
         }

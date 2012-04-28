@@ -23,7 +23,7 @@ import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.MenuItem;
 
 import edu.rosehulman.android.directory.auth.AccountAuthenticator;
-import edu.rosehulman.android.directory.model.AuthenticationResponse;
+import edu.rosehulman.android.directory.model.BannerAuthResponse;
 import edu.rosehulman.android.directory.service.ClientException;
 import edu.rosehulman.android.directory.service.MobileDirectoryService;
 import edu.rosehulman.android.directory.service.ServerException;
@@ -166,7 +166,7 @@ public class LoginActivity extends SherlockActivity {
     	task.execute();
     }
     
-    private void processAuthentication(String username, String password, AuthenticationResponse auth) {
+    private void processAuthentication(String username, String password, BannerAuthResponse auth) {
     	
     	AccountManager manager = AccountManager.get(LoginActivity.this);
     	
@@ -192,7 +192,7 @@ public class LoginActivity extends SherlockActivity {
 				manager.setAuthToken(account, AccountAuthenticator.TOKEN_TYPE, auth.token);
 			}
 			
-			User.setAccount(username);
+			User.setAccount(username, auth.terms, auth.currentTerm);
 			
     	} else if (ACTION_UPDATE_ACCOUNT.equals(action)) {
 			Bundle result = new Bundle();
@@ -211,7 +211,7 @@ public class LoginActivity extends SherlockActivity {
 		finish();
     }
 
-    private class LoginTask extends AsyncTask<Void, Integer, AuthenticationResponse> {
+    private class LoginTask extends AsyncTask<Void, Integer, BannerAuthResponse> {
 
 		private ProgressDialog dialog;
 		
@@ -242,10 +242,10 @@ public class LoginActivity extends SherlockActivity {
     	}
     	
 		@Override
-		protected AuthenticationResponse doInBackground(Void... args) {
+		protected BannerAuthResponse doInBackground(Void... args) {
 
 			MobileDirectoryService service = new MobileDirectoryService();
-			AuthenticationResponse response = null;
+			BannerAuthResponse response = null;
 			serverError = false;
 			
 			for (int attempt = 2; ; attempt++) {
@@ -290,12 +290,12 @@ public class LoginActivity extends SherlockActivity {
 		}
 
 		@Override
-    	protected void onCancelled(AuthenticationResponse result) {
+    	protected void onCancelled(BannerAuthResponse result) {
 			dialog.dismiss();
 		}
 		
 		@Override
-    	protected void onPostExecute(AuthenticationResponse auth) {
+    	protected void onPostExecute(BannerAuthResponse auth) {
     		dialog.dismiss();
     		
     		if (auth == null) {

@@ -47,7 +47,7 @@ public class TermCodeProvider extends ActionProvider {
 	public TermCodeProvider(Context context, TermCode term) {
 		super(context);
 		mContext = context;
-		mTerms = TermCodes.generateTerms();
+		mTerms = User.getTerms();
 		mDefaultTerm = term;
 	}
 

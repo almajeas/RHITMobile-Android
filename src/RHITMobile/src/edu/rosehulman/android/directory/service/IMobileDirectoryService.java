@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import org.json.JSONException;
 
-import edu.rosehulman.android.directory.model.AuthenticationResponse;
+import edu.rosehulman.android.directory.model.BannerAuthResponse;
 import edu.rosehulman.android.directory.model.CampusServicesResponse;
 import edu.rosehulman.android.directory.model.Course;
 import edu.rosehulman.android.directory.model.CoursesResponse;
@@ -164,7 +164,7 @@ public interface IMobileDirectoryService {
 	 * @throws JSONException Likely out of date client. Update client
 	 * @throws IOException General network connectivity issue
 	 */
-	public AuthenticationResponse login(String username, String password) throws ClientException, ServerException, JSONException, IOException;
+	public BannerAuthResponse login(String username, String password) throws ClientException, ServerException, JSONException, IOException;
 	
 	/**
 	 * Gets information about a specific user
@@ -193,6 +193,7 @@ public interface IMobileDirectoryService {
 	/**
 	 * Looks up a specific user's schedule
 	 * @param authToken The valid, active auth token
+	 * @param term The term the course exists in
 	 * @param username The user's username
 	 * @return The courses the user is currently taking
 	 * @throws ClientException If the request was invalid. Change the request before retrying
@@ -200,7 +201,7 @@ public interface IMobileDirectoryService {
 	 * @throws JSONException Likely out of date client. Update client
 	 * @throws IOException General network connectivity issue
 	 */
-	public CoursesResponse getUserSchedule(String authToken, String username) throws ClientException, ServerException, JSONException, IOException;
+	public CoursesResponse getUserSchedule(String authToken, String term, String username) throws ClientException, ServerException, JSONException, IOException;
 
 	/**
 	 * Looks up information about a specific course
@@ -218,6 +219,7 @@ public interface IMobileDirectoryService {
 	/**
 	 * Searches through all courses 
 	 * @param authToken The valid, active auth token
+	 * @param term The term the course exists in
 	 * @param search The search query
 	 * @return Matching courses
 	 * @throws ClientException If the request was invalid. Change the request before retrying
@@ -225,11 +227,12 @@ public interface IMobileDirectoryService {
 	 * @throws JSONException Likely out of date client. Update client
 	 * @throws IOException General network connectivity issue
 	 */
-	public CoursesResponse searchCourses(String authToken, String search) throws ClientException, ServerException, JSONException, IOException;
+	public CoursesResponse searchCourses(String authToken, String term, String search) throws ClientException, ServerException, JSONException, IOException;
 	
 	/**
 	 * Gets the schedule for a specific room
 	 * @param authToken The valid, active auth token
+	 * @param term The term the course exists in
 	 * @param room The name of the room
 	 * @return The schedule for the found room, or null if no room is found
 	 * @throws ClientException If the request was invalid. Change the request before retrying
@@ -237,5 +240,5 @@ public interface IMobileDirectoryService {
 	 * @throws JSONException Likely out of date client. Update client
 	 * @throws IOException General network connectivity issue
 	 */
-	public CoursesResponse getRoomSchedule(String authToken, String room) throws ClientException, ServerException, JSONException, IOException;
+	public CoursesResponse getRoomSchedule(String authToken, String term, String room) throws ClientException, ServerException, JSONException, IOException;
 }

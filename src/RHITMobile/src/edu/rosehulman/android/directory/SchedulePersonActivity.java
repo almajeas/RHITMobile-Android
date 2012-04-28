@@ -4,7 +4,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
 import android.widget.FrameLayout;
@@ -21,7 +23,7 @@ import com.actionbarsherlock.view.Window;
 import edu.rosehulman.android.directory.loaders.AsyncLoaderException;
 import edu.rosehulman.android.directory.loaders.AsyncLoaderResult;
 import edu.rosehulman.android.directory.loaders.InvalidAuthTokenException;
-import edu.rosehulman.android.directory.loaders.LoadSchedule;
+import edu.rosehulman.android.directory.loaders.LoadUserSchedule;
 import edu.rosehulman.android.directory.model.PersonScheduleWeek;
 import edu.rosehulman.android.directory.model.ScheduleDay;
 import edu.rosehulman.android.directory.model.TermCode;
@@ -105,7 +107,7 @@ public class SchedulePersonActivity extends SherlockFragmentActivity implements 
 		
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.removeAllTabs();
-		
+
 		((FrameLayout)findViewById(R.id.fragment_content)).removeAllViews();
 	}
 	
@@ -185,19 +187,32 @@ public class SchedulePersonActivity extends SherlockFragmentActivity implements 
 	}
 	
 	private void processSchedule(PersonScheduleWeek res) {
-		schedule = res;
-		
 		//cleanup old schedule
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.removeAllTabs();
 		((FrameLayout)findViewById(R.id.fragment_content)).removeAllViews();
+		String[] tags = getResources().getStringArray(R.array.schedule_days);
+		if (schedule != null) {
+			FragmentManager fragments = getSupportFragmentManager();
+			FragmentTransaction ft = fragments.beginTransaction();
+			for (ScheduleDay day : ScheduleDay.values()) {
+				if (schedule.hasDay(day)) {
+					String tag = tags[day.ordinal()];
+					Fragment frag = fragments.findFragmentByTag(tag);
+					if (frag != null)
+						ft.remove(frag);
+				}
+			}
+			ft.commit();
+		}
 		
 		//populate new schedule, if there is one
+		schedule = res;
 		if (schedule == null) {
 			getSupportActionBar().setSubtitle(null);
 			return;
 		}
-		String[] tags = getResources().getStringArray(R.array.schedule_days);
+		
 		for (ScheduleDay day : ScheduleDay.values()) {
 			if (schedule.hasDay(day)) {
 				String tag = tags[day.ordinal()];
@@ -219,7 +234,7 @@ public class SchedulePersonActivity extends SherlockFragmentActivity implements 
 	}
 	
 	private void reloadSchedule(String authToken) {
-		Bundle args = LoadSchedule.bundleArgs(authToken, person);
+		Bundle args = LoadUserSchedule.bundleArgs(authToken, term.code, person);
 		getSupportLoaderManager().restartLoader(TASK_LOAD_SCHEDULE, args, mLoadScheduleCallbacks);
 	}
 	
@@ -229,7 +244,7 @@ public class SchedulePersonActivity extends SherlockFragmentActivity implements 
 		
 		@Override
 		public Loader<AsyncLoaderResult<PersonScheduleWeek>> onCreateLoader(int id, Bundle args) {
-			return new LoadSchedule(SchedulePersonActivity.this, args);
+			return new LoadUserSchedule(SchedulePersonActivity.this, args);
 		}
 
 		@Override
@@ -246,7 +261,7 @@ public class SchedulePersonActivity extends SherlockFragmentActivity implements 
 				});
 				
 			} catch (InvalidAuthTokenException ex) {
-				LoadSchedule scheduleLoader = (LoadSchedule)loader;
+				LoadUserSchedule scheduleLoader = (LoadUserSchedule)loader;
 				fragAuth.invalidateAuthToken(scheduleLoader.getAuthToken());
 				fragAuth.obtainAuthToken();
 				
@@ -261,6 +276,9 @@ public class SchedulePersonActivity extends SherlockFragmentActivity implements 
 
 		@Override
 		public void onLoaderReset(Loader<AsyncLoaderResult<PersonScheduleWeek>> loader) {
+			if (isFinishing())
+				return;
+			
 			processSchedule(null);
 		}
 	};

@@ -2,6 +2,7 @@ package edu.rosehulman.android.directory.loaders;
 
 import java.io.IOException;
 
+import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.AccountManagerCallback;
 import android.accounts.AccountManagerFuture;
@@ -10,12 +11,15 @@ import android.accounts.OperationCanceledException;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Parcelable;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.util.Log;
 import edu.rosehulman.android.directory.C;
 import edu.rosehulman.android.directory.User;
 import edu.rosehulman.android.directory.auth.AccountAuthenticator;
+import edu.rosehulman.android.directory.model.TermCode;
+import edu.rosehulman.android.directory.util.ArrayUtil;
 
 public class LoadAuthToken extends Loader<String> {
 	
@@ -107,7 +111,9 @@ public class LoadAuthToken extends Loader<String> {
 		if (mAbortOnLogin)
 			activeActivity = null;
 		
-		manager.getAuthToken(User.getAccount(manager), AccountAuthenticator.TOKEN_TYPE, null, activeActivity, new AccountManagerCallback<Bundle>() {
+		final Account account = User.getAccount(manager);
+		
+		manager.getAuthToken(account, AccountAuthenticator.TOKEN_TYPE, null, activeActivity, new AccountManagerCallback<Bundle>() {
 			@Override
 			public void run(AccountManagerFuture<Bundle> future) {
 				
@@ -117,6 +123,15 @@ public class LoadAuthToken extends Loader<String> {
 						deliverResult(null);
 					} else {
 						String authToken = res.getString(AccountManager.KEY_AUTHTOKEN);
+						
+						//update term codes
+						if (res.containsKey(AccountAuthenticator.KEY_TERM_CODES) && res.containsKey(AccountAuthenticator.KEY_TERM_CODE)) {
+							Parcelable[] pTerms = res.getParcelableArray(AccountAuthenticator.KEY_TERM_CODES);
+							TermCode[] terms = ArrayUtil.cast(pTerms, new TermCode[pTerms.length]);
+							TermCode term = (TermCode)res.getParcelable(AccountAuthenticator.KEY_TERM_CODE);
+							User.setAccount(account.name, terms, term);
+						}
+						
 						deliverResult(authToken);
 					}
 					

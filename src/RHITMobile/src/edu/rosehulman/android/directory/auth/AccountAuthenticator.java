@@ -15,7 +15,7 @@ import android.os.Bundle;
 import android.util.Log;
 import edu.rosehulman.android.directory.C;
 import edu.rosehulman.android.directory.LoginActivity;
-import edu.rosehulman.android.directory.model.AuthenticationResponse;
+import edu.rosehulman.android.directory.model.BannerAuthResponse;
 import edu.rosehulman.android.directory.service.ClientException;
 import edu.rosehulman.android.directory.service.MobileDirectoryService;
 import edu.rosehulman.android.directory.service.ServerException;
@@ -26,6 +26,8 @@ public class AccountAuthenticator extends AbstractAccountAuthenticator {
 	public static final String TOKEN_TYPE = "Kerberos";
 	
 	public static final String KEY_EXPIRATION_TIME = "ExpirationTime";
+	public static final String KEY_TERM_CODES = "TermCodes";
+	public static final String KEY_TERM_CODE = "TermCode";
 	
 	private Context mContext;
 
@@ -68,7 +70,7 @@ public class AccountAuthenticator extends AbstractAccountAuthenticator {
 		String username = account.name;
 		String password = manager.getPassword(account);
 		
-		AuthenticationResponse auth;
+		BannerAuthResponse auth;
 		Bundle res = new Bundle();
 		
 		try {
@@ -98,11 +100,13 @@ public class AccountAuthenticator extends AbstractAccountAuthenticator {
 			Log.e(C.TAG, "Login failed due to network issue, giving up...");
 			throw new NetworkErrorException(e);
 		}
-		
+
 		res.putString(AccountManager.KEY_ACCOUNT_NAME, account.name);
 		res.putString(AccountManager.KEY_ACCOUNT_TYPE, account.type);
 		res.putString(AccountManager.KEY_AUTHTOKEN, auth.token);
 		res.putLong(KEY_EXPIRATION_TIME, auth.expiration.getTime());
+		res.putParcelableArray(KEY_TERM_CODES, auth.terms);
+		res.putParcelable(KEY_TERM_CODE, auth.currentTerm);
 		return res;
 	}
 

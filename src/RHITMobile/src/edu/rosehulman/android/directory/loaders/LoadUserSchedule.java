@@ -8,6 +8,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import edu.rosehulman.android.directory.C;
+import edu.rosehulman.android.directory.R;
 import edu.rosehulman.android.directory.model.Course;
 import edu.rosehulman.android.directory.model.CourseMeeting;
 import edu.rosehulman.android.directory.model.CoursesResponse;
@@ -19,24 +20,28 @@ import edu.rosehulman.android.directory.service.ClientException;
 import edu.rosehulman.android.directory.service.MobileDirectoryService;
 import edu.rosehulman.android.directory.service.ServerException;
 
-public class LoadSchedule extends CachedAsyncLoader<PersonScheduleWeek> {
+public class LoadUserSchedule extends CachedAsyncLoader<PersonScheduleWeek> {
 	
 	private static final String ARG_AUTH_TOKEN = "AuthToken";
+	private static final String ARG_TERM = "Term";
 	private static final String ARG_USERNAME = "Username";
 	
-	public static Bundle bundleArgs(String authToken, String username) {
+	public static Bundle bundleArgs(String authToken, String term, String username) {
 		Bundle res = new Bundle();
 		res.putString(ARG_AUTH_TOKEN, authToken);
+		res.putString(ARG_TERM, term);
 		res.putString(ARG_USERNAME, username);
 		return res;
 	}
 
 	private String mAuthToken;
+	private String mTerm;
 	private String mUsername;
 	
-	public LoadSchedule(Context context, Bundle args) {
+	public LoadUserSchedule(Context context, Bundle args) {
 		super(context);
 		mAuthToken = args.getString(ARG_AUTH_TOKEN);
+		mTerm = args.getString(ARG_TERM);
 		mUsername = args.getString(ARG_USERNAME);
 	}
 
@@ -46,8 +51,6 @@ public class LoadSchedule extends CachedAsyncLoader<PersonScheduleWeek> {
 	
 	@Override
 	protected PersonScheduleWeek doInBackground() throws AsyncLoaderException {
-		Log.d(C.TAG, "Starting schedule loader");
-
 		//get the person's course schedules
 		MobileDirectoryService service = new MobileDirectoryService();
 		CoursesResponse response = loadCourses(service);
@@ -77,8 +80,7 @@ public class LoadSchedule extends CachedAsyncLoader<PersonScheduleWeek> {
 				return null;
 			
 			try {
-				Log.d(C.TAG, "Retrieving schedule");
-				return service.getUserSchedule(mAuthToken, mUsername);
+				return service.getUserSchedule(mAuthToken, mTerm, mUsername);
 
 			} catch (AuthenticationException e) {
 				Log.w(C.TAG, "Invalid auth token");
@@ -86,15 +88,15 @@ public class LoadSchedule extends CachedAsyncLoader<PersonScheduleWeek> {
 				
 			} catch (ClientException e) {
 				Log.e(C.TAG, "Client request failed", e);
-				throw new AsyncLoaderException("Invalid request");
+				throw new AsyncLoaderException(getContext().getString(R.string.error_client));
 				
 			} catch (ServerException e) {
 				Log.e(C.TAG, "Server request failed", e);
-				throw new AsyncLoaderException("Service is rejecting requests. Please try again later.");
+				throw new AsyncLoaderException(getContext().getString(R.string.error_server));
 				
 			} catch (JSONException e) {
 				Log.e(C.TAG, "An error occured while parsing the JSON response", e);
-				throw new AsyncLoaderException("Service is rejecting requests. Please try again later.");
+				throw new AsyncLoaderException(getContext().getString(R.string.error_json));
 				
 			} catch (IOException e) {
 				Log.e(C.TAG, "Network error, retrying...", e);
