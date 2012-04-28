@@ -57,8 +57,6 @@ public class StartupActivity extends SherlockActivity {
 	private ServiceManager<IDataUpdateService> updateService;
 	private boolean updateData = true;
 	
-	private AccountManagerFuture<Bundle> mPendingLogin;
-	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -110,7 +108,7 @@ public class StartupActivity extends SherlockActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		
+
 		//populate the tasks
         updateUI();
 	}
@@ -120,11 +118,6 @@ public class StartupActivity extends SherlockActivity {
 		super.onPause();
 		
 		updateService.cancel();
-		
-		if (mPendingLogin != null) {
-			mPendingLogin.cancel(true);
-			mPendingLogin = null;
-		}
 	}
 
 	@Override
@@ -171,44 +164,37 @@ public class StartupActivity extends SherlockActivity {
     		
 			Bundle extras = data.getExtras();
 			String username = extras.getString(AccountManager.KEY_ACCOUNT_NAME);
-			User.setAccount(username);
 
-			validateLogin();
+			validateLogin(username);
     	}
     }
     
-    private void validateLogin() {
+    private void validateLogin(final String username) {
     	final AccountManager manager = AccountManager.get(this);
-		Account account = User.getAccount(manager);
+		Account account = User.findAccount(manager, username);
 		
-    	mPendingLogin = manager.getAuthToken(account, AccountAuthenticator.TOKEN_TYPE, null, this, new AccountManagerCallback<Bundle>() {
+    	manager.getAuthToken(account, AccountAuthenticator.TOKEN_TYPE, null, this, new AccountManagerCallback<Bundle>() {
 			@Override
 			public void run(AccountManagerFuture<Bundle> future) {
-				mPendingLogin = null;
-				
 				Bundle res;
 				try {
 					res = future.getResult();
+
+					String token = res.getString(AccountManager.KEY_AUTHTOKEN);
+					Date expTime = new Date(res.getLong(AccountAuthenticator.KEY_EXPIRATION_TIME));
+
+					if (expTime.before(new Date())) {
+						manager.invalidateAuthToken(AccountAuthenticator.ACCOUNT_TYPE, token);
+					}
 					
+					User.setAccount(username);
+
 				} catch (OperationCanceledException e) {
-					return;
-					
 				} catch (AuthenticatorException e) {
-					return;
-					
 				} catch (IOException e) {
-					
-					return;
 				}
-				String token = res.getString(AccountManager.KEY_AUTHTOKEN);
-				Date expTime = new Date(res.getLong(AccountAuthenticator.KEY_EXPIRATION_TIME));
-				
-				if (expTime.before(new Date())) {
-					manager.invalidateAuthToken(AccountAuthenticator.ACCOUNT_TYPE, token);
-				}
+
 			}}, null);
-		
-		updateUI();
     }
     
     @Override

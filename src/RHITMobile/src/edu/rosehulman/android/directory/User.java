@@ -60,7 +60,7 @@ public class User {
 		return findAccount(manager, username);
 	}
 	
-	private static Account findAccount(AccountManager manager, String username) {
+	public static Account findAccount(AccountManager manager, String username) {
 		Account[] accounts = manager.getAccountsByType(AccountAuthenticator.ACCOUNT_TYPE);
 		
 		for (Account account : accounts) {
