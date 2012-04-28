@@ -234,7 +234,6 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 		String url = String.format("/banner/course/data/%s/%d", term, crn);
 		JsonClient client = factory.makeJsonClient(HOST, PORT, url);
 		client.addHeader("Auth-Token", authToken);
-		client.addParameter("getschedule", "true");
 		client.addParameter("getenrolled", "true");
 		
 		JSONObject root = client.execute();

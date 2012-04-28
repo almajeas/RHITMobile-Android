@@ -17,7 +17,7 @@ public class AuthenticatedFragment extends Fragment {
 	private static final String KEY_LOAD_ATTEMPTED = "LoadAttempted";
 	
 	public interface AuthenticationCallbacks {
-		public void onAuthTokenObtained(String authtoken);
+		public void onAuthTokenObtained(String authToken);
 		public void onAuthTokenCancelled();
 	}
 
