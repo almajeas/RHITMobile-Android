@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.LoaderManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
 import android.text.TextUtils;
@@ -82,6 +83,11 @@ public class PersonActivity extends SherlockFragmentActivity implements Authenti
         	mFragAuth = new AuthenticatedFragment();
 			getSupportFragmentManager().beginTransaction().add(mFragAuth, "auth").commit();
         }
+        
+        LoaderManager loaders = getSupportLoaderManager();
+		if (loaders.getLoader(TASK_LOAD_USER) != null) {
+			loaders.initLoader(TASK_LOAD_USER, null, mLoadScheduleCallbacks);
+		}
     }
     
     @Override
