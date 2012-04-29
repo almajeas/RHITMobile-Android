@@ -80,14 +80,16 @@ public class SchedulePersonFragment extends Fragment {
     
     private class ScheduleAdapter extends BaseAdapter {
 		
-    	private String[] hours;
+    	private String[] hours_start;
+    	private String[] hours_end;
     	
 		private PersonScheduleDay day;
 		
 		public ScheduleAdapter(PersonScheduleDay day) {
 			this.day = day;
 
-	    	hours = getResources().getStringArray(R.array.hours);
+	    	hours_start = getResources().getStringArray(R.array.hours_start);
+	    	hours_end = getResources().getStringArray(R.array.hours_end);
 		}
 
 		@Override
@@ -122,11 +124,11 @@ public class SchedulePersonFragment extends Fragment {
 			String hour;
 			if (item.hourStart == item.hourEnd) {
 				hour = String.format("%s - %s (%s hour)", 
-						hours[item.hourStart], hours[item.hourEnd+1], 
+						hours_start[item.hourStart], hours_end[item.hourEnd], 
 						Ordinal.convert(item.hourStart));
 			} else {
 				hour = String.format("%s - %s (%s - %s hour)", 
-						hours[item.hourStart], hours[item.hourEnd+1], 
+						hours_start[item.hourStart], hours_end[item.hourEnd], 
 						Ordinal.convert(item.hourStart),
 						Ordinal.convert(item.hourEnd+1));
 			}

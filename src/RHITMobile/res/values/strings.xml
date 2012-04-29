@@ -55,7 +55,7 @@
         <item>SAT</item>
     </string-array>
     
-    <string-array name="hours">
+    <string-array name="hours_start">
         <item></item>
         <item>8:05am</item>
 		<item>9:00am</item>
@@ -68,6 +68,22 @@
 		<item>3:25pm</item>
 		<item>4:20pm</item>
     </string-array>
+    
+    <string-array name="hours_end">
+        <item></item>
+		<item>8:55am</item>
+		<item>9:50am</item>
+		<item>10:45am</item>
+		<item>11:40am</item>
+		<item>12:35pm</item>
+		<item>1:30pm</item>
+		<item>2:25pm</item>
+		<item>3:20pm</item>
+		<item>4:15pm</item>
+		<item>5:10pm</item>
+    </string-array>
+    
+    
 		<string name="authentication_error">Unable to authenticate</string>
 		<string name="error_json">Service responded improperly. Ensure the app is up to date and try again.</string>
 		<string name="error_server">Service is rejecting requests. Please try again later.</string>
