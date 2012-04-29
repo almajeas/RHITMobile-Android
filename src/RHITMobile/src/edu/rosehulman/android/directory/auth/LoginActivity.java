@@ -1,4 +1,4 @@
-package edu.rosehulman.android.directory;
+package edu.rosehulman.android.directory.auth;
 import java.io.IOException;
 
 import org.json.JSONException;
@@ -22,7 +22,9 @@ import android.widget.Toast;
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.MenuItem;
 
-import edu.rosehulman.android.directory.auth.AccountAuthenticator;
+import edu.rosehulman.android.directory.C;
+import edu.rosehulman.android.directory.R;
+import edu.rosehulman.android.directory.TaskManager;
 import edu.rosehulman.android.directory.model.BannerAuthResponse;
 import edu.rosehulman.android.directory.service.ClientException;
 import edu.rosehulman.android.directory.service.MobileDirectoryService;
@@ -191,13 +193,6 @@ public class LoginActivity extends SherlockActivity {
 				
 				manager.setAuthToken(account, AccountAuthenticator.TOKEN_TYPE, auth.token);
 			}
-			
-			String terms[] = new String[auth.terms.length];
-			for (int i = 0; i < terms.length; i++) {
-				terms[i] = auth.terms[i].code;
-			}
-			
-			User.setAccount(username, terms, auth.currentTerm.code);
 			
     	} else if (ACTION_UPDATE_ACCOUNT.equals(action)) {
 			Bundle result = new Bundle();

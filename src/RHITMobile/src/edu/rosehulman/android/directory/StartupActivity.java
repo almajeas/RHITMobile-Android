@@ -328,9 +328,6 @@ public class StartupActivity extends SherlockActivity {
 				public void onClick(View v) {
 					Intent intent = ChooseTypeAndAccountActivity.createIntent(StartupActivity.this, new String[] {AccountAuthenticator.ACCOUNT_TYPE});
 					startActivityForResult(intent, REQUEST_LOGIN_CODE);
-
-					//AccountManager manager = AccountManager.get(StartupActivity.this);
-					//manager.addAccount(AccountAuthenticator.ACCOUNT_TYPE, AccountAuthenticator.TOKEN_TYPE, null, null, StartupActivity.this, null, null);
 				}
 			}));
 		}

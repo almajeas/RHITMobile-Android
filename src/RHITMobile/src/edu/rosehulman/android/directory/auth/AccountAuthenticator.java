@@ -14,7 +14,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import edu.rosehulman.android.directory.C;
-import edu.rosehulman.android.directory.LoginActivity;
 import edu.rosehulman.android.directory.model.BannerAuthResponse;
 import edu.rosehulman.android.directory.service.ClientException;
 import edu.rosehulman.android.directory.service.MobileDirectoryService;

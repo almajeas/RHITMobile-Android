@@ -52,7 +52,7 @@
         
         <activity
             android:label="RHIT Mobile Login"
-            android:name=".LoginActivity"  
+            android:name=".auth.LoginActivity"  
             android:exported="true" 
             android:configChanges="keyboardHidden|orientation" 
             android:windowSoftInputMode="stateUnchanged" 
