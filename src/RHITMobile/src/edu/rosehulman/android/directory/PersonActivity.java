@@ -145,9 +145,9 @@ public class PersonActivity extends SherlockFragmentActivity implements Authenti
     		items.add(new LocationItem(user.office));
     	if (!TextUtils.isEmpty(user.department))
     		items.add(new LabelItem("Department", user.department));
-    	if (!TextUtils.isEmpty(user.majors))
+    	if (!TextUtils.isEmpty(user.majors.trim()))
     		items.add(new LabelItem("Majors", user.majors));
-    	if (!TextUtils.isEmpty(user.currentClass));
+    	if (!TextUtils.isEmpty(user.currentClass.trim()));
     		items.add(new LabelItem("Class", user.currentClass));
     	if (user.cm > 0)
     		items.add(new LabelItem("Campus Mailbox", String.valueOf(user.cm)));
