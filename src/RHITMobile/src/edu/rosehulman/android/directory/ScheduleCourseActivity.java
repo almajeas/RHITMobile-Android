@@ -135,7 +135,7 @@ public class ScheduleCourseActivity extends SherlockFragmentActivity implements 
     	items.add(new LabelItem("Name", course.title));
     	items.add(new LabelItem("Credits", String.valueOf(course.credits)));
     	items.add(new LabelItem("Term", term.toString()));
-    	items.add(new InstructorItem(course.instructor.fullname));
+    	items.add(new InstructorItem(course.instructor));
     	items.add(new LabelItem("Enrollment", String.format("%d/%d", course.enrolled, course.maxEnrollment)));
     	if (course.finalDay != '\0') {
     		String finalTime = "TBA";
@@ -287,13 +287,16 @@ public class ScheduleCourseActivity extends SherlockFragmentActivity implements 
 
     private class InstructorItem extends ClickableListItem {
     	
-    	public InstructorItem(String value) {
-    		super("Instructor", value);
+    	private ShortUser mUser;
+    	
+    	public InstructorItem(ShortUser user) {
+    		super("Instructor", user.fullname);
+    		mUser = user;;
 		}
     	
     	@Override
     	public void onClick() {
-    		Intent intent = PersonActivity.createIntent(ScheduleCourseActivity.this, this.value);
+    		Intent intent = PersonActivity.createIntent(ScheduleCourseActivity.this, mUser.username);
     		startActivity(intent);
     	}
     }
