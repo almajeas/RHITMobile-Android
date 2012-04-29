@@ -16,6 +16,7 @@ import edu.rosehulman.android.directory.model.PersonScheduleDay;
 import edu.rosehulman.android.directory.model.PersonScheduleItem;
 import edu.rosehulman.android.directory.model.TermCode;
 import edu.rosehulman.android.directory.util.Ordinal;
+import edu.rosehulman.android.directory.util.TimeUtil;
 
 public class SchedulePersonFragment extends Fragment {
 	
@@ -122,15 +123,23 @@ public class SchedulePersonFragment extends Fragment {
 			TextView room = (TextView)v.findViewById(R.id.room);
 			
 			String hour;
-			if (item.hourStart == item.hourEnd) {
-				hour = String.format("%s - %s (%s hour)", 
-						hours_start[item.hourStart], hours_end[item.hourEnd], 
-						Ordinal.convert(item.hourStart));
+			if (item.hourStart > 100 || item.hourEnd > 100) {
+				//time
+				hour = String.format("%s - %s",
+						TimeUtil.formatTime(item.hourStart),
+						TimeUtil.formatTime(item.hourEnd));
 			} else {
-				hour = String.format("%s - %s (%s - %s hour)", 
-						hours_start[item.hourStart], hours_end[item.hourEnd], 
-						Ordinal.convert(item.hourStart),
-						Ordinal.convert(item.hourEnd+1));
+				//hour
+				if (item.hourStart == item.hourEnd) {
+					hour = String.format("%s - %s (%s hour)", 
+							hours_start[item.hourStart], hours_end[item.hourEnd], 
+							Ordinal.convert(item.hourStart));
+				} else {
+					hour = String.format("%s - %s (%s - %s hour)", 
+							hours_start[item.hourStart], hours_end[item.hourEnd], 
+							Ordinal.convert(item.hourStart),
+							Ordinal.convert(item.hourEnd));
+				}
 			}
 			
 			course.setText(String.format("%s %s", item.course, item.courseName));

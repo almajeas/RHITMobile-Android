@@ -6,15 +6,20 @@ package edu.rosehulman.android.directory.util;
 public class Ordinal {
 	
 	private static String getSuffix(int value) {
-		switch (value % 10) {
+		switch (value / 10) {
 		case 1:
-			return "st";
-		case 2:
-			return "nd";
-		case 3:
-			return "rd";
-		default:
 			return "th";
+		default:
+			switch (value % 10) {
+			case 1:
+				return "st";
+			case 2:
+				return "nd";
+			case 3:
+				return "rd";
+			default:
+				return "th";
+			}
 		}
 	}
 	
