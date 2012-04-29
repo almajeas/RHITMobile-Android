@@ -29,6 +29,7 @@ import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.view.Window;
 
 import edu.rosehulman.android.directory.AuthenticatedFragment.AuthenticationCallbacks;
 import edu.rosehulman.android.directory.LoadLocation.OnLocationLoadedListener;
@@ -66,10 +67,13 @@ public class PersonActivity extends SherlockFragmentActivity implements Authenti
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.person);
         ActionBar actionBar = getSupportActionBar();
         actionBar.setHomeButtonEnabled(true);
         actionBar.setDisplayHomeAsUpEnabled(true);
+        
+        setSupportProgressBarIndeterminateVisibility(true);
         
         detailsView = (ListView)findViewById(R.id.details);
         

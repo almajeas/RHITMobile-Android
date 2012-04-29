@@ -24,6 +24,7 @@ import android.widget.Toast;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.view.Window;
 
 import edu.rosehulman.android.directory.AuthenticatedFragment.AuthenticationCallbacks;
 import edu.rosehulman.android.directory.loaders.AsyncLoaderException;
@@ -62,11 +63,14 @@ public class ScheduleCourseActivity extends SherlockFragmentActivity implements 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.schedule_course);
 
         ActionBar actionBar = getSupportActionBar();
         actionBar.setHomeButtonEnabled(true);
         actionBar.setDisplayHomeAsUpEnabled(true);
+        
+        setSupportProgressBarIndeterminateVisibility(true);
         
         detailsView = (ListView)findViewById(R.id.details);
         
