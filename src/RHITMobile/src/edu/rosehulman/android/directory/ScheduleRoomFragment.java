@@ -1,7 +1,9 @@
 package edu.rosehulman.android.directory;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,25 +12,21 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 import edu.rosehulman.android.directory.model.RoomScheduleDay;
 import edu.rosehulman.android.directory.model.RoomScheduleItem;
+import edu.rosehulman.android.directory.model.TermCode;
 import edu.rosehulman.android.directory.util.Ordinal;
-
+import edu.rosehulman.android.directory.util.TimeUtil;
 
 public class ScheduleRoomFragment extends Fragment {
-	
-	private static final String[] HOURS = new String[] {"",
-			"8:05am", "9:00am", "9:55am",
-			"10:50am", "11:45am", "12:40pm",
-			"1:35pm", "2:30pm", "3:25pm",
-			"4:20pm"};
-	
+
+	private TermCode term;
 	private String tag;
 	private RoomScheduleDay day;
 	
-	public static Bundle buildArguments(String tag, RoomScheduleDay day) {
+	public static Bundle buildArguments(TermCode term, String tag, RoomScheduleDay day) {
 		Bundle args = new Bundle();
+		args.putParcelable("Term", term);
     	args.putString("Day", tag);
     	args.putParcelable("Schedule", day);
     	return args;
@@ -37,8 +35,8 @@ public class ScheduleRoomFragment extends Fragment {
 	public ScheduleRoomFragment() {
 	}
 	
-    public ScheduleRoomFragment(String tag, RoomScheduleDay day) {
-    	setArguments(buildArguments(tag, day));
+    public ScheduleRoomFragment(TermCode term, String tag, RoomScheduleDay day) {
+    	setArguments(buildArguments(term, tag, day));
 	}
 
     public String getDay() {
@@ -49,8 +47,10 @@ public class ScheduleRoomFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
     	
+    	term = getArguments().getParcelable("Term");
     	tag = getArguments().getString("Day");
     	day = getArguments().getParcelable("Schedule");
+    	
     }
     
 	@Override
@@ -58,7 +58,7 @@ public class ScheduleRoomFragment extends Fragment {
     	View root = inflater.inflate(R.layout.schedule_list, null);
 		ListView list = (ListView)root.findViewById(R.id.list);
 		
-		list.setAdapter(new ScheduleAdapter(day.items));
+		list.setAdapter(new ScheduleAdapter(day));
 		
 		list.setOnItemClickListener(new OnItemClickListener() {
 
@@ -67,11 +67,10 @@ public class ScheduleRoomFragment extends Fragment {
 				if (adapter == null)
 					return;
 
-				RoomScheduleItem item = day.items[position];
+				RoomScheduleItem item = day.getItem(position);
 				
-				Toast.makeText(getActivity(), "TODO implement", Toast.LENGTH_SHORT).show();
-				//Intent intent = ScheduleCourseActivity.createIntent(getActivity(), item.course, item.section);
-				//startActivity(intent);
+				Intent intent = ScheduleCourseActivity.createIntent(getActivity(), term, item.crn, item.course);
+				startActivity(intent);
 			}
 			
 		});
@@ -82,20 +81,26 @@ public class ScheduleRoomFragment extends Fragment {
     
     private class ScheduleAdapter extends BaseAdapter {
 		
-		private RoomScheduleItem[] items;
+    	private String[] hours_start;
+    	private String[] hours_end;
+    	
+		private RoomScheduleDay day;
 		
-		public ScheduleAdapter(RoomScheduleItem[] items) {
-			this.items = items;
+		public ScheduleAdapter(RoomScheduleDay day) {
+			this.day = day;
+
+	    	hours_start = getResources().getStringArray(R.array.hours_start);
+	    	hours_end = getResources().getStringArray(R.array.hours_end);
 		}
 
 		@Override
 		public int getCount() {
-			return items.length;
+			return day.count();
 		}
 
 		@Override
 		public Object getItem(int position) {
-			return items[position];
+			return day.getItem(position);
 		}
 
 		@Override
@@ -111,26 +116,41 @@ public class ScheduleRoomFragment extends Fragment {
 				v = inflater.inflate(R.layout.schedule_person_list_item, null);
 			}
 			
-			RoomScheduleItem item = items[position];
+			RoomScheduleItem item = day.getItem(position);
 			
 			TextView course = (TextView)v.findViewById(R.id.course);
 			TextView time = (TextView)v.findViewById(R.id.time);
+			TextView room = (TextView)v.findViewById(R.id.room);
 			
 			String hour;
-			if (item.hourStart == item.hourEnd) {
-				hour = String.format("%s - %s (%s hour)", 
-						HOURS[item.hourStart], HOURS[item.hourEnd+1], 
-						Ordinal.convert(item.hourStart));
+			if (item.hourStart > 100 || item.hourEnd > 100) {
+				//time
+				hour = String.format("%s - %s",
+						TimeUtil.formatTime(item.hourStart),
+						TimeUtil.formatTime(item.hourEnd));
 			} else {
-				hour = String.format("%s - %s (%s - %s hour)", 
-						HOURS[item.hourStart], HOURS[item.hourEnd+1], 
-						Ordinal.convert(item.hourStart),
-						Ordinal.convert(item.hourEnd+1));
+				//hour
+				if (item.hourStart == item.hourEnd) {
+					hour = String.format("%s - %s (%s hour)", 
+							hours_start[item.hourStart], hours_end[item.hourEnd], 
+							Ordinal.convert(item.hourStart));
+				} else {
+					hour = String.format("%s - %s (%s - %s hour)", 
+							hours_start[item.hourStart], hours_end[item.hourEnd], 
+							Ordinal.convert(item.hourStart),
+							Ordinal.convert(item.hourEnd));
+				}
 			}
 			
-			course.setText(String.format("%s-%02d %s", item.course, item.section, item.courseName));
+			course.setText(String.format("%s %s", item.course, item.courseName));
 			
 			time.setText(hour);
+			
+			room.setVisibility(View.GONE);
+			
+			room.setMovementMethod(LinkMovementMethod.getInstance());
+			room.setFocusable(false);
+			room.setFocusableInTouchMode(false);
 			
 			return v;
 		}

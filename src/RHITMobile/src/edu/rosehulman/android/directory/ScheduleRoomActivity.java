@@ -2,8 +2,17 @@ package edu.rosehulman.android.directory;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.content.Loader;
+import android.util.Log;
+import android.widget.FrameLayout;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.ActionBar.Tab;
@@ -13,16 +22,20 @@ import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 
-import edu.rosehulman.android.directory.TermCodeProvider.OnTermSetListener;
-import edu.rosehulman.android.directory.model.RoomScheduleDay;
-import edu.rosehulman.android.directory.model.RoomScheduleItem;
+import edu.rosehulman.android.directory.loaders.AsyncLoaderException;
+import edu.rosehulman.android.directory.loaders.AsyncLoaderResult;
+import edu.rosehulman.android.directory.loaders.InvalidAuthTokenException;
+import edu.rosehulman.android.directory.loaders.LoadRoomSchedule;
 import edu.rosehulman.android.directory.model.RoomScheduleWeek;
+import edu.rosehulman.android.directory.model.ScheduleDay;
 import edu.rosehulman.android.directory.model.TermCode;
 
-public class ScheduleRoomActivity extends SherlockFragmentActivity implements OnTermSetListener {
+public class ScheduleRoomActivity extends SherlockFragmentActivity implements TermCodeProvider.OnTermSetListener, AuthenticatedFragment.AuthenticationCallbacks {
 	
-	public static final String EXTRA_ROOM = "ROOM";
+	public static final String EXTRA_ROOM = "Room";
 	public static final String EXTRA_TERM_CODE = "TermCode";
+
+	private static final String STATE_SELECTED = "Selected";
 	
 	public static Intent createIntent(Context context, String room) {
 		Intent intent = new Intent(context, ScheduleRoomActivity.class);
@@ -37,15 +50,17 @@ public class ScheduleRoomActivity extends SherlockFragmentActivity implements On
 		intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 		return intent;
 	}
-
+	
+	private static final int TASK_LOAD_SCHEDULE = 1;
+	
 	private String room;
 	private TermCode term;
 	
-	private TaskManager taskManager = new TaskManager();
-	
 	private RoomScheduleWeek schedule;
-
+	
 	private Bundle savedInstanceState;
+	
+	private AuthenticatedFragment fragAuth;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -58,11 +73,20 @@ public class ScheduleRoomActivity extends SherlockFragmentActivity implements On
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
         
-		getSupportFragmentManager().beginTransaction().add(new AuthenticatedFragment(), "auth").commit();
-
+        FragmentManager fragments = getSupportFragmentManager();
+        fragAuth = (AuthenticatedFragment)fragments.findFragmentByTag("auth");
+        if (fragAuth == null) {
+        	fragAuth = new AuthenticatedFragment();
+			getSupportFragmentManager().beginTransaction().add(fragAuth, "auth").commit();
+        }
 		this.savedInstanceState = savedInstanceState;
         
 		handleIntent(getIntent());
+		
+		LoaderManager loaders = getSupportLoaderManager();
+		if (LoadRoomSchedule.getInstance(loaders, TASK_LOAD_SCHEDULE) != null) {
+			loaders.initLoader(TASK_LOAD_SCHEDULE, null, mLoadScheduleCallbacks);
+		}
 	}
 	
 	@Override
@@ -71,10 +95,12 @@ public class ScheduleRoomActivity extends SherlockFragmentActivity implements On
 		setIntent(newIntent);
 		this.savedInstanceState = null;
 		handleIntent(newIntent);
+		setSupportProgressBarIndeterminateVisibility(true);
+		fragAuth.obtainAuthToken();
 	}
 	
 	private void handleIntent(Intent intent) {
-		
+
 		if (!intent.hasExtra(EXTRA_ROOM)) {
 			finish();
 			return;
@@ -88,44 +114,32 @@ public class ScheduleRoomActivity extends SherlockFragmentActivity implements On
 		
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.removeAllTabs();
-		
-		if (savedInstanceState != null &&
-				savedInstanceState.containsKey("Schedule")) {
-			processSchedule((RoomScheduleWeek)savedInstanceState.getParcelable("Schedule"));
-			getSupportActionBar().setSelectedNavigationItem(savedInstanceState.getInt("Selected"));
-			setSupportProgressBarIndeterminateVisibility(false);
-		} else {
-			LoadSchedule task = new LoadSchedule();
-			taskManager.addTask(task);
-			task.execute();
-		}
-	}
-	
-	@Override
-	public void onSaveInstanceState(Bundle state) {
-		super.onSaveInstanceState(state);
-		
-		if (schedule != null) {
-			state.putParcelable("Schedule", schedule);
-		}
-		
-		state.putInt("Selected", getSupportActionBar().getSelectedNavigationIndex());
+
+		((FrameLayout)findViewById(R.id.fragment_content)).removeAllViews();
 	}
 
 	@Override
-	protected void onPause() {
-		super.onPause();
-		taskManager.abortTasks();
+	public void onSaveInstanceState(Bundle state) {
+		super.onSaveInstanceState(state);
+
+		state.putInt(STATE_SELECTED, getSupportActionBar().getSelectedNavigationIndex());
+	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		
+		fragAuth.obtainAuthToken();
 	}
     
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getSupportMenuInflater();
-		inflater.inflate(R.menu.schedule_room, menu);
+		inflater.inflate(R.menu.schedule_person, menu);
 		menu.findItem(R.id.term).setActionProvider(new TermCodeProvider(this, term));
         return true;
 	}
-	
+
 	@Override
     public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
@@ -137,7 +151,7 @@ public class ScheduleRoomActivity extends SherlockFragmentActivity implements On
 		}
 		return true;
 	}
-	
+
 	@Override
 	public void onTermSet(TermCode newTerm) {
 		if (newTerm.equals(term))
@@ -150,9 +164,9 @@ public class ScheduleRoomActivity extends SherlockFragmentActivity implements On
 		startActivity(intent);
 	}
 	
-	private void createTab(String tag, String label) {
+	private void createTab(ScheduleDay day, String tag, String label) {
 		ActionBar actionBar = getSupportActionBar();
-		Bundle args = ScheduleRoomFragment.buildArguments(tag, schedule.getDay(tag));
+		Bundle args = ScheduleRoomFragment.buildArguments(term, tag, schedule.getDay(day));
 		TabListener<ScheduleRoomFragment> l = new TabListener<ScheduleRoomFragment>(this, tag, ScheduleRoomFragment.class, args);
 		Tab tab = actionBar.newTab()
 				.setText(label)
@@ -162,63 +176,112 @@ public class ScheduleRoomActivity extends SherlockFragmentActivity implements On
 	}
 	
 	private void processSchedule(RoomScheduleWeek res) {
-		schedule = res;
-		for (String day : res.tags) {
-			createTab(day, day);
+		//cleanup old schedule
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.removeAllTabs();
+		String[] tags = getResources().getStringArray(R.array.schedule_days);
+		if (schedule != null) {
+			FragmentManager fragments = getSupportFragmentManager();
+			FragmentTransaction ft = fragments.beginTransaction();
+			for (ScheduleDay day : ScheduleDay.values()) {
+				if (schedule.hasDay(day)) {
+					String tag = tags[day.ordinal()];
+					Fragment frag = fragments.findFragmentByTag(tag);
+					if (frag != null) {
+						ft.remove(frag);
+					}
+				}
+			}
+			ft.commit();
+			fragments.executePendingTransactions();
 		}
-		getSupportActionBar().setSubtitle(room);
+		
+		//populate new schedule, if there is one
+		schedule = res;
+		if (schedule == null) {
+			actionBar.setSubtitle(null);
+			return;
+		}
+		
+		for (ScheduleDay day : ScheduleDay.values()) {
+			if (schedule.hasDay(day)) {
+				String tag = tags[day.ordinal()];
+				createTab(day, tag, tag);
+			}
+		}
+		actionBar.setSubtitle(room);
+		
+		if (savedInstanceState != null) {
+			int index = savedInstanceState.getInt(STATE_SELECTED);
+			if (index >= 0 && index < actionBar.getTabCount()) {
+				actionBar.setSelectedNavigationItem(index);
+			}
+		}
 	}
 	
-	private class LoadSchedule extends AsyncTask<Void, Void, RoomScheduleWeek> {
+	@Override
+	public void onAuthTokenObtained(String authToken) {
+		loadSchedule(authToken);
+	}
+
+	@Override
+	public void onAuthTokenCancelled() {
+		Toast.makeText(this, getString(R.string.authentication_error), Toast.LENGTH_SHORT).show();
+		finish();
+	}
+	
+	private Bundle mArgs;
+	private void loadSchedule(String authToken) {
+		Bundle args = LoadRoomSchedule.bundleArgs(authToken, term.code, room);
+		
+		if (mArgs != null) {
+			getSupportLoaderManager().restartLoader(TASK_LOAD_SCHEDULE, args, mLoadScheduleCallbacks);
+		} else {
+			getSupportLoaderManager().initLoader(TASK_LOAD_SCHEDULE, args, mLoadScheduleCallbacks);
+		}
+		
+		mArgs = args;
+	}
+	
+	private LoaderCallbacks<AsyncLoaderResult<RoomScheduleWeek>> mLoadScheduleCallbacks = new LoaderCallbacks<AsyncLoaderResult<RoomScheduleWeek>>() {
+
+		private Handler mHandler = new Handler();
 		
 		@Override
-		protected void onPreExecute() {
-			setSupportProgressBarIndeterminateVisibility(true);
+		public Loader<AsyncLoaderResult<RoomScheduleWeek>> onCreateLoader(int id, Bundle args) {
+			return new LoadRoomSchedule(ScheduleRoomActivity.this, args);
 		}
 
 		@Override
-		protected RoomScheduleWeek doInBackground(Void... params) {
+		public void onLoadFinished(Loader<AsyncLoaderResult<RoomScheduleWeek>> loader, AsyncLoaderResult<RoomScheduleWeek> data) {
+			Log.d(C.TAG, "Finished LoadRoomSchedule");
 			
-			RoomScheduleItem csse432 = 
-					new RoomScheduleItem("CSSE432", "Computer Networks", 1, 5, 5);
-			RoomScheduleItem csse404 = 
-					new RoomScheduleItem("CSSE404", "Compiler Construction", 1, 7, 7);
-			RoomScheduleItem csse304 = 
-					new RoomScheduleItem("CSSE304", "Programming Language Concepts", 1, 8, 8);
-			
-			
-			RoomScheduleItem csse404Wed = 
-					new RoomScheduleItem("CSSE404", "Compiler Construction", 1, 6, 6);
-			RoomScheduleItem csse499Wed = 
-					new RoomScheduleItem("CSSE499", "Senior Project III", 1, 7, 9);
-			
-			return new RoomScheduleWeek(
-					new String[] {"Mon", "Tue", "Wed", "Thu", "Fri"}, 
-					new RoomScheduleDay[] {
-							new RoomScheduleDay(new RoomScheduleItem[] {
-									csse432, csse404, csse304
-							}),
-							new RoomScheduleDay(new RoomScheduleItem[] {
-									csse432, csse404, csse304
-							}),
-							new RoomScheduleDay(new RoomScheduleItem[] {
-									csse404Wed, csse499Wed
-							}),
-							new RoomScheduleDay(new RoomScheduleItem[] {
-									csse432, csse404, csse304
-							}),
-							new RoomScheduleDay(new RoomScheduleItem[] {
-									csse432, csse304
-							})
-					});
+			try {
+				final RoomScheduleWeek result = data.getResult();
+				mHandler.post(new Runnable() {
+					@Override
+					public void run() {
+						setSupportProgressBarIndeterminateVisibility(false);
+						processSchedule(result);	
+					}
+				});
+				
+			} catch (InvalidAuthTokenException ex) {
+				LoadRoomSchedule scheduleLoader = (LoadRoomSchedule)loader;
+				fragAuth.invalidateAuthToken(scheduleLoader.getAuthToken());
+				fragAuth.obtainAuthToken();
+				
+			} catch (AsyncLoaderException ex) {
+				String message = ex.getMessage();
+				if (message != null) {
+					Toast.makeText(ScheduleRoomActivity.this, message, Toast.LENGTH_SHORT).show();
+				}
+				finish();
+			}	
 		}
-		
+
 		@Override
-		protected void onPostExecute(RoomScheduleWeek res) {
-			setSupportProgressBarIndeterminateVisibility(false);
-			processSchedule(res);
+		public void onLoaderReset(Loader<AsyncLoaderResult<RoomScheduleWeek>> loader) {
 		}
-		
-	}
-	
+	};
 }

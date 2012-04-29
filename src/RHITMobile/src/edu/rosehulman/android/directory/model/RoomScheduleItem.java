@@ -3,10 +3,11 @@ package edu.rosehulman.android.directory.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class RoomScheduleItem implements Parcelable {
+public class RoomScheduleItem implements Comparable<RoomScheduleItem>, Parcelable {
+	public int crn;
+	
 	public String course;
 	public String courseName;
-	public int section;
 	public int hourStart;
 	public int hourEnd;
 	
@@ -14,12 +15,22 @@ public class RoomScheduleItem implements Parcelable {
 		
 	}
 	
-	public RoomScheduleItem(String course, String courseName, int section, int hourStart, int hourEnd) {
+	public RoomScheduleItem(int crn, String course, String courseName, int hourStart, int hourEnd) {
+		this.crn = crn;
 		this.course = course;
 		this.courseName = courseName;
-		this.section = section;
 		this.hourStart = hourStart;
 		this.hourEnd = hourEnd;
+	}
+	
+	@Override
+	public int compareTo(RoomScheduleItem other) {
+		if (hourStart < other.hourStart)
+			return -1;
+		else if (hourStart > other.hourStart)
+			return 1;
+		else
+			return 0;
 	}
 	
 	@Override
@@ -29,26 +40,26 @@ public class RoomScheduleItem implements Parcelable {
 
 	@Override
 	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeInt(crn);
 		dest.writeString(course);
 		dest.writeString(courseName);
-		dest.writeInt(section);
 		dest.writeInt(hourStart);
 		dest.writeInt(hourEnd);
+	}
+	
+	public RoomScheduleItem(Parcel in) {
+		crn = in.readInt();
+		course = in.readString();
+		courseName = in.readString();
+		hourStart = in.readInt();
+		hourEnd = in.readInt();
 	}
 
 	public static final Parcelable.Creator<RoomScheduleItem> CREATOR = new Parcelable.Creator<RoomScheduleItem>() {
 
 		@Override
 		public RoomScheduleItem createFromParcel(Parcel in) {
-			RoomScheduleItem res = new RoomScheduleItem();
-			
-			res.course = in.readString();
-			res.courseName = in.readString();
-			res.section = in.readInt();
-			res.hourStart = in.readInt();
-			res.hourEnd = in.readInt();
-			
-			return res;
+			return new RoomScheduleItem(in);
 		}
 
 		@Override

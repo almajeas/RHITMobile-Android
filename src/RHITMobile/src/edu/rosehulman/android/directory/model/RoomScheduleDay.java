@@ -1,14 +1,40 @@
 package edu.rosehulman.android.directory.model;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import android.os.Parcel;
 import android.os.Parcelable;
 
 public class RoomScheduleDay implements Parcelable {
 	
-	public RoomScheduleItem[] items;
+	public List<RoomScheduleItem> mItems;
 
+	public RoomScheduleDay() {
+		mItems = new ArrayList<RoomScheduleItem>();
+	}
+	
 	public RoomScheduleDay(RoomScheduleItem[] items) {
-		this.items = items;
+		this.mItems = new ArrayList<RoomScheduleItem>(Arrays.asList(items));
+	}
+	
+	public boolean isEmpty() {
+		return mItems.isEmpty();
+	}
+	
+	public void addItem(RoomScheduleItem item) {
+		mItems.add(item);
+		Collections.sort(mItems);
+	}
+	
+	public int count() {
+		return mItems.size();
+	}
+	
+	public RoomScheduleItem getItem(int index) {
+		return mItems.get(index);
 	}
 
 	@Override
@@ -18,14 +44,19 @@ public class RoomScheduleDay implements Parcelable {
 
 	@Override
 	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeTypedArray(items, flags);
+		dest.writeTypedList(mItems);
+	}
+	
+	public RoomScheduleDay(Parcel in) {
+		mItems = new ArrayList<RoomScheduleItem>();
+		in.readTypedList(mItems, RoomScheduleItem.CREATOR);
 	}
 
 	public static final Parcelable.Creator<RoomScheduleDay> CREATOR = new Parcelable.Creator<RoomScheduleDay>() {
 
 		@Override
 		public RoomScheduleDay createFromParcel(Parcel in) {
-			return new RoomScheduleDay(in.createTypedArray(RoomScheduleItem.CREATOR));
+			return new RoomScheduleDay(in);
 		}
 
 		@Override

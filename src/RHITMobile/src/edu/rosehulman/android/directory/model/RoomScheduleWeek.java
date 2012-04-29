@@ -1,25 +1,25 @@
 package edu.rosehulman.android.directory.model;
 
-import java.util.Arrays;
-
 import android.os.Parcel;
 import android.os.Parcelable;
 
 public class RoomScheduleWeek implements Parcelable {
 	
-	public String[] tags;
 	public RoomScheduleDay[] days;
 	
 	public RoomScheduleWeek() {
+		days = new RoomScheduleDay[ScheduleDay.values().length];
+		for (int i = 0; i < days.length; i++) {
+			days[i] = new RoomScheduleDay();
+		}
 	}
 	
-	public RoomScheduleWeek(String[] tags, RoomScheduleDay[] days) {
-		this.tags = tags;
-		this.days = days;
+	public boolean hasDay(ScheduleDay day) {
+		return !getDay(day).isEmpty();
 	}
 	
-	public RoomScheduleDay getDay(String tag) {
-		return days[Arrays.asList(tags).indexOf(tag)];
+	public RoomScheduleDay getDay(ScheduleDay day) {
+		return days[day.ordinal()];
 	}
 
 	@Override
@@ -29,18 +29,19 @@ public class RoomScheduleWeek implements Parcelable {
 
 	@Override
 	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeStringArray(tags);
 		dest.writeTypedArray(days, flags);
 	}
 	
-	public static Parcelable.Creator<RoomScheduleWeek> CREATOR = new Parcelable.Creator<RoomScheduleWeek>() {
+	public RoomScheduleWeek(Parcel in) {
+		days = in.createTypedArray(RoomScheduleDay.CREATOR);
+	}
+
+	public static Parcelable.Creator<RoomScheduleWeek> CREATOR =
+			new Parcelable.Creator<RoomScheduleWeek>() {
 
 		@Override
 		public RoomScheduleWeek createFromParcel(Parcel source) {
-			RoomScheduleWeek res = new RoomScheduleWeek();
-			res.tags = source.createStringArray();
-			res.days = source.createTypedArray(RoomScheduleDay.CREATOR);
-			return res;
+			return new RoomScheduleWeek(source);
 		}
 
 		@Override
