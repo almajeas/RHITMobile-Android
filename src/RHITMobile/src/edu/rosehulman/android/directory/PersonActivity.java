@@ -1,14 +1,16 @@
 package edu.rosehulman.android.directory;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.content.Loader;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +21,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
@@ -26,26 +29,38 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 
+import edu.rosehulman.android.directory.AuthenticatedFragment.AuthenticationCallbacks;
 import edu.rosehulman.android.directory.LoadLocation.OnLocationLoadedListener;
+import edu.rosehulman.android.directory.loaders.AsyncLoaderException;
+import edu.rosehulman.android.directory.loaders.AsyncLoaderResult;
+import edu.rosehulman.android.directory.loaders.InvalidAuthTokenException;
+import edu.rosehulman.android.directory.loaders.LoadUser;
 import edu.rosehulman.android.directory.model.Location;
+import edu.rosehulman.android.directory.model.UserDataResponse;
 
-public class PersonActivity extends SherlockFragmentActivity {
+public class PersonActivity extends SherlockFragmentActivity implements AuthenticationCallbacks {
 
-	public static final String EXTRA_PERSON = "PERSON"; 
+	public static final String EXTRA_USERNAME = "Username"; 
 	
 	public static Intent createIntent(Context context) {
 		return createIntent(context, "");
 	}
 
-	public static Intent createIntent(Context context, String person) {
+	public static Intent createIntent(Context context, String username) {
 		Intent intent = new Intent(context, PersonActivity.class);
-		intent.putExtra(EXTRA_PERSON, person);
+		intent.putExtra(EXTRA_USERNAME, username);
 		return intent;
 	}
+	
+	private static final int TASK_LOAD_USER = 1;
+	
+	private String mUsername;
 	
 	private ListView detailsView;
 	
 	private ListItem listItems[];
+	
+	private AuthenticatedFragment mFragAuth;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -58,26 +73,22 @@ public class PersonActivity extends SherlockFragmentActivity {
         detailsView = (ListView)findViewById(R.id.details);
         
         Intent intent = getIntent();
-        String username = intent.getStringExtra(EXTRA_PERSON);
-        Log.d(C.TAG, "Person: " + username);
-        PersonInfo person;
-        if (personMap.containsKey(username)) {
-        	person = personMap.get(username);
-        } else {
-        	person = defaultPerson;
+        mUsername = intent.getStringExtra(EXTRA_USERNAME);
+        Log.d(C.TAG, "Person: " + mUsername);
+        
+		FragmentManager fragments = getSupportFragmentManager();
+        mFragAuth = (AuthenticatedFragment)fragments.findFragmentByTag("auth");
+        if (mFragAuth == null) {
+        	mFragAuth = new AuthenticatedFragment();
+			getSupportFragmentManager().beginTransaction().add(mFragAuth, "auth").commit();
         }
-        
-        getSupportFragmentManager().beginTransaction().add(new AuthenticatedFragment(), "auth").commit();
-        
-        updateUI(person);
-        
-        detailsView.setOnItemClickListener(new OnItemClickListener() {
-			@Override
-			public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-				detailsView_itemClicked(position);
-			}
-		});
-
+    }
+    
+    @Override
+    protected void onStart() {
+    	super.onStart();
+    	
+    	mFragAuth.obtainAuthToken();
     }
     
     @Override
@@ -104,20 +115,37 @@ public class PersonActivity extends SherlockFragmentActivity {
         }
     }
     
-    private void updateUI(PersonInfo person) {
-    	setTitle(person.name);
+    private void processResult(UserDataResponse user) {
+        updateUI(user);
+        
+        detailsView.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+				detailsView_itemClicked(position);
+			}
+		});
+    }
+    
+    private void updateUI(UserDataResponse user) {
+    	setTitle(String.format("%s %s", user.firstName, user.lastName));
     	
     	List<ListItem> items = new LinkedList<ListItem>();
-    	items.add(new ScheduleItem(person.username));
-    	items.add(new EmailItem("wellska1@rose-hulman.edu"));
-    	items.add(new CallItem("1112223333 x1234"));
-    	items.add(new LocationItem("F217"));
-    	if (person.major != null)
-    		items.add(new LabelItem("Major", person.major));
-    	if (person.year != null)
-    		items.add(new LabelItem("Class", person.year));
-    	items.add(new LabelItem("Campus Mailbox", "1965"));
-    	
+    	items.add(new LabelItem("Full Name", user.getFullName()));
+    	items.add(new ScheduleItem(user.user.username));
+    	items.add(new EmailItem(user.email));
+    	if (!TextUtils.isEmpty(user.telephone))
+    		items.add(new CallItem(user.telephone));
+    	if (!TextUtils.isEmpty(user.office))
+    		items.add(new LocationItem(user.office));
+    	if (!TextUtils.isEmpty(user.department))
+    		items.add(new LabelItem("Department", user.department));
+    	if (!TextUtils.isEmpty(user.majors))
+    		items.add(new LabelItem("Majors", user.majors));
+    	if (!TextUtils.isEmpty(user.currentClass));
+    		items.add(new LabelItem("Class", user.currentClass));
+    	if (user.cm > 0)
+    		items.add(new LabelItem("Campus Mailbox", String.valueOf(user.cm)));
+
     	listItems = new ListItem[items.size()];
     	listItems = items.toArray(listItems);
     	detailsView.setAdapter(new DetailsAdapter());
@@ -126,38 +154,6 @@ public class PersonActivity extends SherlockFragmentActivity {
     private void detailsView_itemClicked(int position) {
     	listItems[position].onClick();
     }
-    
-	private PersonInfo defaultPerson = new PersonInfo(3, "wellska1", "Kevin Wells", "SE/CS", "Senior");
-	@SuppressWarnings("serial")
-	private Map<String, PersonInfo> personMap = new HashMap<String, PersonInfo>() {
-		PersonInfo[] defaultPeople = new PersonInfo[] {
-				new PersonInfo(1, "glowskst", "Scott Glowski", "CS/SE/MA", "Senior"),
-				new PersonInfo(2, "theisje", "Jimmy Theis", "SE", "Senior"),
-				defaultPerson,
-				new PersonInfo(4, "wattsbn", "Bryan Watts", "CS/SE", "Senior"),
-				new PersonInfo(5, "hayesez", "Erik Hayes", null, null)};
-		{
-			for (PersonInfo person : defaultPeople) {
-				put(person.username, person);
-			}
-		}
-	};
-
-	public class PersonInfo {
-		public long id;
-		public String username;
-		public String name;
-		public String major;
-		public String year;
-
-		public PersonInfo(long id, String username, String name, String major, String year) {
-			this.id = id;
-			this.username = username;
-			this.name = name;
-			this.major = major;
-			this.year = year;
-		}
-	}
 
     private abstract class ListItem {
     	
@@ -181,7 +177,9 @@ public class PersonActivity extends SherlockFragmentActivity {
 			
 			nameView.setText(name);
 			valueView.setText(value);
-			iconView.setImageResource(icon);
+			if (icon != 0) {
+				iconView.setImageResource(icon);
+			}
 			
 			return v;
     	}
@@ -271,7 +269,7 @@ public class PersonActivity extends SherlockFragmentActivity {
     private class LabelItem extends ListItem {
     	
     	public LabelItem(String name, String value) {
-    		super(name, value, android.R.id.empty);
+    		super(name, value, 0);
 		}
     	
     	@Override
@@ -306,6 +304,64 @@ public class PersonActivity extends SherlockFragmentActivity {
 		public boolean isEnabled(int position) {
 			return listItems[position].isEnabled();
 		}
-		
     }
+    
+	@Override
+	public void onAuthTokenObtained(String authToken) {
+		loadUser(authToken);
+	}
+
+	@Override
+	public void onAuthTokenCancelled() {
+		Toast.makeText(this, getString(R.string.authentication_error), Toast.LENGTH_SHORT).show();
+		finish();
+	}
+    
+    private Bundle mArgs;
+	private void loadUser(String authToken) {
+		Bundle args = LoadUser.bundleArgs(authToken, mUsername);
+		
+		if (mArgs != null) {
+			getSupportLoaderManager().restartLoader(TASK_LOAD_USER, args, mLoadScheduleCallbacks);
+		} else {
+			getSupportLoaderManager().initLoader(TASK_LOAD_USER, args, mLoadScheduleCallbacks);
+		}
+		
+		mArgs = args;
+	}
+	
+	private LoaderCallbacks<AsyncLoaderResult<UserDataResponse>> mLoadScheduleCallbacks = new LoaderCallbacks<AsyncLoaderResult<UserDataResponse>>() {
+
+		@Override
+		public Loader<AsyncLoaderResult<UserDataResponse>> onCreateLoader(int id, Bundle args) {
+			return new LoadUser(PersonActivity.this, args);
+		}
+
+		@Override
+		public void onLoadFinished(Loader<AsyncLoaderResult<UserDataResponse>> loader, AsyncLoaderResult<UserDataResponse> data) {
+			Log.d(C.TAG, "Finished LoadUserSchedule");
+			
+			try {
+				final UserDataResponse result = data.getResult();
+				setSupportProgressBarIndeterminateVisibility(false);
+				processResult(result);
+
+			} catch (InvalidAuthTokenException ex) {
+				LoadUser load = (LoadUser)loader;
+				mFragAuth.invalidateAuthToken(load.getAuthToken());
+				mFragAuth.obtainAuthToken();
+				
+			} catch (AsyncLoaderException ex) {
+				String message = ex.getMessage();
+				if (message != null) {
+					Toast.makeText(PersonActivity.this, message, Toast.LENGTH_SHORT).show();
+				}
+				finish();
+			}	
+		}
+
+		@Override
+		public void onLoaderReset(Loader<AsyncLoaderResult<UserDataResponse>> loader) {
+		}
+	};
 }

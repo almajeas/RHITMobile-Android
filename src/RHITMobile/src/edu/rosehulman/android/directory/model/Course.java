@@ -66,7 +66,8 @@ public class Course {
 		res.course = root.getString("CourseNumber");
 		res.title = root.getString("Title");
 		res.credits = root.getInt("Credits");
-		res.instructor = ShortUser.deserialize(root.getJSONObject("Instructor"));
+		if (!root.isNull("Instructor"))
+			res.instructor = ShortUser.deserialize(root.getJSONObject("Instructor"));
 		res.enrolled = root.getInt("Enrolled");
 		res.maxEnrollment = root.getInt("MaxEnrolled");
 		res.finalDay = root.getString("FinalDay").charAt(0);

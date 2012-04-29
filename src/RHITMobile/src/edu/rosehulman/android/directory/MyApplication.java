@@ -44,7 +44,7 @@ public class MyApplication extends Application {
 	
 	private Handler handler = new Handler();
 	
-	public static final boolean DEBUG = true;
+	public static final boolean DEBUG = false;
 	
 	private static final boolean PURGE_DB = false;
 	

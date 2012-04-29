@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.LoaderManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
 import android.util.Log;
@@ -87,6 +88,11 @@ public class ScheduleCourseActivity extends SherlockFragmentActivity implements 
         if (intent.hasExtra(EXTRA_COURSE)) {
         	setTitle(intent.getStringExtra(EXTRA_COURSE));
         }
+        
+        LoaderManager loaders = getSupportLoaderManager();
+		if (loaders.getLoader(TASK_LOAD_COURSE) != null) {
+			loaders.initLoader(TASK_LOAD_COURSE, null, mLoadCourseCallbacks);
+		}
     }
     
     @Override
@@ -349,15 +355,15 @@ public class ScheduleCourseActivity extends SherlockFragmentActivity implements 
 		Bundle args = LoadCourseInfo.bundleArgs(authToken, term.code, crn);
 		
 		if (mArgs != null) {
-			getSupportLoaderManager().restartLoader(TASK_LOAD_COURSE, args, mLoadScheduleCallbacks);
+			getSupportLoaderManager().restartLoader(TASK_LOAD_COURSE, args, mLoadCourseCallbacks);
 		} else {
-			getSupportLoaderManager().initLoader(TASK_LOAD_COURSE, args, mLoadScheduleCallbacks);
+			getSupportLoaderManager().initLoader(TASK_LOAD_COURSE, args, mLoadCourseCallbacks);
 		}
 		
 		mArgs = args;
 	}
 	
-	private LoaderCallbacks<AsyncLoaderResult<Course>> mLoadScheduleCallbacks = new LoaderCallbacks<AsyncLoaderResult<Course>>() {
+	private LoaderCallbacks<AsyncLoaderResult<Course>> mLoadCourseCallbacks = new LoaderCallbacks<AsyncLoaderResult<Course>>() {
 
 		@Override
 		public Loader<AsyncLoaderResult<Course>> onCreateLoader(int id, Bundle args) {
@@ -366,7 +372,7 @@ public class ScheduleCourseActivity extends SherlockFragmentActivity implements 
 
 		@Override
 		public void onLoadFinished(Loader<AsyncLoaderResult<Course>> loader, AsyncLoaderResult<Course> data) {
-			Log.d(C.TAG, "Finished LoadUserSchedule");
+			Log.d(C.TAG, "Finished LoadCourseInfo");
 			
 			try {
 				final Course result = data.getResult();
