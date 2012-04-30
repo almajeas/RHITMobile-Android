@@ -27,28 +27,6 @@ public class User {
 		return getPrefs().getString(PREF_USERNAME, null);
 	}
 	
-	/**
-	 * Retrieve the user's password
-	 * 
-	 * @return The user's password, if known
-	 */
-	/*
-	public static String getPassword() {
-		SharedPreferences prefs = getPrefs();
-		
-		String encodedKey = prefs.getString(PREF_KEY, null);
-		String encodedPassword = prefs.getString(PREF_PASSWORD, null);
-		
-		if (encodedKey == null || encodedPassword == null)
-			return null;
-		
-		byte[] key = fromString(encodedKey);
-		byte[] encrypted = fromString(encodedPassword);
-		
-		return decrypt(key, encrypted);
-	}
-	*/
-	
 	public static Account getAccount(AccountManager manager) {
 		String username = getUsername();
 		return findAccount(manager, username);
@@ -171,47 +149,4 @@ public class User {
 		MyApplication app = MyApplication.getInstance();
 		return app.getAppPreferences();
 	}
-	
-/*
-	private static String toString(byte[] bytes) {
-		return Base64.encodeToString(bytes, Base64.NO_WRAP);
-	}
-	
-	private static byte[] fromString(String data) {
-		return Base64.decode(data, Base64.NO_WRAP);
-	}
-	
-	private static byte[] encrypt(byte[] key, String password) {
-		try {
-			Cipher c = Cipher.getInstance("AES");
-			c.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(key, "AES"));
-			return c.doFinal(password.getBytes());
-			
-		} catch (Exception e) {
-			return null;
-		}
-	}
-	
-	private static String decrypt(byte[] key, byte[] password) {
-		try {
-			Cipher c = Cipher.getInstance("AES");
-			c.init(Cipher.DECRYPT_MODE, new SecretKeySpec(key, "AES"));
-			return new String(c.doFinal(password));
-			
-		} catch (Exception e) {
-			return null;
-		}
-	}
-	
-	private static byte[] generateKey() {
-		try {
-			KeyGenerator keygen = KeyGenerator.getInstance("AES");
-			keygen.init(128);
-			return keygen.generateKey().getEncoded();
-			
-		} catch (Exception e) {
-			return null;
-		}
-	}
-	*/
 }
