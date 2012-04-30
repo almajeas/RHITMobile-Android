@@ -28,6 +28,9 @@ public class AccountAuthenticator extends AbstractAccountAuthenticator {
 	public static final String KEY_TERM_CODES = "TermCodes";
 	public static final String KEY_TERM_CODE = "TermCode";
 	
+	public static final String USER_KEY_PART = "KeyPart";
+	public static final String USER_IV = "IV";
+	
 	private Context mContext;
 
 	public AccountAuthenticator(Context context) {
@@ -67,10 +70,22 @@ public class AccountAuthenticator extends AbstractAccountAuthenticator {
 		AccountManager manager = AccountManager.get(mContext);
 		
 		String username = account.name;
-		String password = manager.getPassword(account);
+		String encryptedPassword = manager.getPassword(account);
+		String keyPart = manager.getUserData(account, USER_KEY_PART);
+		String iv = manager.getUserData(account, USER_IV);
+
+		String password = Security.decrypt(mContext, keyPart, iv, encryptedPassword);
 		
 		BannerAuthResponse auth;
 		Bundle res = new Bundle();
+		
+		if (password == null) {
+			//password failed to decrypt, get it from the user
+			Log.w(C.TAG, "No password found");
+			Intent intent = LoginActivity.createIntentForUpdateAccount(mContext, response, account);
+			res.putParcelable(AccountManager.KEY_INTENT, intent);
+			return res;
+		}
 		
 		try {
 			Log.d(C.TAG, "Logging in for auth token");

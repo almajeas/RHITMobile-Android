@@ -168,7 +168,7 @@ public class LoginActivity extends SherlockActivity {
     	task.execute();
     }
     
-    private void processAuthentication(String username, String password, BannerAuthResponse auth) {
+    private void processAuthentication(String username, String encryptedPassword, String keyPart, String iv, BannerAuthResponse auth) {
     	
     	AccountManager manager = AccountManager.get(LoginActivity.this);
     	
@@ -176,7 +176,7 @@ public class LoginActivity extends SherlockActivity {
     	
     	if (ACTION_NEW_ACCOUNT.equals(action)) {
 	    	Account account = new Account(username, AccountAuthenticator.ACCOUNT_TYPE);
-			boolean accountCreated = manager.addAccountExplicitly(account, password, null);
+			boolean accountCreated = manager.addAccountExplicitly(account, encryptedPassword, null);
 			
 			if (!accountCreated) {
 				mResponse.onError(AccountManager.ERROR_CODE_BAD_REQUEST, "Failed to create account");
@@ -192,6 +192,8 @@ public class LoginActivity extends SherlockActivity {
 				mResponse.onResult(result);
 				
 				manager.setAuthToken(account, AccountAuthenticator.TOKEN_TYPE, auth.token);
+				manager.setUserData(account, AccountAuthenticator.USER_KEY_PART, keyPart);
+				manager.setUserData(account, AccountAuthenticator.USER_IV, iv);
 			}
 			
     	} else if (ACTION_UPDATE_ACCOUNT.equals(action)) {
@@ -202,8 +204,10 @@ public class LoginActivity extends SherlockActivity {
 			result.putLong(AccountAuthenticator.KEY_EXPIRATION_TIME, auth.expiration.getTime());
 			mResponse.onResult(result);
     		
-			manager.setPassword(mAccount, password);
+			manager.setPassword(mAccount, encryptedPassword);
     		manager.setAuthToken(mAccount, AccountAuthenticator.TOKEN_TYPE, auth.token);
+    		manager.setUserData(mAccount, AccountAuthenticator.USER_KEY_PART, keyPart);
+    		manager.setUserData(mAccount, AccountAuthenticator.USER_IV, iv);
     	}
 
         //remove ourselves from the app stack
@@ -217,6 +221,10 @@ public class LoginActivity extends SherlockActivity {
 		
     	private String username;
     	private String password;
+    	
+    	private String encryptedPassword;
+    	private String keyPart;
+    	private String iv;
     	
     	private boolean serverError;
     	
@@ -253,6 +261,10 @@ public class LoginActivity extends SherlockActivity {
 					response = service.login(username, password);
 					if (response == null)
 						return null;
+					
+					keyPart = Security.generateKeyPart();
+					iv = Security.generateIV();
+					encryptedPassword = Security.encrypt(LoginActivity.this, keyPart, iv, password);
 					return response;
 					
 				} catch (ClientException e) {
@@ -307,7 +319,7 @@ public class LoginActivity extends SherlockActivity {
     			return;
     		}
     		
-    		processAuthentication(username, password, auth);
+    		processAuthentication(username, encryptedPassword, keyPart, iv, auth);
 		}
     }
 
