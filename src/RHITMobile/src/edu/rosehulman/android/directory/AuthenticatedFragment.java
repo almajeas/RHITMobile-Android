@@ -53,6 +53,11 @@ public class AuthenticatedFragment extends Fragment {
 			activity.setResult(Activity.RESULT_CANCELED);
 			activity.finish();
 		}
+		
+		LoaderManager loaders = getLoaderManager();
+		if (loaders.getLoader(LOAD_AUTH_TOKEN) != null) {
+			loaders.initLoader(LOAD_AUTH_TOKEN, null, mLoadAuthTokenCallbacks);
+		}
 	}
 	
 	@Override
@@ -116,13 +121,13 @@ public class AuthenticatedFragment extends Fragment {
 			mAuthToken = null;
 		}
 	};
-	
+
 	private void loadAuthToken() {
 		LoaderManager loaderManager = getLoaderManager();
 		
 		LoadAuthToken loader;
 		Bundle args = LoadAuthToken.bundleArgs(mAbortOnLogin);
-		loader = (LoadAuthToken)loaderManager.initLoader(LOAD_AUTH_TOKEN, args, mLoadAuthTokenCallbacks);
+		loader = (LoadAuthToken)loaderManager.restartLoader(LOAD_AUTH_TOKEN, args, mLoadAuthTokenCallbacks);
 		loader.setActivity(getActivity());
 	}
 	
