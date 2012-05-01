@@ -31,6 +31,9 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 	private static final String HOST = "mobilewin.csse.rose-hulman.edu";
 	private static final int PORT = 5601;
 	
+//	private static final String DEBUG_HOST = "rhitmobile-authtest.herokuapp.com";
+//	private static final int DEBUG_PORT = 443;
+
 	private static ClientFactory factory;
 	
 	/**

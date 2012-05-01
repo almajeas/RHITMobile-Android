@@ -63,7 +63,7 @@ public class LoadUser extends CachedAsyncLoader<UserDataResponse> {
 				
 			} catch (ClientException e) {
 				Log.e(C.TAG, "Client request failed", e);
-				throw new AsyncLoaderException(getContext().getString(R.string.error_client));
+				throw new AsyncLoaderException(e.getMessage());
 				
 			} catch (ServerException e) {
 				Log.e(C.TAG, "Server request failed", e);

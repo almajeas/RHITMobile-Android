@@ -87,6 +87,5 @@
 		<string name="authentication_error">Unable to authenticate</string>
 		<string name="error_json">Service responded improperly. Ensure the app is up to date and try again.</string>
 		<string name="error_server">Service is rejecting requests. Please try again later.</string>
-		<string name="error_client">Invalid request</string>
 
 </resources>
