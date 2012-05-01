@@ -19,8 +19,6 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 
-import android.net.SSLCertificateSocketFactory;
-
 /** Provides common functionality for making REST web service calls */
 public abstract class RestClient {
 
@@ -107,7 +105,6 @@ public abstract class RestClient {
 			throw new RuntimeException("Invalid URI", ex);
 		}
 
-		SSLCertificateSocketFactory.getInsecure(0, null);
 		HttpRequestBase request;
 
 		switch (method) {
