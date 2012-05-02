@@ -28,7 +28,7 @@ public class TermCode implements Parcelable {
 	public static TermCode[] deserialize(JSONArray array) throws JSONException {
 		TermCode[] res = new TermCode[array.length()];
 		for (int i = 0; i < res.length; i++) {
-			res[i] = deserialize(array.getJSONObject(i));
+			res[i] = deserialize(array.getJSONObject(array.length() - i - 1));
 		}
 		return res;
 	}
