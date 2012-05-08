@@ -13,9 +13,10 @@ The source for the android project is split across multiple repositories.  In or
 
 ## Building the Project
 
-There are 3 relevant project folders that may need to be built (all contained within `android/src`):
+There are 4 relevant project folders that will need to be built (all contained within `src`):
 
 * android-mapviewballoons/android-mapviewballoons
+* ActionBarSherlock/library
 * RHITMobile
 * BetaManager (optional)
 
@@ -25,13 +26,13 @@ The BetaManager is an optional project and is only required to add beta function
 
 Android projects need to be signed in order to run on any device, and during development, applications are typically signed with a debug key and is specific to each installation of the SDK.  For official releases of the application, a generated signing key is used (which for security reasons, is not included in this repository).
 
-This signing key is needed to generate the maps API key, which is used to allow the device to download and display Google Maps.  Instructions for obtaining a Maps API Key can be found [here](http://code.google.com/android/add-ons/google-apis/mapkey.html).
+This signing key is needed to generate the maps API key, which is used to allow the device to download and display Google Maps.  Instructions for obtaining a Maps API Key can be found [here](http://code.google.com/android/add-ons/google-apis/mapkey.html).  The Maps API Key can be configured by modifying the `maps_api_key` string in `res/values/values.xml`.
 
 ### Build Number
 
-Each released build of RHITMobile should have a build number higher than any previously used build number.  This number can be set in the `AndroidManifest.xml` file in the two relevant project folders (`RHITMobile` and `BetaManager`).  The value that needs to be changed is the `android:versionCode` attribute of the `manifest` element.  Leaving the value set to 0 will permanently disable all BetaManager functionality.
+Each released build of RHITMobile should have a build number higher than any previously used build number.  This number can be set in the `AndroidManifest.xml` file in the two relevant project folders (`RHITMobile` and `BetaManager`).  The value that needs to be changed is the `android:versionCode` attribute of the `manifest` element.  Setting the value to 0 will permanently disable all BetaManager functionality.
 
-# From the command line
+### From the command line
 
 Building from the command requires the Android SDK to be installed, as described above.  Apache's [Ant](http://ant.apache.org/) is also required to build the project.
 
@@ -58,14 +59,27 @@ To immediately install the built application to a device, the following command 
 
 The same commands can be used to build and install the `BetaManager` project.
 
-# From Eclipse
+### From Eclipse
 
-Building from within Eclipse requires both the Android SDK and the Eclipse ADT Plugin, as described above.  To build the project, simply create a new workspace at `android/src` and import the 3 relevant projects contained in that directory, as shown above.  After importing the projects, simply use Eclipse to build and run the projects.
+Building from within Eclipse requires both the Android SDK and the Eclipse ADT Plugin, as described above.  To build the project, create a new workspace at `src` and import the 4 relevant projects contained in that directory, as shown above.  After importing the projects, use Eclipse to build and run the projects.
+
+To create the ActionBarSherlock project:
+
+1.  Create a new Android project.
+    -  Name the project ActionBarSherlock
+    -  Select "Create project from existing source"
+    -  Set the location to be "[repo path]/src/ActionBarSherlock/library"
+2.  Eclipse will likely create the project incorrectly.  Delete the project (but not the contents on disk), and move `.project` and `.classpath` from "src/ActionBarSherlock" to "src/ActionBarSherlock/library"
+3.  Import the project contained in "src/ActionBarSherlock/library"
+
+Possible project import issues:
+
+*  Projects may fail to build because project specific compilation settings are erroneously automatically configured.  For each project's properties page under "Java Compiler", deselect "Enable project specific settings"
 
 ## Building the Documentation
 
 Documentation specific to developers is included inline in the source code in [Doxygen](http://www.stack.nl/~dimitri/doxygen/) format. To build a copy of this documentation, first [install Doxygen](http://www.stack.nl/~dimitri/doxygen/download.html#latestsrc), then run the following command from the root of the repository (the directory above this one):
 
-    $ doxygen android/src/Doxyfile
+    $ doxygen src/Doxyfile
 
-This will generate a set of HTML documentation under the `doc` directory within the following path: `android/src/RHITMobile`. Open the `index.html` file in this new directory with your favorite web browser to get started with the developer documentation. 
+This will generate a set of HTML documentation under the `doc` directory within the following path: `src/RHITMobile`. Open the `index.html` file in this new directory with your favorite web browser to get started with the developer documentation. 
