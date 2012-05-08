@@ -22,8 +22,8 @@ import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 
-import edu.rosehulman.android.directory.loaders.AsyncLoaderException;
-import edu.rosehulman.android.directory.loaders.AsyncLoaderResult;
+import edu.rosehulman.android.directory.loaders.LoaderException;
+import edu.rosehulman.android.directory.loaders.LoaderResult;
 import edu.rosehulman.android.directory.loaders.InvalidAuthTokenException;
 import edu.rosehulman.android.directory.loaders.LoadUserSchedule;
 import edu.rosehulman.android.directory.model.PersonScheduleWeek;
@@ -243,17 +243,17 @@ public class SchedulePersonActivity extends SherlockFragmentActivity implements 
 		mArgs = args;
 	}
 	
-	private LoaderCallbacks<AsyncLoaderResult<PersonScheduleWeek>> mLoadScheduleCallbacks = new LoaderCallbacks<AsyncLoaderResult<PersonScheduleWeek>>() {
+	private LoaderCallbacks<LoaderResult<PersonScheduleWeek>> mLoadScheduleCallbacks = new LoaderCallbacks<LoaderResult<PersonScheduleWeek>>() {
 
 		private Handler mHandler = new Handler();
 		
 		@Override
-		public Loader<AsyncLoaderResult<PersonScheduleWeek>> onCreateLoader(int id, Bundle args) {
+		public Loader<LoaderResult<PersonScheduleWeek>> onCreateLoader(int id, Bundle args) {
 			return new LoadUserSchedule(SchedulePersonActivity.this, args);
 		}
 
 		@Override
-		public void onLoadFinished(Loader<AsyncLoaderResult<PersonScheduleWeek>> loader, AsyncLoaderResult<PersonScheduleWeek> data) {
+		public void onLoadFinished(Loader<LoaderResult<PersonScheduleWeek>> loader, LoaderResult<PersonScheduleWeek> data) {
 			Log.d(C.TAG, "Finished LoadUserSchedule");
 			
 			try {
@@ -271,7 +271,7 @@ public class SchedulePersonActivity extends SherlockFragmentActivity implements 
 				fragAuth.invalidateAuthToken(scheduleLoader.getAuthToken());
 				fragAuth.obtainAuthToken();
 				
-			} catch (AsyncLoaderException ex) {
+			} catch (LoaderException ex) {
 				String message = ex.getMessage();
 				if (message != null) {
 					Toast.makeText(SchedulePersonActivity.this, message, Toast.LENGTH_SHORT).show();
@@ -281,7 +281,7 @@ public class SchedulePersonActivity extends SherlockFragmentActivity implements 
 		}
 
 		@Override
-		public void onLoaderReset(Loader<AsyncLoaderResult<PersonScheduleWeek>> loader) {
+		public void onLoaderReset(Loader<LoaderResult<PersonScheduleWeek>> loader) {
 		}
 	};
 }

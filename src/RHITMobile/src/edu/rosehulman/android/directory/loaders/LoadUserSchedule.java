@@ -37,7 +37,7 @@ public class LoadUserSchedule extends CachedAsyncLoader<PersonScheduleWeek> {
 	}
 	
 	public static LoadUserSchedule getInstance(LoaderManager loaderManager, int id) {
-		Loader<AsyncLoaderResult<PersonScheduleWeek>> res = loaderManager.getLoader(id);
+		Loader<LoaderResult<PersonScheduleWeek>> res = loaderManager.getLoader(id);
 		return (LoadUserSchedule)res;
 	}
 
@@ -57,7 +57,7 @@ public class LoadUserSchedule extends CachedAsyncLoader<PersonScheduleWeek> {
 	}
 	
 	@Override
-	protected PersonScheduleWeek doInBackground() throws AsyncLoaderException {
+	protected PersonScheduleWeek doInBackground() throws LoaderException {
 		Log.d(C.TAG, "Starting LoadUserSchedule");
 		
 		//get the person's course schedules
@@ -83,7 +83,7 @@ public class LoadUserSchedule extends CachedAsyncLoader<PersonScheduleWeek> {
 		return schedule;
 	}
 	
-	private CoursesResponse loadCourses(MobileDirectoryService service) throws AsyncLoaderException {
+	private CoursesResponse loadCourses(MobileDirectoryService service) throws LoaderException {
 		while (true) {
 			if (Thread.interrupted())
 				return null;
@@ -97,15 +97,15 @@ public class LoadUserSchedule extends CachedAsyncLoader<PersonScheduleWeek> {
 				
 			} catch (ClientException e) {
 				Log.e(C.TAG, "Client request failed", e);
-				throw new AsyncLoaderException(e.getMessage());
+				throw new LoaderException(e.getMessage());
 				
 			} catch (ServerException e) {
 				Log.e(C.TAG, "Server request failed", e);
-				throw new AsyncLoaderException(getContext().getString(R.string.error_server));
+				throw new LoaderException(getContext().getString(R.string.error_server));
 				
 			} catch (JSONException e) {
 				Log.e(C.TAG, "An error occured while parsing the JSON response", e);
-				throw new AsyncLoaderException(getContext().getString(R.string.error_json));
+				throw new LoaderException(getContext().getString(R.string.error_json));
 				
 			} catch (IOException e) {
 				Log.e(C.TAG, "Network error, retrying...", e);

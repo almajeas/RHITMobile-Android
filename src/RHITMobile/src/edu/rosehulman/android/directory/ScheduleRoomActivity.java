@@ -22,8 +22,8 @@ import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 
-import edu.rosehulman.android.directory.loaders.AsyncLoaderException;
-import edu.rosehulman.android.directory.loaders.AsyncLoaderResult;
+import edu.rosehulman.android.directory.loaders.LoaderException;
+import edu.rosehulman.android.directory.loaders.LoaderResult;
 import edu.rosehulman.android.directory.loaders.InvalidAuthTokenException;
 import edu.rosehulman.android.directory.loaders.LoadRoomSchedule;
 import edu.rosehulman.android.directory.model.RoomScheduleWeek;
@@ -243,17 +243,17 @@ public class ScheduleRoomActivity extends SherlockFragmentActivity implements Te
 		mArgs = args;
 	}
 	
-	private LoaderCallbacks<AsyncLoaderResult<RoomScheduleWeek>> mLoadScheduleCallbacks = new LoaderCallbacks<AsyncLoaderResult<RoomScheduleWeek>>() {
+	private LoaderCallbacks<LoaderResult<RoomScheduleWeek>> mLoadScheduleCallbacks = new LoaderCallbacks<LoaderResult<RoomScheduleWeek>>() {
 
 		private Handler mHandler = new Handler();
 		
 		@Override
-		public Loader<AsyncLoaderResult<RoomScheduleWeek>> onCreateLoader(int id, Bundle args) {
+		public Loader<LoaderResult<RoomScheduleWeek>> onCreateLoader(int id, Bundle args) {
 			return new LoadRoomSchedule(ScheduleRoomActivity.this, args);
 		}
 
 		@Override
-		public void onLoadFinished(Loader<AsyncLoaderResult<RoomScheduleWeek>> loader, AsyncLoaderResult<RoomScheduleWeek> data) {
+		public void onLoadFinished(Loader<LoaderResult<RoomScheduleWeek>> loader, LoaderResult<RoomScheduleWeek> data) {
 			Log.d(C.TAG, "Finished LoadRoomSchedule");
 			
 			try {
@@ -271,7 +271,7 @@ public class ScheduleRoomActivity extends SherlockFragmentActivity implements Te
 				fragAuth.invalidateAuthToken(scheduleLoader.getAuthToken());
 				fragAuth.obtainAuthToken();
 				
-			} catch (AsyncLoaderException ex) {
+			} catch (LoaderException ex) {
 				String message = ex.getMessage();
 				if (message != null) {
 					Toast.makeText(ScheduleRoomActivity.this, message, Toast.LENGTH_SHORT).show();
@@ -281,7 +281,7 @@ public class ScheduleRoomActivity extends SherlockFragmentActivity implements Te
 		}
 
 		@Override
-		public void onLoaderReset(Loader<AsyncLoaderResult<RoomScheduleWeek>> loader) {
+		public void onLoaderReset(Loader<LoaderResult<RoomScheduleWeek>> loader) {
 		}
 	};
 }

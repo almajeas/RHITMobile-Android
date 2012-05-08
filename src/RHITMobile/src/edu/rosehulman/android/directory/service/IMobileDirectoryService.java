@@ -9,6 +9,7 @@ import edu.rosehulman.android.directory.model.CampusServicesResponse;
 import edu.rosehulman.android.directory.model.Course;
 import edu.rosehulman.android.directory.model.CoursesResponse;
 import edu.rosehulman.android.directory.model.DirectionsResponse;
+import edu.rosehulman.android.directory.model.LatLon;
 import edu.rosehulman.android.directory.model.LocationCollection;
 import edu.rosehulman.android.directory.model.LocationIdsResponse;
 import edu.rosehulman.android.directory.model.LocationNamesCollection;
@@ -106,6 +107,19 @@ public interface IMobileDirectoryService {
 	 * @throws IOException General network connectivity issue
 	 */
 	public DirectionsResponse getDirections(long from, long to) throws ClientException, ServerException, JSONException, IOException;
+	
+	/**
+	 * Start a directions request from a location to another
+	 * 
+	 * @param from The coordinates of the departing position
+	 * @param to The id of the destination location
+	 * @return A DirectionsResponse with the id of the request and possibly results
+	 * @throws ClientException If the request was invalid. Change the request before retrying
+	 * @throws ServerException If the server had an error. Change the request or try again later
+	 * @throws JSONException Likely out of date client. Update client
+	 * @throws IOException General network connectivity issue
+	 */
+	public DirectionsResponse getDirections(LatLon from, long to) throws ClientException, ServerException, JSONException, IOException;
 	
 	/**
 	 * Start a tour generation request, starting at a location

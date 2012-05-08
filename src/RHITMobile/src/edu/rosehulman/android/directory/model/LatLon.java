@@ -39,6 +39,20 @@ public class LatLon implements Parcelable {
 		this.lon = (int)(lon*1E6);
 	}
 	
+	/**
+	 * @return The latitude of this point
+	 */
+	public float getLatitude() {
+		return (float)this.lat / (float)1E6; 
+	}
+	
+	/**
+	 * @return The longitude of this point
+	 */
+	public float getLongitude() {
+		return (float)this.lon / (float)1E6; 
+	}
+	
 	@Override
 	public LatLon clone() {
 		return new LatLon(lat, lon);

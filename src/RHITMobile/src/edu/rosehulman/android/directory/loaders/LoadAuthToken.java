@@ -18,7 +18,7 @@ import edu.rosehulman.android.directory.C;
 import edu.rosehulman.android.directory.User;
 import edu.rosehulman.android.directory.auth.AccountAuthenticator;
 
-public class LoadAuthToken extends Loader<String> {
+public class LoadAuthToken extends SyncLoader<String> {
 	
 	private static final String ARG_ABORT_ON_LOGIN = "AbortOnLogin";
 	
@@ -29,18 +29,13 @@ public class LoadAuthToken extends Loader<String> {
 	}
 	
 	public static LoadAuthToken getInstance(LoaderManager manager, int id) {
-		Loader<String> loader = manager.getLoader(id);
+		Loader<LoaderResult<String>> loader = manager.getLoader(id);
 		return (LoadAuthToken)loader;
 	}
 	
 	private boolean mAbortOnLogin;
 	
-	private boolean mLoading;
-	private boolean mLoaded;
-	
 	private Activity mActivity;
-	
-	private String mAuthToken;
 
 	public LoadAuthToken(Bundle args, Activity activity) {
 		super(activity);
@@ -51,49 +46,9 @@ public class LoadAuthToken extends Loader<String> {
 	public void setActivity(Activity activity) {
 		mActivity = activity;
 	}
-	
-	@Override
-	protected void onStartLoading() {
-		if (mLoaded) {
-			deliverResult(mAuthToken);
-			
-		} else if (!mLoading) {
-			forceLoad();
-		}
-	}
 
 	@Override
-	protected void onForceLoad() {
-		mLoading = true;
-		
-		loadData();
-	}
-
-	@Override
-	protected void onStopLoading() {
-		if (!mLoading)
-			return;
-		
-		mLoading = false;
-	}
-	
-	@Override
-	protected void onReset() {
-		onStopLoading();
-		
-		mAuthToken = null;
-		mLoaded = false;
-	}
-	
-	@Override
-	public void deliverResult(String data) {
-		mLoaded = true;
-		mLoading = false;
-		mAuthToken = data;
-		super.deliverResult(data);
-	}
-	
-	private void loadData() {
+	protected void loadData() {
 		
 		if (mActivity == null) {
 			deliverResult(null);
@@ -128,7 +83,7 @@ public class LoadAuthToken extends Loader<String> {
 							User.setAccount(account.name, terms, term);
 						}
 						
-						deliverResult(authToken);
+						handleResult(authToken);
 					}
 					
 				} catch (OperationCanceledException e) {

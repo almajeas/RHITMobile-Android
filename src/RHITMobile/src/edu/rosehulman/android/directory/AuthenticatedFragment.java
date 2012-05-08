@@ -8,6 +8,8 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import edu.rosehulman.android.directory.auth.AccountAuthenticator;
 import edu.rosehulman.android.directory.loaders.LoadAuthToken;
+import edu.rosehulman.android.directory.loaders.LoaderException;
+import edu.rosehulman.android.directory.loaders.LoaderResult;
 
 /**
  * A fragment that ensures that the user is logged in
@@ -131,15 +133,19 @@ public class AuthenticatedFragment extends Fragment {
 		loader.setActivity(getActivity());
 	}
 	
-	private LoaderManager.LoaderCallbacks<String> mLoadAuthTokenCallbacks = new LoaderManager.LoaderCallbacks<String>() {
+	private LoaderManager.LoaderCallbacks<LoaderResult<String>> mLoadAuthTokenCallbacks = new LoaderManager.LoaderCallbacks<LoaderResult<String>>() {
 		@Override
-		public Loader<String> onCreateLoader(int id, Bundle args) {
+		public Loader<LoaderResult<String>> onCreateLoader(int id, Bundle args) {
 			return new LoadAuthToken(args, getActivity());
 		}
 
 		@Override
-		public void onLoadFinished(Loader<String> loader, String data) {
-			mAuthToken = data;
+		public void onLoadFinished(Loader<LoaderResult<String>> loader, LoaderResult<String> data) {
+			try {
+				mAuthToken = data.getResult();
+			} catch (LoaderException e) {
+				mAuthToken = null;
+			}
 			
 			AuthenticationCallbacks callbacks = getCallbacks();
 			
@@ -152,7 +158,7 @@ public class AuthenticatedFragment extends Fragment {
 		}
 
 		@Override
-		public void onLoaderReset(Loader<String> loader) {
+		public void onLoaderReset(Loader<LoaderResult<String>> loader) {
 			mAuthToken = null;
 		}
 	};

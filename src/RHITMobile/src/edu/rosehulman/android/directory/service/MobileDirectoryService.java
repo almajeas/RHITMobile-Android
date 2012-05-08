@@ -11,6 +11,7 @@ import edu.rosehulman.android.directory.model.CampusServicesResponse;
 import edu.rosehulman.android.directory.model.Course;
 import edu.rosehulman.android.directory.model.CoursesResponse;
 import edu.rosehulman.android.directory.model.DirectionsResponse;
+import edu.rosehulman.android.directory.model.LatLon;
 import edu.rosehulman.android.directory.model.LocationCollection;
 import edu.rosehulman.android.directory.model.LocationIdsResponse;
 import edu.rosehulman.android.directory.model.LocationNamesCollection;
@@ -124,6 +125,11 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 		}
 		
 		return LocationNamesCollection.deserialize(root);
+	}
+	
+	public DirectionsResponse getDirections(LatLon from, long to) throws ClientException, ServerException, JSONException, IOException {
+		String url = String.format("directions/fromgps/%f/%f/toloc/%d", from.getLatitude(), from.getLongitude(), to);
+		return getDirectionsResponse(url);
 	}
 	
 	@Override

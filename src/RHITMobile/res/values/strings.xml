@@ -37,6 +37,11 @@
     <string name="zoom_in">Zoom In</string>
     <string name="zoom_out">Zoom Out</string>
     
+    <string name="location_services_message">You need GPS network location services to be enabled to use this feature</string>
+    <string name="location_services_title">Enable location services</string>
+    <string name="do_it">Do it</string>
+    <string name="cancel">Cancel</string>
+    
     <!-- Choose Account Activity label -->
     <string name="choose_account_label">Select an account</string>
 
@@ -87,5 +92,6 @@
 		<string name="authentication_error">Unable to authenticate</string>
 		<string name="error_json">Service responded improperly. Ensure the app is up to date and try again.</string>
 		<string name="error_server">Service is rejecting requests. Please try again later.</string>
+		<string name="no_gps_available">No GPS available</string>
 
 </resources>

@@ -1,14 +1,14 @@
 package edu.rosehulman.android.directory.loaders;
 
-public class AsyncLoaderException extends Exception {
+public class LoaderException extends Exception {
 	
 	private static final long serialVersionUID = -5963682795448228471L;
 
-	public AsyncLoaderException() {
+	public LoaderException() {
 		super();
 	}
 	
-	public AsyncLoaderException(String errorMessage) {
+	public LoaderException(String errorMessage) {
 		super(errorMessage);
 	}
 }

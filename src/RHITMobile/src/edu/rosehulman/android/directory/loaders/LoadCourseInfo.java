@@ -32,7 +32,7 @@ public class LoadCourseInfo extends CachedAsyncLoader<Course> {
 	}
 	
 	public static LoadCourseInfo getInstance(LoaderManager loaderManager, int id) {
-		Loader<AsyncLoaderResult<Course>> res = loaderManager.getLoader(id);
+		Loader<LoaderResult<Course>> res = loaderManager.getLoader(id);
 		return (LoadCourseInfo)res;
 	}
 
@@ -52,7 +52,7 @@ public class LoadCourseInfo extends CachedAsyncLoader<Course> {
 	}
 	
 	@Override
-	protected Course doInBackground() throws AsyncLoaderException {
+	protected Course doInBackground() throws LoaderException {
 		Log.d(C.TAG, "Starting LoadCourseInfo");
 		
 		MobileDirectoryService service = new MobileDirectoryService();
@@ -70,15 +70,15 @@ public class LoadCourseInfo extends CachedAsyncLoader<Course> {
 				
 			} catch (ClientException e) {
 				Log.e(C.TAG, "Client request failed", e);
-				throw new AsyncLoaderException(e.getMessage());
+				throw new LoaderException(e.getMessage());
 				
 			} catch (ServerException e) {
 				Log.e(C.TAG, "Server request failed", e);
-				throw new AsyncLoaderException(getContext().getString(R.string.error_server));
+				throw new LoaderException(getContext().getString(R.string.error_server));
 				
 			} catch (JSONException e) {
 				Log.e(C.TAG, "An error occured while parsing the JSON response", e);
-				throw new AsyncLoaderException(getContext().getString(R.string.error_json));
+				throw new LoaderException(getContext().getString(R.string.error_json));
 				
 			} catch (IOException e) {
 				Log.e(C.TAG, "Network error, retrying...", e);

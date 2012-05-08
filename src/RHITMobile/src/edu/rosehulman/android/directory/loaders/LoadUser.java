@@ -41,7 +41,7 @@ public class LoadUser extends CachedAsyncLoader<UserDataResponse> {
 	}
 
 	@Override
-	protected UserDataResponse doInBackground() throws AsyncLoaderException {
+	protected UserDataResponse doInBackground() throws LoaderException {
 
 		MobileDirectoryService service = new MobileDirectoryService();
 			
@@ -63,15 +63,15 @@ public class LoadUser extends CachedAsyncLoader<UserDataResponse> {
 				
 			} catch (ClientException e) {
 				Log.e(C.TAG, "Client request failed", e);
-				throw new AsyncLoaderException(e.getMessage());
+				throw new LoaderException(e.getMessage());
 				
 			} catch (ServerException e) {
 				Log.e(C.TAG, "Server request failed", e);
-				throw new AsyncLoaderException(getContext().getString(R.string.error_server));
+				throw new LoaderException(getContext().getString(R.string.error_server));
 				
 			} catch (JSONException e) {
 				Log.e(C.TAG, "An error occured while parsing the JSON response", e);
-				throw new AsyncLoaderException(getContext().getString(R.string.error_json));
+				throw new LoaderException(getContext().getString(R.string.error_json));
 				
 			} catch (IOException e) {
 				Log.e(C.TAG, "Network error, retrying...", e);

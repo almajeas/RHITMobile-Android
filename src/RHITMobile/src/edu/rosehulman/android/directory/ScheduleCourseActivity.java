@@ -27,8 +27,8 @@ import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 
 import edu.rosehulman.android.directory.AuthenticatedFragment.AuthenticationCallbacks;
-import edu.rosehulman.android.directory.loaders.AsyncLoaderException;
-import edu.rosehulman.android.directory.loaders.AsyncLoaderResult;
+import edu.rosehulman.android.directory.loaders.LoaderException;
+import edu.rosehulman.android.directory.loaders.LoaderResult;
 import edu.rosehulman.android.directory.loaders.InvalidAuthTokenException;
 import edu.rosehulman.android.directory.loaders.LoadCourseInfo;
 import edu.rosehulman.android.directory.model.Course;
@@ -370,15 +370,15 @@ public class ScheduleCourseActivity extends SherlockFragmentActivity implements 
 		mArgs = args;
 	}
 	
-	private LoaderCallbacks<AsyncLoaderResult<Course>> mLoadCourseCallbacks = new LoaderCallbacks<AsyncLoaderResult<Course>>() {
+	private LoaderCallbacks<LoaderResult<Course>> mLoadCourseCallbacks = new LoaderCallbacks<LoaderResult<Course>>() {
 
 		@Override
-		public Loader<AsyncLoaderResult<Course>> onCreateLoader(int id, Bundle args) {
+		public Loader<LoaderResult<Course>> onCreateLoader(int id, Bundle args) {
 			return new LoadCourseInfo(ScheduleCourseActivity.this, args);
 		}
 
 		@Override
-		public void onLoadFinished(Loader<AsyncLoaderResult<Course>> loader, AsyncLoaderResult<Course> data) {
+		public void onLoadFinished(Loader<LoaderResult<Course>> loader, LoaderResult<Course> data) {
 			Log.d(C.TAG, "Finished LoadCourseInfo");
 			
 			try {
@@ -391,7 +391,7 @@ public class ScheduleCourseActivity extends SherlockFragmentActivity implements 
 				mFragAuth.invalidateAuthToken(scheduleLoader.getAuthToken());
 				mFragAuth.obtainAuthToken();
 				
-			} catch (AsyncLoaderException ex) {
+			} catch (LoaderException ex) {
 				String message = ex.getMessage();
 				if (message != null) {
 					Toast.makeText(ScheduleCourseActivity.this, message, Toast.LENGTH_SHORT).show();
@@ -401,7 +401,7 @@ public class ScheduleCourseActivity extends SherlockFragmentActivity implements 
 		}
 
 		@Override
-		public void onLoaderReset(Loader<AsyncLoaderResult<Course>> loader) {
+		public void onLoaderReset(Loader<LoaderResult<Course>> loader) {
 		}
 	};
 }

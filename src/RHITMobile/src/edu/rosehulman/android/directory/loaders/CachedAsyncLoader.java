@@ -5,9 +5,9 @@ import android.util.Log;
 import edu.rosehulman.android.directory.C;
 import edu.rosehulman.android.directory.MyApplication;
 
-public abstract class CachedAsyncLoader<D> extends AsyncLoader<AsyncLoaderResult<D>> {
+public abstract class CachedAsyncLoader<D> extends AsyncLoader<LoaderResult<D>> {
 	
-	private AsyncLoaderResult<D> mData;
+	private LoaderResult<D> mData;
 
 	public CachedAsyncLoader(Context context) {
 		super(context);
@@ -15,11 +15,11 @@ public abstract class CachedAsyncLoader<D> extends AsyncLoader<AsyncLoaderResult
 	
 	@Override
 	protected void onStartLoading() {
-		if (mData != null) {
+		if (mData != null && mData.isSuccess()) {
 			deliverResult(mData);
 		}
 		
-		if (takeContentChanged() || mData == null) {
+		if (takeContentChanged() || mData == null || !mData.isSuccess()) {
 			forceLoad();
 		}
 	}
@@ -39,7 +39,7 @@ public abstract class CachedAsyncLoader<D> extends AsyncLoader<AsyncLoaderResult
 	}
 	
 	@Override
-	public void deliverResult(AsyncLoaderResult<D> data) {
+	public void deliverResult(LoaderResult<D> data) {
 		if (isReset()) {
 			return;
 		}
@@ -50,13 +50,13 @@ public abstract class CachedAsyncLoader<D> extends AsyncLoader<AsyncLoaderResult
 	}
 
 	@Override
-	public AsyncLoaderResult<D> loadInBackground() {
+	public LoaderResult<D> loadInBackground() {
 		if (MyApplication.DEBUG) {
 			try {
-				return AsyncLoaderResult.createResult(doInBackground());
+				return LoaderResult.createResult(doInBackground());
 				
-			} catch (AsyncLoaderException ex) {
-				return AsyncLoaderResult.createError(ex);
+			} catch (LoaderException ex) {
+				return LoaderResult.createError(ex);
 				
 			} catch (RuntimeException ex) {
 				Log.e(C.TAG, "Unhandled exception in loader", ex);
@@ -65,14 +65,14 @@ public abstract class CachedAsyncLoader<D> extends AsyncLoader<AsyncLoaderResult
 			
 		} else {
 			try {
-				return AsyncLoaderResult.createResult(doInBackground());
+				return LoaderResult.createResult(doInBackground());
 				
-			} catch (AsyncLoaderException ex) {
-				return AsyncLoaderResult.createError(ex);
+			} catch (LoaderException ex) {
+				return LoaderResult.createError(ex);
 			}
 		}
 	}
 	
-	protected abstract D doInBackground() throws AsyncLoaderException;
+	protected abstract D doInBackground() throws LoaderException;
 	
 }

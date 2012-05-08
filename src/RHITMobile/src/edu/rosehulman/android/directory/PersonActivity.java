@@ -33,8 +33,8 @@ import com.actionbarsherlock.view.Window;
 
 import edu.rosehulman.android.directory.AuthenticatedFragment.AuthenticationCallbacks;
 import edu.rosehulman.android.directory.LoadLocation.OnLocationLoadedListener;
-import edu.rosehulman.android.directory.loaders.AsyncLoaderException;
-import edu.rosehulman.android.directory.loaders.AsyncLoaderResult;
+import edu.rosehulman.android.directory.loaders.LoaderException;
+import edu.rosehulman.android.directory.loaders.LoaderResult;
 import edu.rosehulman.android.directory.loaders.InvalidAuthTokenException;
 import edu.rosehulman.android.directory.loaders.LoadUser;
 import edu.rosehulman.android.directory.model.Location;
@@ -340,15 +340,15 @@ public class PersonActivity extends SherlockFragmentActivity implements Authenti
 		mArgs = args;
 	}
 	
-	private LoaderCallbacks<AsyncLoaderResult<UserDataResponse>> mLoadScheduleCallbacks = new LoaderCallbacks<AsyncLoaderResult<UserDataResponse>>() {
+	private LoaderCallbacks<LoaderResult<UserDataResponse>> mLoadScheduleCallbacks = new LoaderCallbacks<LoaderResult<UserDataResponse>>() {
 
 		@Override
-		public Loader<AsyncLoaderResult<UserDataResponse>> onCreateLoader(int id, Bundle args) {
+		public Loader<LoaderResult<UserDataResponse>> onCreateLoader(int id, Bundle args) {
 			return new LoadUser(PersonActivity.this, args);
 		}
 
 		@Override
-		public void onLoadFinished(Loader<AsyncLoaderResult<UserDataResponse>> loader, AsyncLoaderResult<UserDataResponse> data) {
+		public void onLoadFinished(Loader<LoaderResult<UserDataResponse>> loader, LoaderResult<UserDataResponse> data) {
 			Log.d(C.TAG, "Finished LoadUserSchedule");
 			
 			try {
@@ -361,7 +361,7 @@ public class PersonActivity extends SherlockFragmentActivity implements Authenti
 				mFragAuth.invalidateAuthToken(load.getAuthToken());
 				mFragAuth.obtainAuthToken();
 				
-			} catch (AsyncLoaderException ex) {
+			} catch (LoaderException ex) {
 				String message = ex.getMessage();
 				if (message != null) {
 					Toast.makeText(PersonActivity.this, message, Toast.LENGTH_SHORT).show();
@@ -371,7 +371,7 @@ public class PersonActivity extends SherlockFragmentActivity implements Authenti
 		}
 
 		@Override
-		public void onLoaderReset(Loader<AsyncLoaderResult<UserDataResponse>> loader) {
+		public void onLoaderReset(Loader<LoaderResult<UserDataResponse>> loader) {
 		}
 	};
 }

@@ -13,6 +13,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -25,17 +26,20 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 
 import edu.rosehulman.android.directory.db.DbIterator;
 import edu.rosehulman.android.directory.db.LocationAdapter;
+import edu.rosehulman.android.directory.fragments.EnableGpsDialogFragment;
+import edu.rosehulman.android.directory.fragments.ObtainLocationDialogFragment;
 import edu.rosehulman.android.directory.model.Hyperlink;
+import edu.rosehulman.android.directory.model.LatLon;
 import edu.rosehulman.android.directory.model.LightLocation;
 import edu.rosehulman.android.directory.model.Location;
 
-public class LocationActivity extends SherlockActivity {
+public class LocationActivity extends SherlockFragmentActivity implements ObtainLocationDialogFragment.LocationCallbacks, EnableGpsDialogFragment.EnableGpsCallbacks {
 
 	public static final String EXTRA_LOCATION = "LOCATION";
 	
@@ -242,9 +246,17 @@ public class LocationActivity extends SherlockActivity {
 	    	    		
 	    	    		break;
 	    	    	case 1: //outside
+	    	    	{
+	    	    		new ObtainLocationDialogFragment().show(getSupportFragmentManager(), ObtainLocationDialogFragment.TAG);
+	    	    	} break;
+	    	    		
+	    	    		
+	    	    		
+	    	    		
+	    	    		
 	    	    		//TODO get location
-	    	    		Toast.makeText(getApplicationContext(), "Outside directions are not yet implemented", Toast.LENGTH_SHORT).show();
-	    	    		break;
+	    	    		//Toast.makeText(getApplicationContext(), "Outside directions are not yet implemented", Toast.LENGTH_SHORT).show();
+	    	    		//break;
 	    	    	}
 	    	    }
 	    	})
@@ -373,5 +385,22 @@ public class LocationActivity extends SherlockActivity {
 		}
 		
 	}
+
+	@Override
+	public void onLocationObtained(LatLon loc) {
+		Intent intent = CampusMapActivity.createDirectionsIntent(this, loc, location.id);
+		startActivity(intent);
+	}
 	
+	@Override
+	public void onLocationCancelled() {
+		
+	}
+
+	@Override
+	public void onEnableGpsTriggered() {
+		FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+		ft.remove(getSupportFragmentManager().findFragmentByTag(ObtainLocationDialogFragment.TAG));
+		ft.commit();
+	}
 }

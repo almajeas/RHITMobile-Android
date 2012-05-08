@@ -37,7 +37,7 @@ public class LoadRoomSchedule extends CachedAsyncLoader<RoomScheduleWeek> {
 	}
 	
 	public static LoadRoomSchedule getInstance(LoaderManager loaderManager, int id) {
-		Loader<AsyncLoaderResult<RoomScheduleWeek>> res = loaderManager.getLoader(id);
+		Loader<LoaderResult<RoomScheduleWeek>> res = loaderManager.getLoader(id);
 		return (LoadRoomSchedule)res;
 	}
 
@@ -57,7 +57,7 @@ public class LoadRoomSchedule extends CachedAsyncLoader<RoomScheduleWeek> {
 	}
 	
 	@Override
-	protected RoomScheduleWeek doInBackground() throws AsyncLoaderException {
+	protected RoomScheduleWeek doInBackground() throws LoaderException {
 		Log.d(C.TAG, "Starting LoadRoomSchedule");
 		
 		//get the person's course schedules
@@ -83,7 +83,7 @@ public class LoadRoomSchedule extends CachedAsyncLoader<RoomScheduleWeek> {
 		return schedule;
 	}
 	
-	private CoursesResponse loadCourses(MobileDirectoryService service) throws AsyncLoaderException {
+	private CoursesResponse loadCourses(MobileDirectoryService service) throws LoaderException {
 		while (true) {
 			if (Thread.interrupted())
 				return null;
@@ -97,15 +97,15 @@ public class LoadRoomSchedule extends CachedAsyncLoader<RoomScheduleWeek> {
 				
 			} catch (ClientException e) {
 				Log.e(C.TAG, "Client request failed", e);
-				throw new AsyncLoaderException(e.getMessage());
+				throw new LoaderException(e.getMessage());
 				
 			} catch (ServerException e) {
 				Log.e(C.TAG, "Server request failed", e);
-				throw new AsyncLoaderException(getContext().getString(R.string.error_server));
+				throw new LoaderException(getContext().getString(R.string.error_server));
 				
 			} catch (JSONException e) {
 				Log.e(C.TAG, "An error occured while parsing the JSON response", e);
-				throw new AsyncLoaderException(getContext().getString(R.string.error_json));
+				throw new LoaderException(getContext().getString(R.string.error_json));
 				
 			} catch (IOException e) {
 				Log.e(C.TAG, "Network error, retrying...", e);

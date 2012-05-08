@@ -54,6 +54,7 @@ import edu.rosehulman.android.directory.maps.ViewController;
 import edu.rosehulman.android.directory.model.DirectionPath;
 import edu.rosehulman.android.directory.model.Directions;
 import edu.rosehulman.android.directory.model.DirectionsResponse;
+import edu.rosehulman.android.directory.model.LatLon;
 import edu.rosehulman.android.directory.model.Location;
 import edu.rosehulman.android.directory.model.LocationIdsResponse;
 import edu.rosehulman.android.directory.model.LocationNamesCollection;
@@ -76,6 +77,7 @@ public class CampusMapActivity extends SherlockMapActivity {
     public static final String ACTION_DIRECTIONS = "edu.rosehulman.android.directory.intent.action.DIRECTIONS";
     public static final String ACTION_TOUR = "edu.rosehulman.android.directory.intent.action.TOUR";
 
+    public static final String EXTRA_START_POINT = "START_POINT";
 	public static final String EXTRA_BUILDING_ID = "BUILDING_ID";
 	public static final String EXTRA_WAYPOINTS = "WAYPOINTS";
 	public static final String EXTRA_TOUR_START_ID = "TOUR_START_ID";
@@ -105,6 +107,14 @@ public class CampusMapActivity extends SherlockMapActivity {
 	public static Intent createDirectionsIntent(Context context, long... ids) {
 		Intent intent = createIntent(context);
 		intent.setAction(ACTION_DIRECTIONS);
+		intent.putExtra(EXTRA_WAYPOINTS, ids);
+		return intent;
+	}
+	
+	public static Intent createDirectionsIntent(Context context, LatLon start, long... ids) {
+		Intent intent = createIntent(context);
+		intent.setAction(ACTION_DIRECTIONS);
+		intent.putExtra(EXTRA_START_POINT, start);
 		intent.putExtra(EXTRA_WAYPOINTS, ids);
 		return intent;
 	}
@@ -222,9 +232,10 @@ public class CampusMapActivity extends SherlockMapActivity {
 					directionsLayer.focus(savedInstanceState.getInt(STATE_SELECTED_STEP, -1), false);
 				}
         	} else {
+        		LatLon start = intent.getParcelableExtra(EXTRA_START_POINT);
 	    		long[] ids = intent.getLongArrayExtra(EXTRA_WAYPOINTS);
 	
-				LoadDirections task = new LoadDirections(ids);
+				LoadDirections task = new LoadDirections(start, ids);
 				taskManager.addTask(task);
 				task.execute();
         	}
@@ -592,7 +603,9 @@ public class CampusMapActivity extends SherlockMapActivity {
 
 	@Override
 	protected boolean isRouteDisplayed() {
-		return ACTION_DIRECTIONS.equals(getIntent().getAction());
+		String action = getIntent().getAction();
+		return ACTION_DIRECTIONS.equals(action) ||
+				ACTION_TOUR.equals(action);
 	}
 	
 	@Override
@@ -967,26 +980,32 @@ public class CampusMapActivity extends SherlockMapActivity {
 		
 	}
 	
-private class LoadDirections extends ProcessDirections {
+	private class LoadDirections extends ProcessDirections {
 		
+		private LatLon start;
 		private long ids[];
 		
-		public LoadDirections(long[] ids) {
+		public LoadDirections(LatLon start, long[] ids) {
 			super("Getting Directions...");
+			this.start = start;
 			this.ids = ids;
 		}
 		
 		@Override
 		protected DirectionsResponse getDirections() {
-			assert(ids.length == 2);
-			long from = ids[0];
-			long to = ids[1];
-			
+			assert(ids.length == 1 || ids.length == 2);
 			DirectionsResponse response = null;
-			
+
 			do {
 				try {
-					response = service.getDirections(from, to);
+					if (start == null) {
+						long from = ids[0];
+						long to = ids[1];
+						response = service.getDirections(from, to);
+					} else {
+						long to = ids[0];
+						response = service.getDirections(start, to);
+					}
 				} catch (Exception e) {
 					Log.e(C.TAG, "Failed to download initial directions");
 					if (isCancelled()) {

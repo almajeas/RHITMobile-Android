@@ -38,7 +38,7 @@ public class LoadUserSearch extends CachedAsyncLoader<ShortUser[]> {
 	}
 
 	@Override
-	protected ShortUser[] doInBackground() throws AsyncLoaderException {
+	protected ShortUser[] doInBackground() throws LoaderException {
 
 		MobileDirectoryService service = new MobileDirectoryService();
 			
@@ -61,15 +61,15 @@ public class LoadUserSearch extends CachedAsyncLoader<ShortUser[]> {
 				
 			} catch (ClientException e) {
 				Log.e(C.TAG, "Client request failed", e);
-				throw new AsyncLoaderException(e.getMessage());
+				throw new LoaderException(e.getMessage());
 				
 			} catch (ServerException e) {
 				Log.e(C.TAG, "Server request failed", e);
-				throw new AsyncLoaderException(getContext().getString(R.string.error_server));
+				throw new LoaderException(getContext().getString(R.string.error_server));
 				
 			} catch (JSONException e) {
 				Log.e(C.TAG, "An error occured while parsing the JSON response", e);
-				throw new AsyncLoaderException(getContext().getString(R.string.error_json));
+				throw new LoaderException(getContext().getString(R.string.error_json));
 				
 			} catch (IOException e) {
 				Log.e(C.TAG, "Network error, retrying...", e);

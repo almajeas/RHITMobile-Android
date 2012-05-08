@@ -18,8 +18,8 @@ import android.widget.Toast;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.app.SherlockListFragment;
 
-import edu.rosehulman.android.directory.loaders.AsyncLoaderException;
-import edu.rosehulman.android.directory.loaders.AsyncLoaderResult;
+import edu.rosehulman.android.directory.loaders.LoaderException;
+import edu.rosehulman.android.directory.loaders.LoaderResult;
 import edu.rosehulman.android.directory.loaders.InvalidAuthTokenException;
 import edu.rosehulman.android.directory.loaders.LoadUserSearch;
 import edu.rosehulman.android.directory.model.ShortUser;
@@ -143,15 +143,15 @@ public class PersonListFragment extends SherlockListFragment {
 		mArgs = args;
 	}
 	
-	private LoaderCallbacks<AsyncLoaderResult<ShortUser[]>> mLoadUsersCallbacks = new LoaderCallbacks<AsyncLoaderResult<ShortUser[]>>() {
+	private LoaderCallbacks<LoaderResult<ShortUser[]>> mLoadUsersCallbacks = new LoaderCallbacks<LoaderResult<ShortUser[]>>() {
 		
 		@Override
-		public Loader<AsyncLoaderResult<ShortUser[]>> onCreateLoader(int id, Bundle args) {
+		public Loader<LoaderResult<ShortUser[]>> onCreateLoader(int id, Bundle args) {
 			return new LoadUserSearch(getActivity(), args);
 		}
 
 		@Override
-		public void onLoadFinished(Loader<AsyncLoaderResult<ShortUser[]>> loader, AsyncLoaderResult<ShortUser[]> data) {
+		public void onLoadFinished(Loader<LoaderResult<ShortUser[]>> loader, LoaderResult<ShortUser[]> data) {
 			
 			try {
 				final ShortUser[] result = data.getResult();
@@ -163,7 +163,7 @@ public class PersonListFragment extends SherlockListFragment {
 				mCallbacks.onRequestAuthToken();
 				mAuthToken = null;
 				
-			} catch (AsyncLoaderException ex) {
+			} catch (LoaderException ex) {
 				String message = ex.getMessage();
 				if (message != null) {
 					Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
@@ -173,7 +173,7 @@ public class PersonListFragment extends SherlockListFragment {
 		}
 
 		@Override
-		public void onLoaderReset(Loader<AsyncLoaderResult<ShortUser[]>> loader) {
+		public void onLoaderReset(Loader<LoaderResult<ShortUser[]>> loader) {
 			processResult(null);
 		}
 	};
