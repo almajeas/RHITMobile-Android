@@ -43,7 +43,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		return instance;
 	}
 
-	private static final int DATABASE_VERSION = 24;
+	/** Current version of the database.  Should be incremented whenever a schema change is made. */
+	private static final int DATABASE_VERSION = 25;
 	
 	private static final String TABLE_CAMPUS_SERVICES = "CampusServices";
 	private static final String CREATE_TABLE_CAMPUS_SERVICES =
@@ -106,6 +107,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 				"( _Id INTEGER PRIMARY KEY AUTOINCREMENT" +
 				", LocationId INTEGER REFERENCES Locations(_Id)" +
 				", Name TEXT NOT NULL" +
+				", Type INTEGER NOT NULL" +
 				", Url TEXT NOT NULL" +
 				");";
 	

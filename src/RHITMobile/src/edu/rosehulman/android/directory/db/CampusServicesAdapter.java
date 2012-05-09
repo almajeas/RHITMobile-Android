@@ -9,6 +9,7 @@ import android.database.Cursor;
 import edu.rosehulman.android.directory.model.CampusServiceItem;
 import edu.rosehulman.android.directory.model.CampusServicesCategory;
 import edu.rosehulman.android.directory.model.Hyperlink;
+import edu.rosehulman.android.directory.model.HyperlinkType;
 
 /**
  * Provide access to various version information stored in the database
@@ -153,7 +154,7 @@ public class CampusServicesAdapter extends TableAdapter {
 		String url = cursor.getString(cursor.getColumnIndex(KEY_URL));
 		cursor.close();
 		
-		return new Hyperlink(name, url);
+		return new Hyperlink(name, HyperlinkType.WEBSITE, url);
 	}
 
 	/**
@@ -304,7 +305,7 @@ public class CampusServicesAdapter extends TableAdapter {
 			String url = cursor.getString(iUrl);
 			String path = cursor.getString(iPath);
 			
-			return new CampusServiceItem(new Hyperlink(name, url), path);
+			return new CampusServiceItem(new Hyperlink(name, HyperlinkType.WEBSITE, url), path);
 		}
 		
 	}
@@ -365,7 +366,7 @@ public class CampusServicesAdapter extends TableAdapter {
 			
 			String name = cursor.getString(iName);
 			String url = cursor.getString(iUrl);
-			Hyperlink link = new Hyperlink(name, url);
+			Hyperlink link = new Hyperlink(name, HyperlinkType.WEBSITE, url);
 			cursor.moveToNext();
 			return link;
 		}

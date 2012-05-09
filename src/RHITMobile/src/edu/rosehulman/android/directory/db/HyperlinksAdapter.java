@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import edu.rosehulman.android.directory.model.Hyperlink;
+import edu.rosehulman.android.directory.model.HyperlinkType;
 
 /**
  * Performs operations on Hyperlinks table
@@ -15,6 +16,7 @@ public class HyperlinksAdapter extends TableAdapter {
 	public static final String KEY_ID = "_Id";
 	public static final String KEY_LOCATION_ID = "LocationId";
 	public static final String KEY_NAME = "Name";
+	public static final String KEY_TYPE = "Type";
 	public static final String KEY_URL = "Url";
 	
 	/**
@@ -39,7 +41,7 @@ public class HyperlinksAdapter extends TableAdapter {
 	 * @return an array of Hyperlinks associated with the location
 	 */
 	public Hyperlink[] getHyperlinks(long id) {
-		String[] projection = new String[] {KEY_NAME, KEY_URL};
+		String[] projection = new String[] {KEY_NAME, KEY_TYPE, KEY_URL};
 		String where = KEY_LOCATION_ID + " =?";
 		String[] args = new String[] {String.valueOf(id)};
 		
@@ -65,6 +67,7 @@ public class HyperlinksAdapter extends TableAdapter {
 		
 		values.put(KEY_LOCATION_ID, locationId);
 		values.put(KEY_NAME, link.name);
+		values.put(KEY_TYPE, link.type.ordinal());
 		values.put(KEY_URL, link.url);
 		
 		db.insert(TABLE_NAME, null, values);
@@ -80,19 +83,22 @@ public class HyperlinksAdapter extends TableAdapter {
 	private class HyperlinkIterator extends DbIterator<Hyperlink> {
 
 		private int iName;
+		private int iType;
 		private int iUrl;
 		
 		public HyperlinkIterator(Cursor cursor) {
 			super(cursor);
 			iName = cursor.getColumnIndex(KEY_NAME);
+			iType = cursor.getColumnIndex(KEY_TYPE);
 			iUrl = cursor.getColumnIndex(KEY_URL);
 		}
 
 		@Override
 		protected Hyperlink convertRow(Cursor cursor) {
 			String name = cursor.getString(iName);
+			HyperlinkType type = HyperlinkType.fromOrdinal(cursor.getInt(iType));
 			String url = cursor.getString(iUrl);
-			return new Hyperlink(name, url);
+			return new Hyperlink(name, type, url);
 		}
 		
 	}
