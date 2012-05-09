@@ -1,4 +1,4 @@
-package edu.rosehulman.android.directory;
+package edu.rosehulman.android.directory.fragments;
 
 import android.accounts.AccountManager;
 import android.app.Activity;
@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import edu.rosehulman.android.directory.User;
 import edu.rosehulman.android.directory.auth.AccountAuthenticator;
 import edu.rosehulman.android.directory.loaders.LoadAuthToken;
 import edu.rosehulman.android.directory.loaders.LoaderException;

@@ -61,12 +61,12 @@
         </activity>
         
         <activity
-            android:name=".ChooseTypeAndAccountActivity" 
+            android:name=".compat.ChooseTypeAndAccountActivity" 
             android:theme="@style/Theme.Sherlock">
         </activity>
         
         <activity
-            android:name=".ChooseAccountTypeActivity" 
+            android:name=".compat.ChooseAccountTypeActivity" 
             android:theme="@style/Theme.Sherlock">
         </activity>
         

@@ -25,10 +25,10 @@ import com.readystatesoftware.mapviewballoons.BalloonItemizedOverlay;
 import edu.rosehulman.android.directory.DirectionListActivity;
 import edu.rosehulman.android.directory.LocationActivity;
 import edu.rosehulman.android.directory.R;
-import edu.rosehulman.android.directory.TaskManager;
 import edu.rosehulman.android.directory.model.DirectionPath;
 import edu.rosehulman.android.directory.model.Directions;
 import edu.rosehulman.android.directory.model.Location;
+import edu.rosehulman.android.directory.tasks.TaskManager;
 import edu.rosehulman.android.directory.util.BoundingBox;
 
 /**

@@ -22,10 +22,13 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 
-import edu.rosehulman.android.directory.LoadTourTag.OnTourTagLoadedListener;
 import edu.rosehulman.android.directory.db.TourTagsAdapter;
 import edu.rosehulman.android.directory.model.TourTag;
 import edu.rosehulman.android.directory.model.TourTagItem;
+import edu.rosehulman.android.directory.tasks.BackgroundTask;
+import edu.rosehulman.android.directory.tasks.LoadTourTag;
+import edu.rosehulman.android.directory.tasks.TaskManager;
+import edu.rosehulman.android.directory.tasks.LoadTourTag.OnTourTagLoadedListener;
 
 public class CampusToursTagSelectSearchActivity extends SherlockListActivity {
 

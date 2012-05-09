@@ -1,4 +1,4 @@
-package edu.rosehulman.android.directory;
+package edu.rosehulman.android.directory.fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,19 +12,22 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import edu.rosehulman.android.directory.model.RoomScheduleDay;
-import edu.rosehulman.android.directory.model.RoomScheduleItem;
+import edu.rosehulman.android.directory.ClickableLocationSpan;
+import edu.rosehulman.android.directory.R;
+import edu.rosehulman.android.directory.ScheduleCourseActivity;
+import edu.rosehulman.android.directory.model.PersonScheduleDay;
+import edu.rosehulman.android.directory.model.PersonScheduleItem;
 import edu.rosehulman.android.directory.model.TermCode;
 import edu.rosehulman.android.directory.util.Ordinal;
 import edu.rosehulman.android.directory.util.TimeUtil;
 
-public class ScheduleRoomFragment extends Fragment {
-
+public class SchedulePersonFragment extends Fragment {
+	
 	private TermCode term;
 	private String tag;
-	private RoomScheduleDay day;
+	private PersonScheduleDay day;
 	
-	public static Bundle buildArguments(TermCode term, String tag, RoomScheduleDay day) {
+	public static Bundle buildArguments(TermCode term, String tag, PersonScheduleDay day) {
 		Bundle args = new Bundle();
 		args.putParcelable("Term", term);
     	args.putString("Day", tag);
@@ -32,10 +35,10 @@ public class ScheduleRoomFragment extends Fragment {
     	return args;
 	}
 	
-	public ScheduleRoomFragment() {
+	public SchedulePersonFragment() {
 	}
 	
-    public ScheduleRoomFragment(TermCode term, String tag, RoomScheduleDay day) {
+    public SchedulePersonFragment(TermCode term, String tag, PersonScheduleDay day) {
     	setArguments(buildArguments(term, tag, day));
 	}
 
@@ -67,7 +70,7 @@ public class ScheduleRoomFragment extends Fragment {
 				if (adapter == null)
 					return;
 
-				RoomScheduleItem item = day.getItem(position);
+				PersonScheduleItem item = day.getItem(position);
 				
 				Intent intent = ScheduleCourseActivity.createIntent(getActivity(), term, item.crn, item.course);
 				startActivity(intent);
@@ -84,9 +87,9 @@ public class ScheduleRoomFragment extends Fragment {
     	private String[] hours_start;
     	private String[] hours_end;
     	
-		private RoomScheduleDay day;
+		private PersonScheduleDay day;
 		
-		public ScheduleAdapter(RoomScheduleDay day) {
+		public ScheduleAdapter(PersonScheduleDay day) {
 			this.day = day;
 
 	    	hours_start = getResources().getStringArray(R.array.hours_start);
@@ -116,7 +119,7 @@ public class ScheduleRoomFragment extends Fragment {
 				v = inflater.inflate(R.layout.schedule_person_list_item, null);
 			}
 			
-			RoomScheduleItem item = day.getItem(position);
+			PersonScheduleItem item = day.getItem(position);
 			
 			TextView course = (TextView)v.findViewById(R.id.course);
 			TextView time = (TextView)v.findViewById(R.id.time);
@@ -146,7 +149,7 @@ public class ScheduleRoomFragment extends Fragment {
 			
 			time.setText(hour);
 			
-			room.setVisibility(View.GONE);
+			ClickableLocationSpan.linkify(room, item.room);
 			
 			room.setMovementMethod(LinkMovementMethod.getInstance());
 			room.setFocusable(false);

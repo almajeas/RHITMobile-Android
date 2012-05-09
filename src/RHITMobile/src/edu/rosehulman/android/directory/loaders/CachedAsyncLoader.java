@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Log;
 import edu.rosehulman.android.directory.C;
 import edu.rosehulman.android.directory.MyApplication;
+import edu.rosehulman.android.directory.compat.AsyncLoader;
 
 public abstract class CachedAsyncLoader<D> extends AsyncLoader<LoaderResult<D>> {
 	

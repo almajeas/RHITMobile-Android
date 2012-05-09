@@ -8,8 +8,9 @@ import android.text.style.ClickableSpan;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
-import edu.rosehulman.android.directory.LoadLocation.OnLocationLoadedListener;
 import edu.rosehulman.android.directory.model.Location;
+import edu.rosehulman.android.directory.tasks.LoadLocation;
+import edu.rosehulman.android.directory.tasks.LoadLocation.OnLocationLoadedListener;
 
 public class ClickableLocationSpan extends ClickableSpan {
 	

@@ -1,4 +1,4 @@
-package edu.rosehulman.android.directory;
+package edu.rosehulman.android.directory.fragments;
 
 import android.app.Activity;
 import android.app.SearchManager;
@@ -18,10 +18,12 @@ import android.widget.Toast;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.app.SherlockListFragment;
 
-import edu.rosehulman.android.directory.loaders.LoaderException;
-import edu.rosehulman.android.directory.loaders.LoaderResult;
+import edu.rosehulman.android.directory.PersonActivity;
+import edu.rosehulman.android.directory.R;
 import edu.rosehulman.android.directory.loaders.InvalidAuthTokenException;
 import edu.rosehulman.android.directory.loaders.LoadUserSearch;
+import edu.rosehulman.android.directory.loaders.LoaderException;
+import edu.rosehulman.android.directory.loaders.LoaderResult;
 import edu.rosehulman.android.directory.model.ShortUser;
 
 public class PersonListFragment extends SherlockListFragment {

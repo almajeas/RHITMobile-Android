@@ -7,6 +7,6 @@
         android:id="@+id/list_fragment"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:name="edu.rosehulman.android.directory.PersonListFragment" />;
+        android:name="edu.rosehulman.android.directory.fragments.PersonListFragment" />
 
 </LinearLayout>

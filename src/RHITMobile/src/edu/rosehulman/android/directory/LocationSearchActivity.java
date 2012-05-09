@@ -25,7 +25,6 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 
-import edu.rosehulman.android.directory.LoadLocation.OnLocationLoadedListener;
 import edu.rosehulman.android.directory.db.LocationAdapter;
 import edu.rosehulman.android.directory.db.VersionsAdapter;
 import edu.rosehulman.android.directory.model.Location;
@@ -35,6 +34,10 @@ import edu.rosehulman.android.directory.model.VersionType;
 import edu.rosehulman.android.directory.service.ClientException;
 import edu.rosehulman.android.directory.service.MobileDirectoryService;
 import edu.rosehulman.android.directory.service.ServerException;
+import edu.rosehulman.android.directory.tasks.BackgroundTask;
+import edu.rosehulman.android.directory.tasks.LoadLocation;
+import edu.rosehulman.android.directory.tasks.TaskManager;
+import edu.rosehulman.android.directory.tasks.LoadLocation.OnLocationLoadedListener;
 
 public class LocationSearchActivity extends SherlockListActivity {
 	

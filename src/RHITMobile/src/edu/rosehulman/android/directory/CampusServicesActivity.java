@@ -25,6 +25,8 @@ import edu.rosehulman.android.directory.ServiceManager.ServiceRunnable;
 import edu.rosehulman.android.directory.db.CampusServicesAdapter;
 import edu.rosehulman.android.directory.model.CampusServicesCategory;
 import edu.rosehulman.android.directory.model.Hyperlink;
+import edu.rosehulman.android.directory.tasks.BackgroundTask;
+import edu.rosehulman.android.directory.tasks.TaskManager;
 
 public class CampusServicesActivity extends SherlockListActivity {
 

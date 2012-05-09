@@ -19,10 +19,10 @@ import com.google.android.maps.OverlayItem;
 import com.readystatesoftware.mapviewballoons.BalloonItemizedOverlay;
 
 import edu.rosehulman.android.directory.LocationActivity;
-import edu.rosehulman.android.directory.PopulateLocation;
-import edu.rosehulman.android.directory.TaskManager;
 import edu.rosehulman.android.directory.db.LocationAdapter;
 import edu.rosehulman.android.directory.model.Location;
+import edu.rosehulman.android.directory.tasks.PopulateLocation;
+import edu.rosehulman.android.directory.tasks.TaskManager;
 
 /**
  * Overlay containing Point Of Interest markers

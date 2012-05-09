@@ -38,6 +38,8 @@ import edu.rosehulman.android.directory.model.LatLon;
 import edu.rosehulman.android.directory.model.Location;
 import edu.rosehulman.android.directory.model.TourTag;
 import edu.rosehulman.android.directory.model.TourTagItem;
+import edu.rosehulman.android.directory.tasks.TaskManager;
+import edu.rosehulman.android.directory.tasks.UITask;
 
 public class CampusToursStartupActivity extends SherlockFragmentActivity implements ObtainLocationDialogFragment.LocationCallbacks, EnableGpsDialogFragment.EnableGpsCallbacks {
 	

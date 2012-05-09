@@ -8,7 +8,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import edu.rosehulman.android.directory.C;
-import edu.rosehulman.android.directory.LoadLocation;
 import edu.rosehulman.android.directory.R;
 import edu.rosehulman.android.directory.model.Location;
 import edu.rosehulman.android.directory.model.LocationIdResponse;
@@ -18,6 +17,7 @@ import edu.rosehulman.android.directory.service.AuthenticationException;
 import edu.rosehulman.android.directory.service.ClientException;
 import edu.rosehulman.android.directory.service.MobileDirectoryService;
 import edu.rosehulman.android.directory.service.ServerException;
+import edu.rosehulman.android.directory.tasks.LoadLocation;
 
 public class LoadUser extends CachedAsyncLoader<UserInfo> {
 

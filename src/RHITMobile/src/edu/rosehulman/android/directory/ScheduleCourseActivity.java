@@ -26,7 +26,8 @@ import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 
-import edu.rosehulman.android.directory.AuthenticatedFragment.AuthenticationCallbacks;
+import edu.rosehulman.android.directory.fragments.AuthenticatedFragment;
+import edu.rosehulman.android.directory.fragments.AuthenticatedFragment.AuthenticationCallbacks;
 import edu.rosehulman.android.directory.loaders.LoaderException;
 import edu.rosehulman.android.directory.loaders.LoaderResult;
 import edu.rosehulman.android.directory.loaders.InvalidAuthTokenException;

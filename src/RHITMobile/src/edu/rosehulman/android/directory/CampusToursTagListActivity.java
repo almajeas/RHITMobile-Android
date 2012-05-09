@@ -20,10 +20,12 @@ import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.MenuItem;
 
+import edu.rosehulman.android.directory.compat.TouchListView;
 import edu.rosehulman.android.directory.db.TourTagsAdapter;
 import edu.rosehulman.android.directory.model.LatLon;
 import edu.rosehulman.android.directory.model.TourTag;
 import edu.rosehulman.android.directory.model.TourTagItem;
+import edu.rosehulman.android.directory.tasks.TaskManager;
 
 public class CampusToursTagListActivity extends SherlockActivity {
 	

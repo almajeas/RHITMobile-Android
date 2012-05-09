@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package edu.rosehulman.android.directory.loaders;
+package edu.rosehulman.android.directory.compat;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;

@@ -33,6 +33,7 @@ import com.actionbarsherlock.view.MenuItem;
 
 import edu.rosehulman.android.directory.ServiceManager.ServiceRunnable;
 import edu.rosehulman.android.directory.auth.AccountAuthenticator;
+import edu.rosehulman.android.directory.compat.ChooseTypeAndAccountActivity;
 
 public class StartupActivity extends SherlockActivity {
 	

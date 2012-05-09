@@ -1,4 +1,4 @@
-package edu.rosehulman.android.directory;
+package edu.rosehulman.android.directory.tasks;
 
 import android.os.AsyncTask;
 import edu.rosehulman.android.directory.db.TourTagsAdapter;

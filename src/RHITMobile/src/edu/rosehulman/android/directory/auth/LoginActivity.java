@@ -24,11 +24,11 @@ import com.actionbarsherlock.view.MenuItem;
 
 import edu.rosehulman.android.directory.C;
 import edu.rosehulman.android.directory.R;
-import edu.rosehulman.android.directory.TaskManager;
 import edu.rosehulman.android.directory.model.BannerAuthResponse;
 import edu.rosehulman.android.directory.service.ClientException;
 import edu.rosehulman.android.directory.service.MobileDirectoryService;
 import edu.rosehulman.android.directory.service.ServerException;
+import edu.rosehulman.android.directory.tasks.TaskManager;
 
 /**
  * Activity used to register users for the beta program

@@ -23,11 +23,14 @@ import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 
 import edu.rosehulman.android.directory.IDataUpdateService.AsyncRequest;
-import edu.rosehulman.android.directory.LoadCampusServiceHyperlink.OnHyperlinkLoadedListener;
 import edu.rosehulman.android.directory.ServiceManager.ServiceRunnable;
 import edu.rosehulman.android.directory.db.CampusServicesAdapter;
 import edu.rosehulman.android.directory.model.CampusServiceItem;
 import edu.rosehulman.android.directory.model.Hyperlink;
+import edu.rosehulman.android.directory.tasks.BackgroundTask;
+import edu.rosehulman.android.directory.tasks.LoadCampusServiceHyperlink;
+import edu.rosehulman.android.directory.tasks.TaskManager;
+import edu.rosehulman.android.directory.tasks.LoadCampusServiceHyperlink.OnHyperlinkLoadedListener;
 
 public class CampusServicesSearchActivity extends SherlockListActivity {
 

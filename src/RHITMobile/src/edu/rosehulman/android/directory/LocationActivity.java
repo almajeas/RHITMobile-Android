@@ -38,6 +38,8 @@ import edu.rosehulman.android.directory.model.Hyperlink;
 import edu.rosehulman.android.directory.model.LatLon;
 import edu.rosehulman.android.directory.model.LightLocation;
 import edu.rosehulman.android.directory.model.Location;
+import edu.rosehulman.android.directory.tasks.TaskManager;
+import edu.rosehulman.android.directory.tasks.UITask;
 
 public class LocationActivity extends SherlockFragmentActivity implements ObtainLocationDialogFragment.LocationCallbacks, EnableGpsDialogFragment.EnableGpsCallbacks {
 

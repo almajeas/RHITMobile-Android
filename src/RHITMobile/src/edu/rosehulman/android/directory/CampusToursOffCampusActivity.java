@@ -15,8 +15,10 @@ import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockListActivity;
 import com.actionbarsherlock.view.MenuItem;
 
-import edu.rosehulman.android.directory.LoadLocation.OnLocationLoadedListener;
 import edu.rosehulman.android.directory.model.Location;
+import edu.rosehulman.android.directory.tasks.LoadLocation;
+import edu.rosehulman.android.directory.tasks.TaskManager;
+import edu.rosehulman.android.directory.tasks.LoadLocation.OnLocationLoadedListener;
 import edu.rosehulman.android.directory.util.ArrayUtil;
 
 public class CampusToursOffCampusActivity extends SherlockListActivity {

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package edu.rosehulman.android.directory;
+package edu.rosehulman.android.directory.compat;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -47,6 +47,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import edu.rosehulman.android.directory.R;
 
 /**
  * @hide

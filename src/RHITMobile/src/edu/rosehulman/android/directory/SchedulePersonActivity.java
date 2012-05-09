@@ -22,6 +22,8 @@ import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 
+import edu.rosehulman.android.directory.fragments.AuthenticatedFragment;
+import edu.rosehulman.android.directory.fragments.SchedulePersonFragment;
 import edu.rosehulman.android.directory.loaders.LoaderException;
 import edu.rosehulman.android.directory.loaders.LoaderResult;
 import edu.rosehulman.android.directory.loaders.InvalidAuthTokenException;

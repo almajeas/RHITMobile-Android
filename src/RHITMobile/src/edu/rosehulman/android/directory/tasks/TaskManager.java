@@ -1,7 +1,8 @@
-package edu.rosehulman.android.directory;
+package edu.rosehulman.android.directory.tasks;
 
 import java.util.HashSet;
 import java.util.Set;
+
 
 import android.os.AsyncTask;
 

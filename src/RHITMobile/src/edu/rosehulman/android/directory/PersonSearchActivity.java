@@ -10,8 +10,11 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 
-import edu.rosehulman.android.directory.AuthenticatedFragment.AuthenticationCallbacks;
-import edu.rosehulman.android.directory.PersonListFragment.PersonListCallbacks;
+import edu.rosehulman.android.directory.R;
+import edu.rosehulman.android.directory.fragments.AuthenticatedFragment;
+import edu.rosehulman.android.directory.fragments.PersonListFragment;
+import edu.rosehulman.android.directory.fragments.AuthenticatedFragment.AuthenticationCallbacks;
+import edu.rosehulman.android.directory.fragments.PersonListFragment.PersonListCallbacks;
 
 public class PersonSearchActivity extends SherlockFragmentActivity implements AuthenticationCallbacks, PersonListCallbacks {
 

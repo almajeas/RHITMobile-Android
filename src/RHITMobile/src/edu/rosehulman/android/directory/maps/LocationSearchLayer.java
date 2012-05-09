@@ -15,8 +15,8 @@ import com.readystatesoftware.mapviewballoons.BalloonItemizedOverlay;
 
 import edu.rosehulman.android.directory.C;
 import edu.rosehulman.android.directory.LocationActivity;
-import edu.rosehulman.android.directory.PopulateLocation;
 import edu.rosehulman.android.directory.model.Location;
+import edu.rosehulman.android.directory.tasks.PopulateLocation;
 
 /**
  * Overlay containing search results
