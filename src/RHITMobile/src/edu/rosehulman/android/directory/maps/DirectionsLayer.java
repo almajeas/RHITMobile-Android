@@ -112,8 +112,10 @@ public class DirectionsLayer extends BalloonItemizedOverlay<OverlayItem> impleme
 			overlay = new OverlayItem(path.coord.asGeoPoint(), path.dir, "");
 		} else if (path.dir != null) {
 			overlay = new OverlayItem(path.coord.asGeoPoint(), path.dir, loc.name);
-		} else {
+		} else if (loc != null) {
 			overlay = new OverlayItem(path.coord.asGeoPoint(), loc.name, loc.description);
+		} else {
+			overlay = new OverlayItem(path.coord.asGeoPoint(), "Starting position", "");
 		}
 
 		if (path.flag || i == 0) {
