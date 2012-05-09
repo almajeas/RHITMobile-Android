@@ -8,8 +8,11 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -22,18 +25,21 @@ import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.MenuItem;
 
 import edu.rosehulman.android.directory.IDataUpdateService.AsyncRequest;
 import edu.rosehulman.android.directory.ServiceManager.ServiceRunnable;
 import edu.rosehulman.android.directory.db.LocationAdapter;
 import edu.rosehulman.android.directory.db.TourTagsAdapter;
+import edu.rosehulman.android.directory.fragments.EnableGpsDialogFragment;
+import edu.rosehulman.android.directory.fragments.ObtainLocationDialogFragment;
+import edu.rosehulman.android.directory.model.LatLon;
 import edu.rosehulman.android.directory.model.Location;
 import edu.rosehulman.android.directory.model.TourTag;
 import edu.rosehulman.android.directory.model.TourTagItem;
 
-public class CampusToursStartupActivity extends SherlockActivity {
+public class CampusToursStartupActivity extends SherlockFragmentActivity implements ObtainLocationDialogFragment.LocationCallbacks, EnableGpsDialogFragment.EnableGpsCallbacks {
 	
 	public static Intent createIntent(Context context) {
 		return new Intent(context, CampusToursStartupActivity.class);
@@ -166,6 +172,7 @@ public class CampusToursStartupActivity extends SherlockActivity {
 		super.onPause();
 		taskManager.abortTasks();
 		updateService.cancel();
+		stopGpsUpdates();
 	}
 	
     @Override
@@ -256,9 +263,37 @@ public class CampusToursStartupActivity extends SherlockActivity {
 		}.start();		
 	}
 	
+	private LocationManager mLocationManager;
+	private LocationListener mLocationListener;
+	
 	private void rdoOnCampusOutside_checked(boolean isChecked) {
-		//TODO start/stop GPS
-
+		
+		if (isChecked) {
+			mLocationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+			mLocationListener = new LocationListener() {
+				@Override
+				public void onStatusChanged(String provider, int status, Bundle extras) {}
+				@Override
+				public void onProviderEnabled(String provider) {}
+				@Override
+				public void onProviderDisabled(String provider) {}
+				@Override
+				public void onLocationChanged(android.location.Location location) {}
+			};
+			mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, mLocationListener);
+			
+		} else {
+			stopGpsUpdates();
+		}
+	}
+	
+	private void stopGpsUpdates() {
+		if (mLocationManager == null || mLocationListener == null)
+			return;
+		
+		mLocationManager.removeUpdates(mLocationListener);
+		mLocationManager = null;
+		mLocationListener = null;
 	}
 	
 	private void rdoOffCampus_checked(boolean isChecked) {
@@ -266,8 +301,7 @@ public class CampusToursStartupActivity extends SherlockActivity {
 	
     private void btnTour_clicked() {
     	if (rdoOnCampusOutside.isChecked()) {
-    		Toast.makeText(this, "Outside tours not yet supported", Toast.LENGTH_SHORT).show();
-    		groupLocation.clearCheck();
+    		new ObtainLocationDialogFragment().show(getSupportFragmentManager(), ObtainLocationDialogFragment.TAG);
     		return;
     	}
     	
@@ -326,4 +360,28 @@ public class CampusToursStartupActivity extends SherlockActivity {
 		}
     	
     }
+    
+	@Override
+	public void onLocationObtained(LatLon loc) {
+    	if (rdoGeneral.isChecked()) {
+    		//general tours
+    		Intent intent = CampusMapActivity.createTourIntent(this, loc, TourTagItem.getIds(defaultTags));
+    		startActivity(intent);
+    	} else {
+    		//special interest tours
+    		Intent intent = CampusToursTagListActivity.createIntent(this, loc, defaultTags);
+    		startActivity(intent);
+    	}
+	}
+	
+	@Override
+	public void onLocationCancelled() {
+	}
+
+	@Override
+	public void onEnableGpsTriggered() {
+		FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+		ft.remove(getSupportFragmentManager().findFragmentByTag(ObtainLocationDialogFragment.TAG));
+		ft.commit();
+	}
 }

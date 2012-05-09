@@ -134,6 +134,14 @@ public class CampusMapActivity extends SherlockMapActivity {
 		return intent;
 	}
 	
+	public static Intent createTourIntent(Context context, LatLon start, long[] tags) {
+		Intent intent = createIntent(context);
+		intent.setAction(ACTION_TOUR);
+		intent.putExtra(EXTRA_START_POINT, start);
+		intent.putExtra(EXTRA_TOUR_TAGS, tags);
+		return intent;
+	}
+	
 	public static Intent createResultIntent(int directionsFocusIndex) {
 		Intent intent = new Intent();
 		intent.putExtra(EXTRA_DIRECTIONS_FOCUS_INDEX, directionsFocusIndex);
@@ -245,13 +253,14 @@ public class CampusMapActivity extends SherlockMapActivity {
 			
 		} else if (ACTION_TOUR.equals(intent.getAction())) {
 			long startId = intent.getLongExtra(EXTRA_TOUR_START_ID, -1);
+			LatLon start = intent.getParcelableExtra(EXTRA_START_POINT);
 			
 			setTitle("Campus Tour");
 			
 			if (savedInstanceState != null && 
         			savedInstanceState.containsKey(STATE_DIRECTIONS) &&
         			savedInstanceState.containsKey(STATE_LOCATIONS) &&
-        			startId >= 0) {
+        			(startId >= 0 || start != null)) {
 				//restore on-campus tour
 				Directions directions = savedInstanceState.getParcelable(STATE_DIRECTIONS);
 				Parcelable[] pLocations = savedInstanceState.getParcelableArray(STATE_LOCATIONS);
@@ -263,7 +272,7 @@ public class CampusMapActivity extends SherlockMapActivity {
 				}
 			} else if (savedInstanceState != null && 
         			savedInstanceState.containsKey(STATE_LOCATIONS) &&
-        			startId == -1) {
+        			(startId == -1 && start == null)) {
 				//restore off-campus tour
 				Parcelable[] pLocations = savedInstanceState.getParcelableArray(STATE_LOCATIONS);
 				Location[] locations = ArrayUtil.cast(pLocations, new Location[pLocations.length]); 
@@ -275,12 +284,16 @@ public class CampusMapActivity extends SherlockMapActivity {
         	} else {
 				long[] tagIds = intent.getLongArrayExtra(EXTRA_TOUR_TAGS);
 				
-				if (startId == -1) {
-					LoadOffsiteTour task = new LoadOffsiteTour(tagIds);
+				if (start != null) {
+					LoadTour task = new LoadTour(start, tagIds);
+	    			taskManager.addTask(task);
+	    			task.execute();
+				} else if (startId >= 0) {
+					LoadTour task = new LoadTour(startId, tagIds);
 	    			taskManager.addTask(task);
 	    			task.execute();
 				} else {
-	    			LoadTour task = new LoadTour(startId, tagIds);
+					LoadOffsiteTour task = new LoadOffsiteTour(tagIds);
 	    			taskManager.addTask(task);
 	    			task.execute();
 				}
@@ -1037,11 +1050,19 @@ public class CampusMapActivity extends SherlockMapActivity {
 	private class LoadTour extends ProcessDirections {
 		
 		private long startId;
+		private LatLon start;
+		
 		private long tagIds[];
 		
 		public LoadTour(long startId, long[] tagIds) {
 			super("Building Tour...");
 			this.startId = startId;
+			this.tagIds = tagIds;
+		}
+		
+		public LoadTour(LatLon start, long[] tagIds) {
+			super("Building Tour...");
+			this.start = start;
 			this.tagIds = tagIds;
 		}
 		
@@ -1051,7 +1072,10 @@ public class CampusMapActivity extends SherlockMapActivity {
 			
 			do {
 				try {
-					response = service.getTour(startId, tagIds);
+					if (start == null)
+						response = service.getTour(startId, tagIds);
+					else
+						response = service.getTour(start, tagIds);
 				} catch (Exception e) {
 					Log.e(C.TAG, "Failed to download tour data");
 					if (isCancelled()) {

@@ -144,6 +144,13 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 				startId, ArrayUtil.join(tagIds, "/"));
 		return getDirectionsResponse(url);
 	}
+	
+	@Override
+	public DirectionsResponse getTour(LatLon start, long[] tagIds) throws ClientException, ServerException, JSONException, IOException {
+		String url = String.format("tours/oncampus/fromgps/%f/%f/%s", 
+				start.getLatitude(), start.getLongitude(), ArrayUtil.join(tagIds, "/"));
+		return getDirectionsResponse(url);
+	}
 
 	@Override
 	public LocationIdsResponse getTour(long[] tagIds) throws ClientException, ServerException, JSONException, IOException {

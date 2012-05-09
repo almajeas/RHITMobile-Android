@@ -21,11 +21,13 @@ import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.MenuItem;
 
 import edu.rosehulman.android.directory.db.TourTagsAdapter;
+import edu.rosehulman.android.directory.model.LatLon;
 import edu.rosehulman.android.directory.model.TourTag;
 import edu.rosehulman.android.directory.model.TourTagItem;
 
 public class CampusToursTagListActivity extends SherlockActivity {
 	
+	public static String EXTRA_START_POSITION = "START_POSITION";
     public static String EXTRA_START_LOCATION = "START_LOCATION";
     public static String EXTRA_INITIAL_TAGS = "INITIAL_TAGS";
 	public static String EXTRA_TAG = "TAG";
@@ -44,6 +46,15 @@ public class CampusToursTagListActivity extends SherlockActivity {
 	public static Intent createIntent(Context context, long startLocation, TourTagItem[] tags) {
 		Intent intent = new Intent(context, CampusToursTagListActivity.class);
 		intent.putExtra(EXTRA_START_LOCATION, startLocation);
+		if (tags != null) {
+			intent.putExtra(EXTRA_INITIAL_TAGS, tags);
+		}
+		return intent;
+	}
+	
+	public static Intent createIntent(Context context, LatLon start, TourTagItem[] tags) {
+		Intent intent = new Intent(context, CampusToursTagListActivity.class);
+		intent.putExtra(EXTRA_START_POSITION, start);
 		if (tags != null) {
 			intent.putExtra(EXTRA_INITIAL_TAGS, tags);
 		}
@@ -179,16 +190,22 @@ public class CampusToursTagListActivity extends SherlockActivity {
 			tagIds[i] = tagItems.get(i).tag.tagId;
 		}
 		
-    	if (intent.hasExtra(EXTRA_START_LOCATION)) {
+    	if (intent.hasExtra(EXTRA_START_LOCATION) || intent.hasExtra(EXTRA_START_POSITION)) {
     		//on campus (inside) tour
     		long startId = intent.getLongExtra(EXTRA_START_LOCATION, -1);
-    		if (startId < 0) {
+    		LatLon start = intent.getParcelableExtra(EXTRA_START_POSITION);
+    		
+    		if (startId >= 0) {
+        		Intent newIntent = CampusMapActivity.createTourIntent(this, startId, tagIds);
+        		startActivity(newIntent);	
+    		} else if (start != null) {
+        		Intent newIntent = CampusMapActivity.createTourIntent(this, start, tagIds);
+        		startActivity(newIntent);
+    		} else {
     			finish();
     			return;
     		}
     		
-    		Intent newIntent = CampusMapActivity.createTourIntent(this, startId, tagIds);
-    		startActivity(newIntent);
     	} else {
     		//off campus tour
     		Intent newIntent = CampusMapActivity.createTourIntent(this, tagIds);

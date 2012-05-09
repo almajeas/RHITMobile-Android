@@ -133,7 +133,20 @@ public interface IMobileDirectoryService {
 	 * @throws IOException General network connectivity issue
 	 */
 	public DirectionsResponse getTour(long startId, long[] tagIds) throws ClientException, ServerException, JSONException, IOException;
-	
+
+	/**
+	 * Start a tour generation request, starting at a location
+	 * 
+	 * @param start The coordinates of the departing position
+	 * @param tagIds The selected tags of interest
+	 * @return A DirectionsResponse with the id of the request and possibly results
+	 * @throws ClientException If the request was invalid. Change the request before retrying
+	 * @throws ServerException If the server had an error. Change the request or try again later
+	 * @throws JSONException Likely out of date client. Update client
+	 * @throws IOException General network connectivity issue
+	 */
+	public DirectionsResponse getTour(LatLon start, long[] tagIds) throws ClientException, ServerException, JSONException, IOException;
+
 	/**
 	 * Start a tour generation request, offsite
 	 * 
