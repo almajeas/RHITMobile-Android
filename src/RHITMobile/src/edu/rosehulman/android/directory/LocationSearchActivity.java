@@ -1,11 +1,14 @@
 package edu.rosehulman.android.directory;
 
+import java.io.IOException;
+
+import org.json.JSONException;
+
 import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockListActivity;
@@ -28,7 +32,9 @@ import edu.rosehulman.android.directory.model.Location;
 import edu.rosehulman.android.directory.model.LocationName;
 import edu.rosehulman.android.directory.model.LocationNamesCollection;
 import edu.rosehulman.android.directory.model.VersionType;
+import edu.rosehulman.android.directory.service.ClientException;
 import edu.rosehulman.android.directory.service.MobileDirectoryService;
+import edu.rosehulman.android.directory.service.ServerException;
 
 public class LocationSearchActivity extends SherlockListActivity {
 	
@@ -167,7 +173,7 @@ public class LocationSearchActivity extends SherlockListActivity {
 		startActivity(intent);
 	}
 	
-	private class SearchLocations extends AsyncTask<String, Void, LocationInfo[]> {
+	private class SearchLocations extends BackgroundTask<String, Void, LocationInfo[]> {
 		
 		ProgressDialog dialog;
 
@@ -186,13 +192,38 @@ public class LocationSearchActivity extends SherlockListActivity {
 			String query = params[0];
 			MobileDirectoryService service = new MobileDirectoryService();
 			
-			LocationNamesCollection names;
-			try {
-				names = service.searchLocations(query);
-			} catch (Exception e) {
-				e.printStackTrace();
-				return null;
-			}
+			LocationNamesCollection names = null;
+			do {
+				try {
+					names = service.searchLocations(query);
+					
+				} catch (ClientException e) {
+					Log.e(C.TAG, "Client request failed", e);
+					setError(e.getMessage());
+					return null;
+					
+				} catch (ServerException e) {
+					Log.e(C.TAG, "Server request failed", e);
+					setError(getString(R.string.error_server));
+					return null;
+					
+				} catch (JSONException e) {
+					Log.e(C.TAG, "An error occured while parsing the JSON response", e);
+					setError(getString(R.string.error_json));
+					return null;
+					
+				} catch (IOException e) {
+					if (isCancelled()) {
+						return null;
+					}
+					Log.e(C.TAG, "Network error, retrying...", e);
+					try {
+						Thread.sleep(2000);
+					} catch (InterruptedException ex) {
+						return null;
+					}
+				}
+			} while (names == null);
 			
 			VersionsAdapter versions = new VersionsAdapter();
 			versions.open();
@@ -226,6 +257,9 @@ public class LocationSearchActivity extends SherlockListActivity {
 			dialog.dismiss();
 			
 			if (res == null) {
+				if (hasError()) {
+					Toast.makeText(LocationSearchActivity.this, getError(), Toast.LENGTH_SHORT).show();
+				}
 				finish();
 				return;
 			}
@@ -255,6 +289,11 @@ public class LocationSearchActivity extends SherlockListActivity {
 		
 		@Override
 		protected void onCancelled() {
+			dialog.dismiss();
+		}
+
+		@Override
+		protected void onAbort() {
 			dialog.dismiss();
 		}
 		

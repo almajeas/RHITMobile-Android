@@ -1,7 +1,10 @@
 package edu.rosehulman.android.directory;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.json.JSONException;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -59,7 +62,9 @@ import edu.rosehulman.android.directory.model.Location;
 import edu.rosehulman.android.directory.model.LocationIdsResponse;
 import edu.rosehulman.android.directory.model.LocationNamesCollection;
 import edu.rosehulman.android.directory.model.VersionType;
+import edu.rosehulman.android.directory.service.ClientException;
 import edu.rosehulman.android.directory.service.MobileDirectoryService;
+import edu.rosehulman.android.directory.service.ServerException;
 import edu.rosehulman.android.directory.util.ArrayUtil;
 import edu.rosehulman.android.directory.util.BoundingBox;
 import edu.rosehulman.android.directory.util.Point;
@@ -924,7 +929,7 @@ public class CampusMapActivity extends SherlockMapActivity {
     	
     }
     
-	private class SearchLocations extends AsyncTask<String, Void, LocationSearchLayer> {
+	private class SearchLocations extends BackgroundTask<String, Void, LocationSearchLayer> {
 		
 		private ProgressDialog dialog;
 
@@ -943,13 +948,38 @@ public class CampusMapActivity extends SherlockMapActivity {
 			String query = params[0];
 			MobileDirectoryService service = new MobileDirectoryService();
 			
-			LocationNamesCollection names;
-			try {
-				names = service.searchLocations(query);
-			} catch (Exception e) {
-				e.printStackTrace();
-				return null;
-			}
+			LocationNamesCollection names = null;
+			do {
+				try {
+					names = service.searchLocations(query);
+
+				} catch (ClientException e) {
+					Log.e(C.TAG, "Client request failed", e);
+					setError(e.getMessage());
+					return null;
+					
+				} catch (ServerException e) {
+					Log.e(C.TAG, "Server request failed", e);
+					setError(getString(R.string.error_server));
+					return null;
+					
+				} catch (JSONException e) {
+					Log.e(C.TAG, "An error occured while parsing the JSON response", e);
+					setError(getString(R.string.error_json));
+					return null;
+					
+				} catch (IOException e) {
+					if (isCancelled()) {
+						return null;
+					}
+					Log.e(C.TAG, "Network error, retrying...", e);
+					try {
+						Thread.sleep(2000);
+					} catch (InterruptedException ex) {
+						return null;
+					}
+				}
+			} while (names == null);
 			
 			VersionsAdapter versions = new VersionsAdapter();
 			versions.open();
@@ -982,12 +1012,24 @@ public class CampusMapActivity extends SherlockMapActivity {
 		@Override
 		protected void onPostExecute(LocationSearchLayer res) {
 			dialog.dismiss();
+			
+			if (res == null) {
+				if (hasError()) {
+					Toast.makeText(CampusMapActivity.this, getError(), Toast.LENGTH_SHORT).show();
+				}
+				return;
+			}
 			CampusMapActivity.this.searchOverlay = res;
 			rebuildOverlays();
 		}
 		
 		@Override
 		protected void onCancelled() {
+			dialog.dismiss();
+		}
+
+		@Override
+		protected void onAbort() {
 			dialog.dismiss();
 		}
 		
@@ -1005,43 +1047,27 @@ public class CampusMapActivity extends SherlockMapActivity {
 		}
 		
 		@Override
-		protected DirectionsResponse getDirections() {
+		protected DirectionsResponse getDirections() throws ClientException, ServerException, JSONException, IOException {
 			assert(ids.length == 1 || ids.length == 2);
-			DirectionsResponse response = null;
-
-			do {
-				try {
-					if (start == null) {
-						long from = ids[0];
-						long to = ids[1];
-						response = service.getDirections(from, to);
-					} else {
-						long to = ids[0];
-						response = service.getDirections(start, to);
-					}
-				} catch (Exception e) {
-					Log.e(C.TAG, "Failed to download initial directions");
-					if (isCancelled()) {
-						return null;
-					}
-					try {
-						Thread.sleep(2000);
-					} catch (InterruptedException ex) {
-						return null;
-					}
-				}
-			} while (response == null);
 			
-			return response;
+			if (start == null) {
+				long from = ids[0];
+				long to = ids[1];
+				return service.getDirections(from, to);
+				
+			} else {
+				long to = ids[0];
+				return service.getDirections(start, to);
+			}
 		}
 
 		@Override
-		protected DirectionsResponse checkStatus(int requestId) throws Exception {
+		protected DirectionsResponse checkStatus(int requestId) throws ClientException, ServerException, JSONException, IOException {
 			return service.getDirectionsStatus(requestId);
 		}
 
 		@Override
-		protected String getError() {
+		protected String getUnknownError() {
 			return "An error occurred while generating directions.  Try a different destination location.";
 		}
 		
@@ -1067,50 +1093,31 @@ public class CampusMapActivity extends SherlockMapActivity {
 		}
 		
 		@Override
-		protected DirectionsResponse getDirections() {
-			DirectionsResponse response = null;
-			
-			do {
-				try {
-					if (start == null)
-						response = service.getTour(startId, tagIds);
-					else
-						response = service.getTour(start, tagIds);
-				} catch (Exception e) {
-					Log.e(C.TAG, "Failed to download tour data");
-					if (isCancelled()) {
-						return null;
-					}
-					try {
-						Thread.sleep(2000);
-					} catch (InterruptedException ex) {
-						return null;
-					}
-				}
-			} while (response == null);
-			
-			return response;
+		protected DirectionsResponse getDirections() throws ClientException, ServerException, JSONException, IOException {
+			if (start == null) {
+				return service.getTour(startId, tagIds);
+			} else {
+				return service.getTour(start, tagIds);
+			}
 		}
 
 		@Override
-		protected DirectionsResponse checkStatus(int requestId) throws Exception {
+		protected DirectionsResponse checkStatus(int requestId) throws ClientException, ServerException, JSONException, IOException {
 			return service.getOncampusTourStatus(requestId);
 		}
 		
 		@Override
-		protected String getError() {
+		protected String getUnknownError() {
 			return "An error occurred while loading your tour.  Try again later or try using different tags.";
 		}
 		
 	}
 
-	private class LoadOffsiteTour extends AsyncTask<Void, Integer, Void> {
+	private class LoadOffsiteTour extends BackgroundTask<Void, Integer, Location[]> {
 		
 		private ProgressDialog dialog;
 
 		private long tagIds[];
-		
-		private Location[] nodes;
 		
 		public LoadOffsiteTour(long[] tagIds) {
 			this.tagIds = tagIds;
@@ -1133,7 +1140,7 @@ public class CampusMapActivity extends SherlockMapActivity {
 		}
 		
 		@Override
-		protected Void doInBackground(Void... params) {
+		protected Location[] doInBackground(Void... params) {
 			
 			MobileDirectoryService service = new MobileDirectoryService();
 			
@@ -1142,14 +1149,30 @@ public class CampusMapActivity extends SherlockMapActivity {
 			do {
 				try {
 					response = service.getTour(tagIds);
-				} catch (Exception ex) {
-					Log.e(C.TAG, "Failed to download tour data");
+					
+				} catch (ClientException e) {
+					Log.e(C.TAG, "Client request failed", e);
+					setError(e.getMessage());
+					return null;
+					
+				} catch (ServerException e) {
+					Log.e(C.TAG, "Server request failed", e);
+					setError(getString(R.string.error_server));
+					return null;
+					
+				} catch (JSONException e) {
+					Log.e(C.TAG, "An error occured while parsing the JSON response", e);
+					setError(getString(R.string.error_json));
+					return null;
+					
+				} catch (IOException e) {
 					if (isCancelled()) {
 						return null;
 					}
+					Log.e(C.TAG, "Network error, retrying...", e);
 					try {
 						Thread.sleep(2000);
-					} catch (InterruptedException ex1) {
+					} catch (InterruptedException ex) {
 						return null;
 					}
 				}
@@ -1167,37 +1190,46 @@ public class CampusMapActivity extends SherlockMapActivity {
 				nodeList.add(loc);
 			}
 			locationAdapter.close();
-			nodes = new Location[nodeList.size()];
+			Location[] nodes = new Location[nodeList.size()];
 			nodeList.toArray(nodes);
 			
-			return null;
+			return nodes;
 		}
 
 		@Override
-		protected void onPostExecute(Void res) {
+		protected void onPostExecute(Location[] nodes) {
 			dialog.dismiss();
 			
-			if (nodes != null) {
-				generateOffsiteTourLayer(nodes);
-
-				//fit the bounds of the map to the tour
-				BoundingBox bounds = offsiteTourLayer.bounds;
-				if (bounds != null) {
-					Point center = bounds.getCenter();
-					GeoPoint pt = new GeoPoint(center.x, center.y);
-					new ViewController(mapView).animateTo(pt, bounds.getHeight(), bounds.getWidth(), false);
+			if (nodes == null) {
+				if (hasError()) {
+					Toast.makeText(CampusMapActivity.this, getError(), Toast.LENGTH_SHORT).show();
 				}
-				
-				rebuildOverlays();
-			} else {
 				finish();
+				return;
 			}
+			
+			generateOffsiteTourLayer(nodes);
+
+			//fit the bounds of the map to the tour
+			BoundingBox bounds = offsiteTourLayer.bounds;
+			if (bounds != null) {
+				Point center = bounds.getCenter();
+				GeoPoint pt = new GeoPoint(center.x, center.y);
+				new ViewController(mapView).animateTo(pt, bounds.getHeight(), bounds.getWidth(), false);
+			}
+			
+			rebuildOverlays();
 		}
 		
 		@Override
 		protected void onCancelled() {
 			dialog.dismiss();
 			finish();
+		}
+
+		@Override
+		protected void onAbort() {
+			dialog.dismiss();
 		}
 		
 	}
@@ -1216,9 +1248,9 @@ public class CampusMapActivity extends SherlockMapActivity {
 			this.message = message;
 		}
 		
-		protected abstract DirectionsResponse getDirections();
-		protected abstract DirectionsResponse checkStatus(int requestId) throws Exception;
-		protected abstract String getError();
+		protected abstract DirectionsResponse getDirections() throws ClientException, ServerException, JSONException, IOException;
+		protected abstract DirectionsResponse checkStatus(int requestId) throws ClientException, ServerException, JSONException, IOException;
+		protected abstract String getUnknownError();
 
 		@Override
 		protected void onPreExecute() {
@@ -1240,21 +1272,67 @@ public class CampusMapActivity extends SherlockMapActivity {
 		@Override
 		protected Directions doInBackground(Void... params) {
 			
-			DirectionsResponse response = getDirections();
-			if (response == null) {
-				return null;
-			}
+			DirectionsResponse response = null;
+			
+			do {
+				try {
+					response = getDirections();
+					
+				} catch (ClientException e) {
+					Log.e(C.TAG, "Client request failed", e);
+					setError(e.getMessage());
+					return null;
+					
+				} catch (ServerException e) {
+					Log.e(C.TAG, "Server request failed", e);
+					setError(getString(R.string.error_server));
+					return null;
+					
+				} catch (JSONException e) {
+					Log.e(C.TAG, "An error occured while parsing the JSON response", e);
+					setError(getString(R.string.error_json));
+					return null;
+					
+				} catch (IOException e) {
+					if (isCancelled()) {
+						return null;
+					}
+					Log.e(C.TAG, "Network error, retrying...", e);
+					try {
+						Thread.sleep(2000);
+					} catch (InterruptedException ex) {
+						return null;
+					}
+				}
+			} while (response == null);
+			
 			int requestID = response.requestID;
 			
 			while (response.done != 100) {
 				publishProgress(response.done);
 				try {
 					response = checkStatus(requestID);
-				} catch (Exception e) {
-					Log.e(C.TAG, "Failed to download directions");
+					
+				} catch (ClientException e) {
+					Log.e(C.TAG, "Client request failed", e);
+					setError(e.getMessage());
+					return null;
+					
+				} catch (ServerException e) {
+					Log.e(C.TAG, "Server request failed", e);
+					setError(getString(R.string.error_server));
+					return null;
+					
+				} catch (JSONException e) {
+					Log.e(C.TAG, "An error occured while parsing the JSON response", e);
+					setError(getString(R.string.error_json));
+					return null;
+					
+				} catch (IOException e) {
 					if (isCancelled()) {
 						return null;
 					}
+					Log.e(C.TAG, "Network error, retrying...", e);
 					try {
 						Thread.sleep(2000);
 					} catch (InterruptedException ex) {
@@ -1296,7 +1374,13 @@ public class CampusMapActivity extends SherlockMapActivity {
 			dialog.dismiss();
 			
 			if (directions == null || directions.paths.length == 0) {
-				Toast.makeText(CampusMapActivity.this, getError(), Toast.LENGTH_LONG).show();
+				String error;
+				if (hasError())
+					error = getError();
+				else
+					error = getUnknownError();
+				
+				Toast.makeText(CampusMapActivity.this, error, Toast.LENGTH_LONG).show();
 				finish();
 				return;
 			}
