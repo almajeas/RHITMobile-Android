@@ -6,19 +6,7 @@ import java.net.URLEncoder;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import edu.rosehulman.android.directory.model.BannerAuthResponse;
-import edu.rosehulman.android.directory.model.CampusServicesResponse;
-import edu.rosehulman.android.directory.model.Course;
-import edu.rosehulman.android.directory.model.CoursesResponse;
-import edu.rosehulman.android.directory.model.DirectionsResponse;
-import edu.rosehulman.android.directory.model.LatLon;
-import edu.rosehulman.android.directory.model.LocationCollection;
-import edu.rosehulman.android.directory.model.LocationIdsResponse;
-import edu.rosehulman.android.directory.model.LocationNamesCollection;
-import edu.rosehulman.android.directory.model.TourTagsResponse;
-import edu.rosehulman.android.directory.model.UserDataResponse;
-import edu.rosehulman.android.directory.model.UsersResponse;
-import edu.rosehulman.android.directory.model.VersionResponse;
+import edu.rosehulman.android.directory.model.*;
 import edu.rosehulman.android.directory.util.ArrayUtil;
 
 /**
@@ -125,6 +113,19 @@ public class MobileDirectoryService implements IMobileDirectoryService {
 		}
 		
 		return LocationNamesCollection.deserialize(root);
+	}
+	
+	@Override
+	public LocationIdResponse lookupLocation(String name) throws ClientException, ServerException, JSONException, IOException {
+		String url = String.format("locations/withname/%s", URLEncoder.encode(name));
+		JsonClient client = factory.makeJsonClient(HOST, PORT, url);
+		
+		JSONObject root = client.execute();
+		if (root == null) {
+			return null;
+		}
+		
+		return LocationIdResponse.deserialize(root);
 	}
 	
 	public DirectionsResponse getDirections(LatLon from, long to) throws ClientException, ServerException, JSONException, IOException {

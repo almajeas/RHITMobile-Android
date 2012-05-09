@@ -4,19 +4,7 @@ import java.io.IOException;
 
 import org.json.JSONException;
 
-import edu.rosehulman.android.directory.model.BannerAuthResponse;
-import edu.rosehulman.android.directory.model.CampusServicesResponse;
-import edu.rosehulman.android.directory.model.Course;
-import edu.rosehulman.android.directory.model.CoursesResponse;
-import edu.rosehulman.android.directory.model.DirectionsResponse;
-import edu.rosehulman.android.directory.model.LatLon;
-import edu.rosehulman.android.directory.model.LocationCollection;
-import edu.rosehulman.android.directory.model.LocationIdsResponse;
-import edu.rosehulman.android.directory.model.LocationNamesCollection;
-import edu.rosehulman.android.directory.model.TourTagsResponse;
-import edu.rosehulman.android.directory.model.UserDataResponse;
-import edu.rosehulman.android.directory.model.UsersResponse;
-import edu.rosehulman.android.directory.model.VersionResponse;
+import edu.rosehulman.android.directory.model.*;
 
 /**
  * Interface for communicating with the mobile directory web service
@@ -94,6 +82,18 @@ public interface IMobileDirectoryService {
 	 * @throws IOException General network connectivity issue
 	 */
 	public LocationNamesCollection searchLocations(String query) throws ClientException, ServerException, JSONException, IOException;
+	
+	/**
+	 * Retrieve the id of a location with the given name
+	 * 
+	 * @param name The name of the location
+	 * @return An id of a location
+	 * @throws ClientException If the request was invalid. Change the request before retrying
+	 * @throws ServerException If the server had an error. Change the request or try again later
+	 * @throws JSONException Likely out of date client. Update client
+	 * @throws IOException General network connectivity issue
+	 */
+	public LocationIdResponse lookupLocation(String name) throws ClientException, ServerException, JSONException, IOException;
 	
 	/**
 	 * Start a directions request from a location to another

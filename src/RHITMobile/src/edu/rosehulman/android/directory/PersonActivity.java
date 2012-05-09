@@ -32,13 +32,13 @@ import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 
 import edu.rosehulman.android.directory.AuthenticatedFragment.AuthenticationCallbacks;
-import edu.rosehulman.android.directory.LoadLocation.OnLocationLoadedListener;
-import edu.rosehulman.android.directory.loaders.LoaderException;
-import edu.rosehulman.android.directory.loaders.LoaderResult;
 import edu.rosehulman.android.directory.loaders.InvalidAuthTokenException;
 import edu.rosehulman.android.directory.loaders.LoadUser;
+import edu.rosehulman.android.directory.loaders.LoaderException;
+import edu.rosehulman.android.directory.loaders.LoaderResult;
 import edu.rosehulman.android.directory.model.Location;
 import edu.rosehulman.android.directory.model.UserDataResponse;
+import edu.rosehulman.android.directory.model.UserInfo;
 
 public class PersonActivity extends SherlockFragmentActivity implements AuthenticationCallbacks {
 
@@ -125,7 +125,7 @@ public class PersonActivity extends SherlockFragmentActivity implements Authenti
         }
     }
     
-    private void processResult(UserDataResponse user) {
+    private void processResult(UserInfo user) {
         updateUI(user);
         
         detailsView.setOnItemClickListener(new OnItemClickListener() {
@@ -136,7 +136,8 @@ public class PersonActivity extends SherlockFragmentActivity implements Authenti
 		});
     }
     
-    private void updateUI(UserDataResponse user) {
+    private void updateUI(UserInfo userInfo) {
+    	UserDataResponse user = userInfo.data;
     	setTitle(String.format("%s %s", user.firstName, user.lastName));
     	
     	List<ListItem> items = new LinkedList<ListItem>();
@@ -146,7 +147,7 @@ public class PersonActivity extends SherlockFragmentActivity implements Authenti
     	if (!TextUtils.isEmpty(user.telephone))
     		items.add(new CallItem(user.telephone));
     	if (!TextUtils.isEmpty(user.office))
-    		items.add(new LocationItem(user.office));
+    		items.add(new LocationItem(user.office, userInfo.location));
     	if (!TextUtils.isEmpty(user.department))
     		items.add(new LabelItem("Department", user.department));
     	if (!TextUtils.isEmpty(user.majors.trim()))
@@ -257,22 +258,24 @@ public class PersonActivity extends SherlockFragmentActivity implements Authenti
     	}
     }
     
-    private class LocationItem extends ClickableListItem {
+    private class LocationItem extends ListItem {
     	
-    	public LocationItem(String value) {
+    	private Location mLocation;
+    	
+    	public LocationItem(String value, Location location) {
     		super("Room #", value, R.drawable.action_location);
+    		mLocation = location;
 		}
     	
     	@Override
+    	public boolean isEnabled() {
+    		return mLocation != null;
+    	}
+    	
+    	@Override
     	public void onClick() {
-    		new LoadLocation((long)1362170, new OnLocationLoadedListener() {
-				@Override
-				public void onLocationLoaded(Location location) {
-					Intent intent = LocationActivity.createIntent(PersonActivity.this, location);
-					startActivity(intent);
-				}
-			}).execute();
-    		//FIXME find the actual location ID
+    		Intent intent = LocationActivity.createIntent(PersonActivity.this, mLocation);
+			startActivity(intent);
     	}
     }
     
@@ -340,19 +343,19 @@ public class PersonActivity extends SherlockFragmentActivity implements Authenti
 		mArgs = args;
 	}
 	
-	private LoaderCallbacks<LoaderResult<UserDataResponse>> mLoadScheduleCallbacks = new LoaderCallbacks<LoaderResult<UserDataResponse>>() {
+	private LoaderCallbacks<LoaderResult<UserInfo>> mLoadScheduleCallbacks = new LoaderCallbacks<LoaderResult<UserInfo>>() {
 
 		@Override
-		public Loader<LoaderResult<UserDataResponse>> onCreateLoader(int id, Bundle args) {
+		public Loader<LoaderResult<UserInfo>> onCreateLoader(int id, Bundle args) {
 			return new LoadUser(PersonActivity.this, args);
 		}
 
 		@Override
-		public void onLoadFinished(Loader<LoaderResult<UserDataResponse>> loader, LoaderResult<UserDataResponse> data) {
+		public void onLoadFinished(Loader<LoaderResult<UserInfo>> loader, LoaderResult<UserInfo> data) {
 			Log.d(C.TAG, "Finished LoadUserSchedule");
 			
 			try {
-				final UserDataResponse result = data.getResult();
+				final UserInfo result = data.getResult();
 				setSupportProgressBarIndeterminateVisibility(false);
 				processResult(result);
 
@@ -371,7 +374,7 @@ public class PersonActivity extends SherlockFragmentActivity implements Authenti
 		}
 
 		@Override
-		public void onLoaderReset(Loader<LoaderResult<UserDataResponse>> loader) {
+		public void onLoaderReset(Loader<LoaderResult<UserInfo>> loader) {
 		}
 	};
 }

@@ -78,6 +78,27 @@ public class LoadLocation extends AsyncTask<Void, Void, Location> {
 		return loc;
 	}
 	
+	public static Location loadLocationSynchronously(long id) {
+		LocationAdapter locationAdapter = new LocationAdapter();
+		locationAdapter.open();
+		try {
+			Location loc = locationAdapter.getLocation(id);
+			
+			if (loc == null) {
+				//invalid id
+				return null;
+			}
+
+			locationAdapter.loadHyperlinks(loc);
+			locationAdapter.loadAlternateNames(loc);
+
+			return loc;
+			
+		} finally {
+			locationAdapter.close();
+		}
+	}
+	
 	@Override
 	protected void onPostExecute(Location res) {
 		listener.onLocationLoaded(res);
