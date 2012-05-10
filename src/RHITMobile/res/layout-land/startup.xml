@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
+    android:layout_height="fill_parent"
+    android:gravity="center" >
 
     <GridView
         xmlns:android="http://schemas.android.com/apk/res/android"
@@ -12,7 +13,6 @@
         android:gravity="center|fill"
         android:horizontalSpacing="10dp"
         android:numColumns="auto_fit"
-        android:paddingTop="30dp"
         android:stretchMode="columnWidth"
         android:verticalSpacing="60dp" />
 
