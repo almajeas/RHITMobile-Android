@@ -1,7 +1,9 @@
 package edu.rosehulman.android.directory;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import android.content.Context;
 import android.content.Intent;
@@ -23,7 +25,6 @@ import com.actionbarsherlock.app.SherlockActivity;
 import edu.rosehulman.android.directory.model.DirectionPath;
 import edu.rosehulman.android.directory.model.Directions;
 import edu.rosehulman.android.directory.model.Location;
-import edu.rosehulman.android.directory.util.ArrayUtil;
 
 public class DirectionListActivity extends SherlockActivity {
 	
@@ -38,7 +39,6 @@ public class DirectionListActivity extends SherlockActivity {
 	}
 	
 	private Directions directions;
-	private Location[] locations;
 	
 	private List<ListItem> listItems;
 	
@@ -54,8 +54,11 @@ public class DirectionListActivity extends SherlockActivity {
         directions = intent.getParcelableExtra(EXTRA_DIRECTIONS);
         
         Parcelable[] arr = intent.getParcelableArrayExtra(EXTRA_LOCATIONS);
-        locations = new Location[arr.length];
-        ArrayUtil.cast(arr, locations);
+        Map<Long, Location> locations = new HashMap<Long, Location>();
+        for (Parcelable parcelable : arr) {
+        	Location location = (Location)parcelable;
+        	locations.put(location.id, location);
+        }
         
         directionList = (ListView)findViewById(R.id.directions);
         
@@ -65,14 +68,17 @@ public class DirectionListActivity extends SherlockActivity {
         	listItems.add(new NodeListItem(0, "Starting Location"));
         }
 
-        int iLoc = 0;
         int step = 0;
         for (int i = 0; i < directions.paths.length; i++) {
         	DirectionPath path = directions.paths[i];
         	DirectionPath next = (i < directions.paths.length-1) ? directions.paths[i+1] : null;
 			if (path.flag) {
-				listItems.add(new GoalListItem(step, locations[iLoc].name, locations[iLoc]));
-				iLoc++;
+				Location location = locations.get(path.location);
+				if (location == null) {
+					listItems.add(new GoalListItem(step, "Unknown Location", null));
+				} else {
+					listItems.add(new GoalListItem(step, location.name, location));	
+				}
 				if (path.hasDirection()) {
 					if (path.dir != null) {
 						listItems.add(new StepListItem(step, path, next));
@@ -87,7 +93,7 @@ public class DirectionListActivity extends SherlockActivity {
 			}
 		}
         //remove the last direction ("Arrive at destination")
-        listItems.remove(listItems.size()-1);
+        //listItems.remove(listItems.size()-1);
         
         directionList.setAdapter(listAdapter);
         directionList.setOnItemClickListener(new OnItemClickListener() {
@@ -248,6 +254,9 @@ public class DirectionListActivity extends SherlockActivity {
 
 		@Override
 		public void click() {
+			if (location == null)
+				return;
+			
 			Intent intent = LocationActivity.createIntent(DirectionListActivity.this, location);
 			startActivity(intent);
 		}
