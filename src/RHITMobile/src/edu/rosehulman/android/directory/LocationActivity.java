@@ -107,9 +107,9 @@ public class LocationActivity extends SherlockFragmentActivity implements Obtain
 				btnSchedule_clicked();
 			}
 		});
-        
-        //TODO check value in the location itself 
-        if (true) {
+         
+        if (User.isLoggedIn(AccountManager.get(this))) {
+            //TODO determine if room even has a schedule
         	btnSchedule.setVisibility(View.VISIBLE);
         }
         
@@ -120,10 +120,6 @@ public class LocationActivity extends SherlockFragmentActivity implements Obtain
 	    } else {
 	    	//restore state
 	    }
-
-        if (!User.isLoggedIn(AccountManager.get(this))) {
-        	btnSchedule.setVisibility(View.GONE);
-        }
     }
     
     @Override
