@@ -7,8 +7,8 @@
 
         <Preference
             android:key="logout"
-            android:summary="Logs the user out of the application"
-            android:title="Clear Login" />
+            android:summary="Logs out of the application"
+            android:title="Logout" />
     </PreferenceCategory>
 
     <PreferenceCategory
