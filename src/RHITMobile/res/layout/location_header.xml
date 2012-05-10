@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/description"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="10dip"
+        android:text="@string/sample_text" />
+
+    <LinearLayout
+        android:id="@+id/linearLayout1"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingBottom="10dip"
+        android:paddingLeft="10dip"
+        android:paddingRight="10dip"
+        android:paddingTop="15dip" >
+
+        <Button
+            android:id="@+id/btnShowOnMap"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.0"
+            android:drawableTop="@drawable/ic_menu_mapmode"
+            android:text="@string/map" />
+
+        <Button
+            android:id="@+id/btnDirections"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.0"
+            android:drawableTop="@drawable/ic_menu_directions"
+            android:text="@string/directions" />
+
+        <Button
+            android:id="@+id/btnSchedule"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.0"
+            android:drawableTop="@drawable/ic_menu_my_calendar"
+            android:text="@string/schedule"
+            android:visibility="gone" />
+    </LinearLayout>
+
+</LinearLayout>

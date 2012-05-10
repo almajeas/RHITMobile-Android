@@ -1,9 +1,7 @@
 package edu.rosehulman.android.directory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import android.accounts.AccountManager;
 import android.app.AlertDialog;
@@ -20,8 +18,8 @@ import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
+import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,6 +36,7 @@ import edu.rosehulman.android.directory.model.Hyperlink;
 import edu.rosehulman.android.directory.model.LatLon;
 import edu.rosehulman.android.directory.model.LightLocation;
 import edu.rosehulman.android.directory.model.Location;
+import edu.rosehulman.android.directory.tasks.LoadLocation;
 import edu.rosehulman.android.directory.tasks.TaskManager;
 import edu.rosehulman.android.directory.tasks.UITask;
 
@@ -47,16 +46,11 @@ public class LocationActivity extends SherlockFragmentActivity implements Obtain
 	
     private TaskManager taskManager;
     
-    private Location location;
-    
+    private View header;
     private TextView description;
-    
-    private View linksGroup;
-    private View childrenGroup;
-    
-    private ListView linksList;
-    private ListView childrenList;
-    
+    private ListView details;
+
+    private Location location;
     private LightLocation[] children;
     
     public static Intent createIntent(Context context, Location location) {
@@ -76,19 +70,28 @@ public class LocationActivity extends SherlockFragmentActivity implements Obtain
         
         taskManager = new TaskManager();
         
-        description = (TextView)findViewById(R.id.description);
-        linksList = (ListView)findViewById(R.id.links);
-        childrenList = (ListView)findViewById(R.id.children);
+        header = LayoutInflater.from(this).inflate(R.layout.location_header, null);
+        description = (TextView)header.findViewById(R.id.description);
         
-        linksGroup = findViewById(R.id.linksGroup);
-        childrenGroup = findViewById(R.id.childrenGroup);
+        View btnShowOnMap = header.findViewById(R.id.btnShowOnMap);
+        View btnDirections = header.findViewById(R.id.btnDirections);
+        View btnSchedule = header.findViewById(R.id.btnSchedule);
         
-        View btnShowOnMap = findViewById(R.id.btnShowOnMap);
-        View btnDirections = findViewById(R.id.btnDirections);
-        View btnSchedule = findViewById(R.id.btnSchedule);
+        details = (ListView)findViewById(R.id.details);
+        details.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+				ListAdapter adapter = details.getAdapter();
+				
+				if (adapter == null)
+					return;
+				
+				ListItems.ListItem item = (ListItems.ListItem)adapter.getItem(position);
+				details_itemClicked(item);
+			}
+		});
+        details.addHeaderView(header);
         
-        linksList.setOnItemClickListener(linkClickListener);
-        childrenList.setOnItemClickListener(childClickListener);
         btnShowOnMap.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -126,29 +129,11 @@ public class LocationActivity extends SherlockFragmentActivity implements Obtain
     protected void onStart() {
     	super.onStart();
     	
-    	updateLocation();
+    	processResult();
     	
     	LoadLocationExtras loadExtras = new LoadLocationExtras();
     	taskManager.addTask(loadExtras);
     	loadExtras.execute(location);
-    }
-    
-    @Override
-    protected void onSaveInstanceState(Bundle bundle) {
-    	super.onSaveInstanceState(bundle);
-    	//TODO save our state
-    }
-    
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        //MenuInflater inflater = getMenuInflater();
-        //inflater.inflate(R.menu.location, menu);
-        return true;
-    }
-    
-    @Override
-    protected void onResume() {
-    	super.onResume();
     }
     
     @Override
@@ -174,6 +159,42 @@ public class LocationActivity extends SherlockFragmentActivity implements Obtain
         default:
             return super.onOptionsItemSelected(item);
         }
+    }
+    
+    private void processResult() {
+        ListItems.DetailsAdapter adapter = createDetailsAdapter();
+        
+        setTitle(location.name);
+        description.setText(location.description);
+        
+        details.setAdapter(adapter);
+    }
+    
+    private ListItems.DetailsAdapter createDetailsAdapter() {
+    	List<ListItems.ListItem> items = new LinkedList<ListItems.ListItem>();
+    	
+    	if (location.links.length > 0) {
+    		items.add(new ListItems.ListHeader(this, getString(R.string.links)));
+    		
+    		for (Hyperlink link : location.links) {
+    			//TODO filter based on link type
+    			items.add(new HyperlinkItem(this, link));
+    		}
+    	}
+    	
+    	if (children != null && children.length > 0) {
+    		items.add(new ListItems.ListHeader(this, getString(R.string.whats_inside)));
+    		
+    		for (LightLocation child : children) {
+    			items.add(new InnerLocationItem(this, child));
+    		}
+    	}
+    	
+    	return new ListItems.DetailsAdapter(items);
+    }
+    
+    private void details_itemClicked(ListItems.ListItem item) {
+    	item.onClick();
     }
     
     private void btnShowOnMap_clicked() {
@@ -247,14 +268,6 @@ public class LocationActivity extends SherlockFragmentActivity implements Obtain
 	    	    	{
 	    	    		new ObtainLocationDialogFragment().show(getSupportFragmentManager(), ObtainLocationDialogFragment.TAG);
 	    	    	} break;
-	    	    		
-	    	    		
-	    	    		
-	    	    		
-	    	    		
-	    	    		//TODO get location
-	    	    		//Toast.makeText(getApplicationContext(), "Outside directions are not yet implemented", Toast.LENGTH_SHORT).show();
-	    	    		//break;
 	    	    	}
 	    	    }
 	    	})
@@ -265,121 +278,72 @@ public class LocationActivity extends SherlockFragmentActivity implements Obtain
     	Intent intent = ScheduleRoomActivity.createIntent(this, location.name);
     	startActivity(intent);
     }
-    
-    private void updateLinks() {
-    	if (location.links.length > 0) {
-	    	List<Map<String, ?>> data = new ArrayList<Map<String, ?>>();
-	    	for (Hyperlink link : location.links) {
-	    		Map<String, String> row = new HashMap<String, String>();
-				row.put("name", link.name);
-				data.add(row);
-			}
-	    	String[] from = new String[] {"name"};
-	    	int[] to = new int[] {R.id.name};
-	        linksList.setAdapter(new SimpleAdapter(this, data, R.layout.hyperlink_item, from, to));
-	        linksGroup.setVisibility(View.VISIBLE);
-    	} else {
-    		linksGroup.setVisibility(View.GONE);
-    	}
-    }
-    
-    private void updateInnerLocations() {
-    	if (children != null && children.length > 0) {
-	    	List<Map<String, ?>> data = new ArrayList<Map<String, ?>>();
-	    	for (LightLocation child : children) {
-	    		Map<String, String> row = new HashMap<String, String>();
-				row.put("name", child.name);
-				data.add(row);
-			}
-	    	String[] from = new String[] {"name"};
-	    	int[] to = new int[] {R.id.name};
-	        childrenList.setAdapter(new SimpleAdapter(this, data, R.layout.inner_item, from, to));
-	        childrenGroup.setVisibility(View.VISIBLE);
-    	} else {
-    		childrenGroup.setVisibility(View.GONE);
-    	}
-    }
-    
-    private void updateLocation() {
-    	setTitle(location.name);
-    	description.setText(location.description);
+
+    private class HyperlinkItem extends ListItems.ClickableListItem {
     	
-    	updateLinks();
-    	updateInnerLocations();
-    }
-    
-    private OnItemClickListener linkClickListener = new OnItemClickListener() {
+    	private Hyperlink mLink;
+
+		public HyperlinkItem(Context context, Hyperlink link) {
+			super(context, link.name, link.url);
+			mLink = link;
+		}
+
 		@Override
-		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-			Hyperlink link = location.links[position];
+		public void onClick() {
 			Intent intent = new Intent(Intent.ACTION_VIEW);
-			intent.setData(Uri.parse(link.url));
+			intent.setData(Uri.parse(mLink.url));
 			startActivity(intent);
 		}
-	};
-	
-    private OnItemClickListener childClickListener = new OnItemClickListener() {
-		@Override
-		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-			LightLocation child = children[position];
-			LoadChildLocation loadChild = new LoadChildLocation();
-			taskManager.addTask(loadChild);
-			loadChild.execute(child.id);
-		}
-	};
-	
-	private class LoadLocationExtras extends AsyncTask<Location, Void, Void> {
+    }
+    
+    private class InnerLocationItem extends ListItems.ClickableListItem {
+    	
+    	private LightLocation mChild;
 
-		private LightLocation[] children;
-		
+		public InnerLocationItem(Context context, LightLocation child) {
+			super(context, child.name, null);
+			mChild = child;
+		}
+
 		@Override
-		protected Void doInBackground(Location... params) {
+		public void onClick() {
+			LoadLocation loadChild = new LoadLocation(mChild.id, new LoadLocation.OnLocationLoadedListener() {
+				@Override
+				public void onLocationLoaded(Location location) {
+					Intent intent = createIntent(LocationActivity.this, location);
+					LocationActivity.this.startActivity(intent);
+				}
+			});
+			taskManager.addTask(loadChild);
+			loadChild.execute();
+		}
+    }
+	
+	private class LoadLocationExtras extends AsyncTask<Location, Void, LightLocation[]> {
+
+		@Override
+		protected LightLocation[] doInBackground(Location... params) {
 			Location loc = params[0];
 			
 			LocationAdapter locationAdapter = new LocationAdapter();
 			locationAdapter.open();
 			
 			DbIterator<LightLocation> locations = locationAdapter.getChildren(loc.id);
-			children = new LightLocation[locations.getCount()];
+			
+			LightLocation[] children = new LightLocation[locations.getCount()];
 			for (int i = 0; locations.hasNext(); i++) {
 				children[i] = locations.getNext();
 			}
 			
 			locationAdapter.close();
-			return null;
+			return children;
 		}
 		
 		@Override
-		protected void onPostExecute(Void res) {
-			LocationActivity.this.children = children;
+		protected void onPostExecute(LightLocation[] res) {
+			LocationActivity.this.children = res;
 			
-			updateLocation();
-		}
-		
-	}
-	
-	private class LoadChildLocation extends AsyncTask<Long, Void, Location> {
-
-		@Override
-		protected Location doInBackground(Long... params) {
-			
-			long id = params[0];
-					
-			LocationAdapter locationAdapter = new LocationAdapter();
-			locationAdapter.open();
-			
-			Location location = locationAdapter.getLocation(id);
-			locationAdapter.loadAlternateNames(location);
-			locationAdapter.loadHyperlinks(location);
-			
-			locationAdapter.close();
-			return location;
-		}
-		
-		@Override
-		protected void onPostExecute(Location res) {
-			Intent intent = createIntent(LocationActivity.this, res);
-			LocationActivity.this.startActivity(intent);
+			processResult();
 		}
 		
 	}

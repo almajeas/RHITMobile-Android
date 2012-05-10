@@ -13,10 +13,8 @@ import android.support.v4.content.Loader;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,10 +26,10 @@ import com.actionbarsherlock.view.Window;
 
 import edu.rosehulman.android.directory.fragments.AuthenticatedFragment;
 import edu.rosehulman.android.directory.fragments.AuthenticatedFragment.AuthenticationCallbacks;
-import edu.rosehulman.android.directory.loaders.LoaderException;
-import edu.rosehulman.android.directory.loaders.LoaderResult;
 import edu.rosehulman.android.directory.loaders.InvalidAuthTokenException;
 import edu.rosehulman.android.directory.loaders.LoadCourseInfo;
+import edu.rosehulman.android.directory.loaders.LoaderException;
+import edu.rosehulman.android.directory.loaders.LoaderResult;
 import edu.rosehulman.android.directory.model.Course;
 import edu.rosehulman.android.directory.model.ShortUser;
 import edu.rosehulman.android.directory.model.TermCode;
@@ -56,8 +54,6 @@ public class ScheduleCourseActivity extends SherlockFragmentActivity implements 
 	private int crn;
 	
 	private ListView detailsView;
-	
-	private ListItem listItems[];
 	
 	private AuthenticatedFragment mFragAuth;
 	
@@ -120,23 +116,23 @@ public class ScheduleCourseActivity extends SherlockFragmentActivity implements 
 	}
     
     private void processResult(Course course) {
-        createListItems(course);
+        final ListItems.DetailsAdapter adapter = createDetailsAdapter(course);
         
         setTitle(course.title);
         getSupportActionBar().setSubtitle(course.course);
         
-        detailsView.setAdapter(new DetailsAdapter());
+        detailsView.setAdapter(adapter);
         detailsView.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-				detailsView_itemClicked(position);
+				detailsView_itemClicked(adapter.getItem(position));
 			}
 		});
     }
     
-    private void createListItems(Course course) {
-    	List<ListItem> items = new LinkedList<ListItem>();
-    	items.add(new ListHeader("General Info"));
+    private ListItems.DetailsAdapter createDetailsAdapter(Course course) {
+    	List<ListItems.ListItem> items = new LinkedList<ListItems.ListItem>();
+    	items.add(new ListItems.ListHeader(this, "General Info"));
     	items.add(new LabelItem("Name", course.title));
     	items.add(new LabelItem("Credits", String.valueOf(course.credits)));
     	items.add(new LabelItem("Term", term.toString()));
@@ -162,58 +158,19 @@ public class ScheduleCourseActivity extends SherlockFragmentActivity implements 
     		items.add(new LabelItem("Final", label));
     	}
     	
-    	items.add(new ListHeader("Students"));
+    	items.add(new ListItems.ListHeader(this, "Students"));
     	for (ShortUser student : course.students) {
     		items.add(new PersonListItem(student.username, student.fullname, student.subtitle));
     	}
     	
-    	listItems = new ListItem[items.size()];
-    	listItems = items.toArray(listItems);
+    	return new ListItems.DetailsAdapter(items);
     }
     
-    private void detailsView_itemClicked(int position) {
-    	listItems[position].onClick();
-    }
-    
-
-    private interface ListItem {
-    	public View getView();
-    	public boolean isEnabled();
-    	public void onClick();
-    }
-    
-    private class ListHeader implements ListItem {
-    	
-    	private String name;
-    	
-    	public ListHeader(String name) {
-    		this.name = name;
-    	}
-
-		@Override
-		public View getView() {
-			LayoutInflater inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			View v = inflater.inflate(R.layout.list_section_header, null);
-			
-			TextView nameView = (TextView)v.findViewById(R.id.name);
-			
-			nameView.setText(name.toUpperCase());
-			
-			return v;
-		}
-
-		@Override
-		public boolean isEnabled() {
-			return false;
-		}
-
-		@Override
-		public void onClick() {
-			
-		}
+    private void detailsView_itemClicked(ListItems.ListItem item) {
+    	item.onClick();
     }
 
-    private class PersonListItem implements ListItem {
+    private class PersonListItem implements ListItems.ListItem {
     	
     	public String username; 
 		public String name;
@@ -247,56 +204,14 @@ public class ScheduleCourseActivity extends SherlockFragmentActivity implements 
     		startActivity(intent);
     	}
     }
-    
-    private abstract class DetailsListItem implements ListItem {
-    	
-		public String name;
-    	public String value;
-    	
-    	public DetailsListItem(String name, String value) {
-			this.name = name;
-			this.value = value;
-		}
-    	
-    	public View getView() {
-			LayoutInflater inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			View v = inflater.inflate(R.layout.list_item_two_line, null);
-			
-			TextView nameView = (TextView)v.findViewById(R.id.name);
-			TextView valueView = (TextView)v.findViewById(R.id.description);
-			
-			nameView.setText(name);
-			valueView.setText(value);
-			
-			return v;
-    	}
-    	
-    	public boolean isEnabled() {
-    		return false;
-    	}
-    	
-    	public abstract void onClick();
-    }
-    
-    private abstract class ClickableListItem extends DetailsListItem {
-    	
-    	public ClickableListItem(String name, String value) {
-    		super(name, value);
-		}
-    	
-    	@Override
-    	public boolean isEnabled() {
-    		return true;
-    	}
-    }
 
-    private class InstructorItem extends ClickableListItem {
+    private class InstructorItem extends ListItems.ClickableListItem {
     	
     	private ShortUser mUser;
     	
     	public InstructorItem(ShortUser user) {
-    		super("Instructor", user.fullname);
-    		mUser = user;;
+    		super(ScheduleCourseActivity.this, "Instructor", user.fullname);
+    		mUser = user;
 		}
     	
     	@Override
@@ -306,10 +221,10 @@ public class ScheduleCourseActivity extends SherlockFragmentActivity implements 
     	}
     }
     
-    private class LabelItem extends DetailsListItem {
+    private class LabelItem extends ListItems.DetailsListItem {
     	
     	public LabelItem(String name, String value) {
-    		super(name, value);
+    		super(ScheduleCourseActivity.this, name, value);
 		}
     	
     	@Override
@@ -318,35 +233,6 @@ public class ScheduleCourseActivity extends SherlockFragmentActivity implements 
     	}
     }
     
-    private class DetailsAdapter extends BaseAdapter {
-
-		@Override
-		public int getCount() {
-			return listItems.length;
-		}
-
-		@Override
-		public Object getItem(int position) {
-			return listItems[position];
-		}
-
-		@Override
-		public long getItemId(int position) {
-			return position;
-		}
-
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-			return listItems[position].getView();
-		}
-		
-		@Override
-		public boolean isEnabled(int position) {
-			return listItems[position].isEnabled();
-		}
-		
-    }
-
 	@Override
 	public void onAuthTokenObtained(String authToken) {
 		loadCourse(authToken);
