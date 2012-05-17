@@ -18,7 +18,6 @@ import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.location.LocationProvider;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -431,21 +430,14 @@ public class CampusMapActivity extends SherlockMapActivity {
 
 			@Override
 			public void onProviderDisabled(String provider) {
-				//TODO yell at user
 			}
 
 			@Override
 			public void onProviderEnabled(String provider) {
-				//TODO stop yelling at user
 			}
 
 			@Override
 			public void onStatusChanged(String provider, int status, Bundle extras) {
-				if (status != LocationProvider.AVAILABLE) {
-					//TODO handle appropriately
-					//TEMPORARILY_UNAVAILABLE
-					//AVAILABLE
-				}
 			}
 		};
         

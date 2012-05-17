@@ -145,11 +145,6 @@ public abstract class TableAdapter {
 		return column + " AS " + alias;
 	}
 
-	//protected String tables(String... args) {
-	//	//TODO implement
-	//	return args[0];
-	//}
-
 	/**
 	 * Format a table name/alias pair
 	 * 

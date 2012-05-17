@@ -48,9 +48,6 @@ public class DataUpdateService extends Service {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		if (intent != null) {
-			//TODO handle method
-		}
 		return START_STICKY;
 	}
 

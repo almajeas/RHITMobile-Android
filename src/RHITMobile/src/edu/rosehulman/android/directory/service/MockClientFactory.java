@@ -8,7 +8,6 @@ public class MockClientFactory implements ClientFactory {
 
 	@Override
 	public RestClient makeRestClient(String host, int port, String path) {
-		//TODO make a mock rest client (if ever needed)
 		return null;
 	}
 	
