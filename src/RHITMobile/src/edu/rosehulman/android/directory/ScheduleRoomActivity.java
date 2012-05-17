@@ -35,6 +35,7 @@ import edu.rosehulman.android.directory.model.TermCode;
 public class ScheduleRoomActivity extends SherlockFragmentActivity implements TermCodeProvider.OnTermSetListener, AuthenticatedFragment.AuthenticationCallbacks {
 	
 	public static final String EXTRA_ROOM = "Room";
+	public static final String EXTRA_SCHEDULE = "Schedule";
 	public static final String EXTRA_TERM_CODE = "TermCode";
 
 	private static final String STATE_SELECTED = "Selected";
@@ -45,6 +46,13 @@ public class ScheduleRoomActivity extends SherlockFragmentActivity implements Te
 		return intent;
 	}
 
+	public static Intent createIntent(Context context, String room, RoomScheduleWeek schedule) {
+		Intent intent = new Intent(context, ScheduleRoomActivity.class);
+		intent.putExtra(EXTRA_ROOM, room);
+		intent.putExtra(EXTRA_SCHEDULE, schedule);
+		return intent;
+	}
+	
 	public static Intent createIntent(Context context, String room, TermCode term) {
 		Intent intent = new Intent(context, ScheduleRoomActivity.class);
 		intent.putExtra(EXTRA_ROOM, room);
@@ -221,9 +229,21 @@ public class ScheduleRoomActivity extends SherlockFragmentActivity implements Te
 		}
 	}
 	
+	private Handler mHandler = new Handler();
 	@Override
-	public void onAuthTokenObtained(String authToken) {
-		loadSchedule(authToken);
+	public void onAuthTokenObtained(final String authToken) {
+		mHandler.post(new Runnable() {
+			@Override
+			public void run() {
+				Intent intent = getIntent();
+				if (intent.hasExtra(EXTRA_SCHEDULE)) {
+					setSupportProgressBarIndeterminateVisibility(false);
+					processSchedule((RoomScheduleWeek)intent.getParcelableExtra(EXTRA_SCHEDULE));
+				} else {
+					loadSchedule(authToken);
+				}	
+			}
+		});
 	}
 
 	@Override

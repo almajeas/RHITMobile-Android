@@ -14,6 +14,13 @@ public class RoomScheduleWeek implements Parcelable {
 		}
 	}
 	
+	public boolean isEmpty() {
+		for (ScheduleDay day : ScheduleDay.values())
+			if (hasDay(day))
+				return false;
+		return true;
+	}
+	
 	public boolean hasDay(ScheduleDay day) {
 		return !getDay(day).isEmpty();
 	}

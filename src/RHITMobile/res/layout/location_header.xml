@@ -43,6 +43,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1.0"
             android:drawableTop="@drawable/ic_menu_my_calendar"
+            android:state_enabled="false"
             android:text="@string/schedule"
             android:visibility="gone" />
     </LinearLayout>

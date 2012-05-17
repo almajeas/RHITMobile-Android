@@ -11,7 +11,12 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.content.Loader;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -30,21 +35,33 @@ import com.actionbarsherlock.view.MenuItem;
 
 import edu.rosehulman.android.directory.db.DbIterator;
 import edu.rosehulman.android.directory.db.LocationAdapter;
+import edu.rosehulman.android.directory.fragments.AuthenticatedFragment;
 import edu.rosehulman.android.directory.fragments.EnableGpsDialogFragment;
 import edu.rosehulman.android.directory.fragments.ObtainLocationDialogFragment;
+import edu.rosehulman.android.directory.loaders.InvalidAuthTokenException;
+import edu.rosehulman.android.directory.loaders.LoadRoomSchedule;
+import edu.rosehulman.android.directory.loaders.LoaderException;
+import edu.rosehulman.android.directory.loaders.LoaderResult;
 import edu.rosehulman.android.directory.model.Hyperlink;
 import edu.rosehulman.android.directory.model.LatLon;
 import edu.rosehulman.android.directory.model.LightLocation;
 import edu.rosehulman.android.directory.model.Location;
+import edu.rosehulman.android.directory.model.RoomScheduleWeek;
 import edu.rosehulman.android.directory.tasks.LoadLocation;
 import edu.rosehulman.android.directory.tasks.TaskManager;
 import edu.rosehulman.android.directory.tasks.UITask;
 
-public class LocationActivity extends SherlockFragmentActivity implements ObtainLocationDialogFragment.LocationCallbacks, EnableGpsDialogFragment.EnableGpsCallbacks {
+public class LocationActivity extends SherlockFragmentActivity implements ObtainLocationDialogFragment.LocationCallbacks, EnableGpsDialogFragment.EnableGpsCallbacks, AuthenticatedFragment.AuthenticationCallbacks {
 
 	public static final String EXTRA_LOCATION = "LOCATION";
-	
-    private TaskManager taskManager;
+
+    public static Intent createIntent(Context context, Location location) {
+		Intent intent = new Intent(context, LocationActivity.class);
+		intent.putExtra(LocationActivity.EXTRA_LOCATION, location);
+		return intent;
+    }
+    
+	private TaskManager taskManager;
     
     private View header;
     private TextView description;
@@ -52,12 +69,11 @@ public class LocationActivity extends SherlockFragmentActivity implements Obtain
 
     private Location location;
     private LightLocation[] children;
-    
-    public static Intent createIntent(Context context, Location location) {
-		Intent intent = new Intent(context, LocationActivity.class);
-		intent.putExtra(LocationActivity.EXTRA_LOCATION, location);
-		return intent;
-    }
+
+	private AuthenticatedFragment mFragAuth;
+	
+	private RoomScheduleWeek mSchedule;
+	private View btnSchedule;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -75,7 +91,7 @@ public class LocationActivity extends SherlockFragmentActivity implements Obtain
         
         View btnShowOnMap = header.findViewById(R.id.btnShowOnMap);
         View btnDirections = header.findViewById(R.id.btnDirections);
-        View btnSchedule = header.findViewById(R.id.btnSchedule);
+        btnSchedule = header.findViewById(R.id.btnSchedule);
         
         details = (ListView)findViewById(R.id.details);
         details.setOnItemClickListener(new OnItemClickListener() {
@@ -112,8 +128,15 @@ public class LocationActivity extends SherlockFragmentActivity implements Obtain
 		});
          
         if (User.isLoggedIn(AccountManager.get(this))) {
-            //TODO determine if room even has a schedule
-        	btnSchedule.setVisibility(View.VISIBLE);
+            btnSchedule.setVisibility(View.VISIBLE);
+            btnSchedule.setEnabled(false);
+        	
+    		FragmentManager fragments = getSupportFragmentManager();
+            mFragAuth = (AuthenticatedFragment)fragments.findFragmentByTag("auth");
+            if (mFragAuth == null) {
+            	mFragAuth = new AuthenticatedFragment();
+    			getSupportFragmentManager().beginTransaction().add(mFragAuth, "auth").commit();
+            }
         }
         
         location = getIntent().getParcelableExtra(EXTRA_LOCATION);
@@ -130,6 +153,10 @@ public class LocationActivity extends SherlockFragmentActivity implements Obtain
     	super.onStart();
     	
     	processResult();
+    	
+        if (mFragAuth != null) {
+        	mFragAuth.obtainAuthToken();
+        }
     	
     	LoadLocationExtras loadExtras = new LoadLocationExtras();
     	taskManager.addTask(loadExtras);
@@ -275,7 +302,7 @@ public class LocationActivity extends SherlockFragmentActivity implements Obtain
     }
     
     private void btnSchedule_clicked() {
-    	Intent intent = ScheduleRoomActivity.createIntent(this, location.name);
+    	Intent intent = ScheduleRoomActivity.createIntent(this, location.name, mSchedule);
     	startActivity(intent);
     }
 
@@ -365,4 +392,70 @@ public class LocationActivity extends SherlockFragmentActivity implements Obtain
 		ft.remove(getSupportFragmentManager().findFragmentByTag(ObtainLocationDialogFragment.TAG));
 		ft.commit();
 	}
+
+	@Override
+	public void onAuthTokenObtained(String authToken) {
+		loadSchedule(authToken);
+	}
+
+	@Override
+	public void onAuthTokenCancelled() {
+		
+	}
+	
+	private void onScheduleObtained(RoomScheduleWeek schedule) {
+		if (schedule == null || schedule.isEmpty())
+			return;
+		
+		mSchedule = schedule;
+		btnSchedule.setEnabled(true);
+	}
+
+	private static final int TASK_LOAD_SCHEDULE = 1;
+	private void loadSchedule(String authToken) {
+		Bundle args = LoadRoomSchedule.bundleArgs(authToken, User.getTerm().code, location.name);
+		getSupportLoaderManager().initLoader(TASK_LOAD_SCHEDULE, args, mLoadScheduleCallbacks);
+	}
+	
+	private LoaderCallbacks<LoaderResult<RoomScheduleWeek>> mLoadScheduleCallbacks = new LoaderCallbacks<LoaderResult<RoomScheduleWeek>>() {
+
+		private Handler mHandler = new Handler();
+		
+		@Override
+		public Loader<LoaderResult<RoomScheduleWeek>> onCreateLoader(int id, Bundle args) {
+			return new LoadRoomSchedule(LocationActivity.this, args);
+		}
+
+		@Override
+		public void onLoadFinished(Loader<LoaderResult<RoomScheduleWeek>> loader, LoaderResult<RoomScheduleWeek> data) {
+			Log.d(C.TAG, "Finished LoadRoomSchedule");
+			
+			try {
+				final RoomScheduleWeek result = data.getResult();
+				mHandler.post(new Runnable() {
+					@Override
+					public void run() {
+						setSupportProgressBarIndeterminateVisibility(false);
+						onScheduleObtained(result);
+					}
+				});
+				
+			} catch (InvalidAuthTokenException ex) {
+				LoadRoomSchedule scheduleLoader = (LoadRoomSchedule)loader;
+				mFragAuth.invalidateAuthToken(scheduleLoader.getAuthToken());
+				mFragAuth.obtainAuthToken();
+				
+			} catch (LoaderException ex) {
+				String message = ex.getMessage();
+				if (message != null) {
+					Toast.makeText(LocationActivity.this, message, Toast.LENGTH_SHORT).show();
+				}
+				finish();
+			}	
+		}
+
+		@Override
+		public void onLoaderReset(Loader<LoaderResult<RoomScheduleWeek>> loader) {
+		}
+	};
 }
