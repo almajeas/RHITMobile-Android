@@ -181,8 +181,11 @@ public class ScheduleRoomActivity extends SherlockFragmentActivity implements Te
 		Tab tab = actionBar.newTab()
 				.setText(label)
 				.setTabListener(l);
+
 		actionBar.addTab(tab);
-		//TODO set selected day to today
+		if (ScheduleDay.today() == day) {
+			actionBar.selectTab(tab);
+		}
 	}
 	
 	private void processSchedule(RoomScheduleWeek res) {
