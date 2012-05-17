@@ -208,7 +208,7 @@ public interface IMobileDirectoryService {
 	/**
 	 * Gets lightweight information about a group of users
 	 * @param authToken The valid, active auth token
-	 * @param username The search query
+	 * @param search The search query
 	 * @return lightweight user data list
 	 * @throws ClientException If the request was invalid. Change the request before retrying
 	 * @throws ServerException If the server had an error. Change the request or try again later

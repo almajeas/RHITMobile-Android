@@ -92,10 +92,9 @@ public class C {
 	 * \subsection sec_layer_model Model
 	 *
 	 *  - \ref edu.rosehulman.android.directory.model
-
 	 *  - \ref edu.rosehulman.android.directory.db
 	 *
-	 * \subsection sec_layer_model View
+	 * \subsection sec_layer_view View
 	 *
 	 * The view layer for Android actually contains no code.  Instead, the views
 	 * are entirely contained in layout XML files found in the project's
@@ -108,6 +107,15 @@ public class C {
 	 * - \ref edu.rosehulman.android.directory.maps
 	 * - \ref edu.rosehulman.android.directory.service
 	 * - \ref edu.rosehulman.android.directory.util
+	 * - \ref edu.rosehulman.android.directory.fragments
+	 * - \ref edu.rosehulman.android.directory.loaders
+	 * - \ref edu.rosehulman.android.directory.tasks
+	 * - \ref edu.rosehulman.android.directory.providers
+	 *
+	 * \subsection sec_layer_misc Misc
+	 *
+	 * - \ref edu.rosehulman.android.directory.auth
+	 * - \ref edu.rosehulman.android.directory.compat
 	 *
 	 *
 	 * \section doc_maintenance_sec Maintaining This Documentation
@@ -181,8 +189,51 @@ public class C {
 	
 	/*! \package edu.rosehulman.android.directory.util
 	 * 
-	 * This layer contains various utility functionality that is not associated
-	 * with any other package and should not be associated with the UI classes.
+	 * This layer contains various utility functionality that is not
+	 * associated with any other package and should not be associated with
+	 * the UI classes.
+	 */
+	
+	/*! \package edu.rosehulman.android.directory.fragments
+	 * 
+	 * Fragments contain common functionalilty that can be used by more
+	 * than one activity.  Most fragments are stored in this package.
+	 */
+	
+	/*! \package edu.rosehulman.android.directory.loaders
+	 * 
+	 * Loaders are a more powerful form of background data loading when
+	 * compared to AsyncTasks.  Unlike AsyncTasks, Loaders are not bound to
+	 * an activity, so it makes sense to define them in their own class
+	 * files.
+	 */
+	
+	/*! \package edu.rosehulman.android.directory.tasks
+	 * 
+	 * This package contains any background tasks that may be used by
+	 * multiple activities.
+	 */
+	
+	/*! \package edu.rosehulman.android.directory.providers
+	 * 
+	 * When searching it is useful to provide search suggestions.  This
+	 * feature requires a provider to do the background processing, which
+	 * is implemented in this package
+	 */
+	
+	/*! \package edu.rosehulman.android.directory.auth
+	 * 
+	 * RHIT Mobile stores user credentials in the android accounts list, so
+	 * RHIT Mobile needs to set itself up as an account authenticator.
+	 * That funcitonality is isolated to this package for easy extraction
+	 * if it ever becomes necessary.
+	 */
+	
+	/*! \package edu.rosehulman.android.directory.compat
+	 * 
+	 * In order to maintain compatability with android 2.2, certain classes
+	 * needed to be backported from newer versions of android.  Those
+	 * classes are kept in this package.
 	 */
 	
 	

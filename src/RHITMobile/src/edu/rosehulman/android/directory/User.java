@@ -69,7 +69,6 @@ public class User {
 	 * @param username The user's name
 	 * @param terms The available terms
 	 * @param term The current term
-	 * @param token The authentication token that can be used in web requests
 	 */
 	public static void setAccount(String username, String[] terms, String term) {
 		JSONArray array = new JSONArray();

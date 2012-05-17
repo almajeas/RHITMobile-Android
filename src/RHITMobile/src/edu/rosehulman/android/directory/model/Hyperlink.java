@@ -38,6 +38,7 @@ public class Hyperlink implements Parcelable {
 	 * Creates a new, initialized Hyperlink
 	 * 
 	 * @param name The name to use
+	 * @param type The type of the hyperlink
 	 * @param url The URL to use
 	 */
 	public Hyperlink(String name, HyperlinkType type, String url) {
