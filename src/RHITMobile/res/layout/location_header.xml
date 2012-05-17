@@ -23,28 +23,31 @@
 
         <Button
             android:id="@+id/btnShowOnMap"
-            android:layout_width="wrap_content"
+            android:layout_width="0px"
             android:layout_height="wrap_content"
             android:layout_weight="1.0"
             android:drawableTop="@drawable/ic_menu_mapmode"
-            android:text="@string/map" />
+            android:text="@string/map"
+            android:textSize="14.5sp" />
 
         <Button
             android:id="@+id/btnDirections"
-            android:layout_width="wrap_content"
+            android:layout_width="0px"
             android:layout_height="wrap_content"
             android:layout_weight="1.0"
             android:drawableTop="@drawable/ic_menu_directions"
-            android:text="@string/directions" />
+            android:text="@string/directions"
+            android:textSize="14.5sp" />
 
         <Button
             android:id="@+id/btnSchedule"
-            android:layout_width="wrap_content"
+            android:layout_width="0px"
             android:layout_height="wrap_content"
             android:layout_weight="1.0"
             android:drawableTop="@drawable/ic_menu_my_calendar"
             android:state_enabled="false"
             android:text="@string/schedule"
+            android:textSize="14.5sp"
             android:visibility="gone" />
     </LinearLayout>
 
