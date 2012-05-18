@@ -257,7 +257,7 @@ public class DataUpdateService extends Service {
 	 
 	        String message = "Updating remote data...";
 	 
-	        updateNotification = new Notification(R.drawable.icon, message, System.currentTimeMillis());
+	        updateNotification = new Notification(R.drawable.status_bar, message, System.currentTimeMillis());
 	        updateNotification.flags = Notification.FLAG_ONGOING_EVENT;
 	    }
 		
