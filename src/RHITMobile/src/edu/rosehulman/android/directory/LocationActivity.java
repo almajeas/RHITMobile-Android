@@ -450,7 +450,6 @@ public class LocationActivity extends SherlockFragmentActivity implements Obtain
 				if (message != null) {
 					Toast.makeText(LocationActivity.this, message, Toast.LENGTH_SHORT).show();
 				}
-				finish();
 			}	
 		}
 
