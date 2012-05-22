@@ -53,7 +53,7 @@
             android:label="RHIT Mobile Login"
             android:name=".auth.LoginActivity"  
             android:exported="true" 
-            android:configChanges="keyboardHidden|orientation" 
+            android:configChanges="keyboardHidden|orientation|screenSize" 
             android:windowSoftInputMode="stateUnchanged" 
             android:excludeFromRecents="true"
             android:theme="@style/Theme.Sherlock" >
@@ -123,7 +123,7 @@
         <activity
             android:label="Campus Tours"
             android:name=".CampusToursStartupActivity" 
-            android:configChanges="keyboardHidden|orientation" 
+            android:configChanges="keyboardHidden|orientation|screenSize" 
             android:theme="@style/Theme.Sherlock"
             android:exported="true" >
         </activity>
@@ -132,14 +132,14 @@
             android:label="Tour Interest Selection"
             android:name=".CampusToursTagListActivity"  
             android:theme="@style/Theme.Sherlock"
-            android:configChanges="keyboardHidden|orientation" >
+            android:configChanges="keyboardHidden|orientation|screenSize" >
         </activity>
         
         <activity
             android:label="Tour Interests"
             android:name=".CampusToursTagSelectActivity"  
             android:theme="@style/Theme.Sherlock"
-            android:configChanges="keyboardHidden|orientation" >
+            android:configChanges="keyboardHidden|orientation|screenSize" >
             
             <meta-data
             	android:name="android.app.default_searchable"
@@ -150,7 +150,7 @@
             android:label="Tour Interests"
             android:name=".CampusToursTagSelectSearchActivity"  
             android:theme="@style/Theme.Sherlock"
-            android:configChanges="keyboardHidden|orientation"
+            android:configChanges="keyboardHidden|orientation|screenSize"
             android:launchMode="singleTop" >
                         
             <intent-filter >
@@ -169,7 +169,7 @@
             android:label="Off Campus Tour"
             android:name=".CampusToursOffCampusActivity"  
             android:theme="@style/Theme.Sherlock"
-            android:configChanges="keyboardHidden|orientation" >
+            android:configChanges="keyboardHidden|orientation|screenSize" >
         </activity>
 
         <activity
@@ -206,7 +206,7 @@
             android:label="Location Search"
             android:name=".LocationSearchActivity"
             android:launchMode="singleTop"
-            android:configChanges="keyboardHidden|orientation"
+            android:configChanges="keyboardHidden|orientation|screenSize"
             android:theme="@style/Theme.Sherlock" >
             
             <intent-filter >
@@ -225,7 +225,7 @@
             android:label="Directory"
             android:name=".PersonSearchActivity"
             android:launchMode="singleTop"
-            android:configChanges="keyboardHidden|orientation"
+            android:configChanges="keyboardHidden|orientation|screenSize"
             android:theme="@style/Theme.Sherlock" >
             
             <intent-filter >
