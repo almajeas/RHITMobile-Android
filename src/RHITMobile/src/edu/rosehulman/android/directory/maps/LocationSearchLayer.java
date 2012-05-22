@@ -47,6 +47,9 @@ public class LocationSearchLayer extends BalloonItemizedOverlay<OverlayItem> imp
 	 */
 	public LocationSearchLayer(Drawable defaultMarker, MapView mapView) {
 		super(boundCenterBottom(defaultMarker), mapView);
+		setShowClose(false);
+		setShowDisclosure(true);
+		
 		items = new ArrayList<SearchItem>();
 	}
 	

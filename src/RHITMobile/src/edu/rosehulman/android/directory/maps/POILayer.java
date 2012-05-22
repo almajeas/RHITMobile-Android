@@ -58,6 +58,9 @@ public class POILayer extends BalloonItemizedOverlay<OverlayItem> implements Man
 	 */
 	public POILayer(Drawable defaultMarker, MapView mapView, TaskManager taskManager) {
 		super(boundCenterBottom(defaultMarker), mapView);
+		setShowClose(false);
+		setShowDisclosure(true);
+		
 		this.taskManager = taskManager;
 		poiMap = new HashMap<Long, PointOfInterest>();
 		pois = new ArrayList<PointOfInterest>();

@@ -42,6 +42,8 @@ public class OffsiteTourLayer extends BalloonItemizedOverlay<OverlayItem> implem
 
 	public OffsiteTourLayer(MapView mapView, TaskManager taskManager, Location[] locations, UIListener uiListener) {
 		super(boundCenter(mapView.getResources().getDrawable(R.drawable.tour_node_marker)), mapView);
+		setShowClose(false);
+		setShowDisclosure(true);
 		
 		this.locations = locations;
 		this.uiListener = uiListener;

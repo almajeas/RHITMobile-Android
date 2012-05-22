@@ -197,6 +197,13 @@ public class CampusMapActivity extends SherlockMapActivity {
         actionBar.setHomeButtonEnabled(true);
         actionBar.setDisplayHomeAsUpEnabled(true);
         
+        //touch some classes
+        try {
+			Class.forName("com.readystatesoftware.mapviewballoons.BalloonItemizedOverlay");
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+        
         intent = getIntent();
         
         taskManager = new TaskManager();

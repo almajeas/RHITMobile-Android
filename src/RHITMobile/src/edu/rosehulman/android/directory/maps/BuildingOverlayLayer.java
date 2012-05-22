@@ -5,14 +5,18 @@ import java.util.Map;
 
 import android.graphics.Canvas;
 import android.graphics.Point;
+import android.graphics.drawable.Drawable;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup.LayoutParams;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
+import com.google.android.maps.OverlayItem;
 import com.readystatesoftware.mapviewballoons.BalloonOverlayView;
-import com.readystatesoftware.mapviewballoons.BalloonOverlayView.OnTapListener;
+import com.readystatesoftware.mapviewballoons.R;
 
 import edu.rosehulman.android.directory.db.DbIterator;
 import edu.rosehulman.android.directory.db.LocationAdapter;
@@ -49,7 +53,7 @@ public class BuildingOverlayLayer extends Overlay implements ManageableOverlay {
 	private Point pt;
 	private BuildingOverlay selected;
 	private MapView mapView;
-	private BalloonOverlayView balloon;
+	private BalloonOverlayView<OverlayItem> balloon;
 	
 	private OverlayManagerControl manager;
 	
@@ -184,8 +188,10 @@ public class BuildingOverlayLayer extends Overlay implements ManageableOverlay {
 			Location location = overlay.getLocation();
 			boolean recycle = (balloon != null);
 			if (!recycle) {
-				balloon = new BalloonOverlayView(mapView.getContext(), 0);	
-				balloon.setOnTapListener(balloonTapListener);
+				balloon = new BalloonOverlayView<OverlayItem>(mapView.getContext(), 0);	
+				balloon.findViewById(R.id.balloon_close).setVisibility(View.GONE);
+				balloon.findViewById(R.id.balloon_disclosure).setVisibility(View.VISIBLE);
+				balloon.findViewById(R.id.balloon_inner_layout).setOnTouchListener(balloonTapListener);
 			}
 			
 			balloon.setVisibility(View.GONE);
@@ -195,7 +201,7 @@ public class BuildingOverlayLayer extends Overlay implements ManageableOverlay {
 					LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, point,
 					MapView.LayoutParams.BOTTOM_CENTER);
 			params.mode = MapView.LayoutParams.MODE_MAP;
-			balloon.setText(location.name, location.description);
+			balloon.setData(new OverlayItem(null, location.name, location.description));
 			balloon.setVisibility(View.VISIBLE);
 			
 			if (recycle) {
@@ -232,18 +238,47 @@ public class BuildingOverlayLayer extends Overlay implements ManageableOverlay {
 	}
 	
 	
-	private OnTapListener balloonTapListener = new OnTapListener() {
-		
-		@Override
-		public boolean onTap(View v) {
-			
+	private OnTouchListener balloonTapListener = new OnTouchListener() {
+
+		private void dispatchTap() {
 			Location loc = selected.getLocation();
 			
 			if (listener != null) {
 				listener.onTap(loc);
 			}
+		}
+		
+		float startX;
+		float startY;
+		@Override
+		public boolean onTouch(View v, MotionEvent event) {
 			
-			return true;
+			View l =  ((View)v.getParent()).findViewById(R.id.balloon_main_layout);
+			Drawable d = l.getBackground();
+			
+			if (event.getAction() == MotionEvent.ACTION_DOWN) {
+				int[] states = {android.R.attr.state_pressed};
+				if (d.setState(states)) {
+					d.invalidateSelf();
+				}
+				startX = event.getX();
+				startY = event.getY();
+				return true;
+			} else if (event.getAction() == MotionEvent.ACTION_UP) {
+				int newStates[] = {};
+				if (d.setState(newStates)) {
+					d.invalidateSelf();
+				}
+				if (Math.abs(startX - event.getX()) < 40 && 
+						Math.abs(startY - event.getY()) < 40 ) {
+					// call overridden method
+					dispatchTap();
+				}
+				return true;
+			} else {
+				return false;
+			}
+			
 		}
 	};
 

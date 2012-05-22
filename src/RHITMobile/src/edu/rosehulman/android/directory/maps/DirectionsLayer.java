@@ -61,6 +61,9 @@ public class DirectionsLayer extends BalloonItemizedOverlay<OverlayItem> impleme
 
 	public DirectionsLayer(MapView mapView, TaskManager taskManager, Directions directions, Location[] locations, UIListener uiListener) {
 		super(boundCenter(getDirectionsDrawable(mapView.getResources(), DirectionsBitmap.NODE)), mapView);
+		setShowClose(false);
+		setShowDisclosure(true);
+		
 		this.directions = directions;
 		this.locations = locations;
 		this.uiListener = uiListener;
