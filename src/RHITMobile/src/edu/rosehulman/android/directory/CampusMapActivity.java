@@ -584,7 +584,9 @@ public class CampusMapActivity extends SherlockMapActivity {
 				}
 			});
     	} else {
-    		poiLayer.focus(id, animate);
+    		if (poiLayer != null) {
+    			poiLayer.focus(id, animate);
+    		}
     	}
     }
     
@@ -1342,6 +1344,8 @@ public class CampusMapActivity extends SherlockMapActivity {
 					}
 				}
 			}
+			if (isCancelled())
+				return null;
 			
 			//load the relevant locations
 			LocationAdapter locationAdapter = new LocationAdapter();
@@ -1362,6 +1366,9 @@ public class CampusMapActivity extends SherlockMapActivity {
 			
 			publishProgress(100);
 
+			if (isCancelled())
+				return null;
+			
 			return response.result;
 		}
 		
