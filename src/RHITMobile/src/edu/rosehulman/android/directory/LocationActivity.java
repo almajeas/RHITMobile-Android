@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.LoaderManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
 import android.util.Log;
@@ -136,6 +137,11 @@ public class LocationActivity extends SherlockFragmentActivity implements Obtain
             if (mFragAuth == null) {
             	mFragAuth = new AuthenticatedFragment();
     			getSupportFragmentManager().beginTransaction().add(mFragAuth, "auth").commit();
+            }
+
+            LoaderManager loaderManager = getSupportLoaderManager();
+            if (loaderManager.getLoader(TASK_LOAD_SCHEDULE) != null) {
+            	loaderManager.initLoader(TASK_LOAD_SCHEDULE, null, mLoadScheduleCallbacks);
             }
         }
         
