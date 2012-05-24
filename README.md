@@ -1,5 +1,48 @@
 # RHIT Mobile (Android Edition)
 
+## License - Source Code
+
+Rose-Hulman Mobile is owned by Rose-Hulman Institute of Technology and released
+under the
+[Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0):
+
+    Copyright 2012 Rose-Hulman Institute of Technology
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this softare except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+## License - Media
+
+All original media (as well as media source files, if included) are released
+under the
+[Creative Commons Attribution 3.0 Unported License (CC BY 3.0)](https://creativecommons.org/licenses/by/3.0/).
+Attribution to [Rose-Hulman Institute of Technology](http://www.rose-hulman.edu)
+(with a link) is required in any derivative or redistributed works. Any present
+or past students, faculty, or staff of Rose-Hulman Institute of Technology are
+not required to include attribution, though it is still appreciated.
+
+![Creative Commons Attribution 3.0 Unported License Logo](http://i.creativecommons.org/l/by/3.0/88x31.png)
+
+In broad terms, this license means that you are free:
+
+* **to Share** — to copy, distribute and transmit the work
+* **to Remix** — to adapt the work
+* to make commercial use of the work
+
+For complete details, see the
+[human-readable deed](https://creativecommons.org/licenses/by/3.0/),
+as well as the
+[full license](https://creativecommons.org/licenses/by/3.0/legalcode).
+
 ## Setting Up a Build Environment
 
 Android projects require the [Android SDK](http://developer.android.com/sdk/index.html).  As instructions for setting up the SDK may change over time, refer to the official documentation for instructions on setting up both the Android SDK and the Eclipse ADT plugin.
